@@ -15,9 +15,9 @@ const Home = () => {
       <TrustedSection/>
       <WhyChooseTradePro/>
       <TradingFeatures/>
-      {/* <TradingLuck/> */}
-      {/* <DownloadAccessibility/> */}
-      {/* <TestimonialSection/> */}
+      <TradingLuck/>
+      <DownloadAccessibility/>
+      <TestimonialSection/>
       <RiskWarningSection/>
     </div>
   )

@@ -3,7 +3,7 @@ import { TriangleAlert, Shield, Info, ExternalLink } from "lucide-react";
 
 export default function RiskWarningSection() {
   return (
-    <section className="py-16 bg-gradient-to-r from-yellow-900/20 via-orange-900/20 to-red-900/20 border-y border-yellow-500/20">
+    <section className="py-16 bg-gradient-to-r from-[#3e2723]/90 via-[#2c1810]/90 to-[#1b0d0b]/90 border-y border-[#4e342e]/40 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-gradient-to-br from-gray-800/100 to-gray-900/100 rounded-2xl p-8 border border-gray-700/50">
           <div className="flex flex-col lg:flex-row items-start gap-8">

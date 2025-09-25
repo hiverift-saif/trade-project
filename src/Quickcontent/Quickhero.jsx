@@ -46,19 +46,19 @@ export default function Quickhero() {
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
           <button
             onClick={() => navigate("/registration")}
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-12 py-6 text-xl font-semibold rounded-md shadow-2xl hover:scale-105 transition-all duration-300"
+            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-6 py-2 text-xl font-semibold rounded-md shadow-2xl hover:scale-105 transition-all duration-300"
           >
             <UserPlus className="w-6 h-6 mr-3" /> Registration
           </button>
           <button
             onClick={() => navigate("/login")}
-            className="inline-flex items-center justify-center gap-2 border border-white/40 backdrop-blur-sm bg-white/10 text-white px-12 py-6 text-xl font-semibold rounded-md shadow-2xl hover:bg-white/20 hover:scale-105 transition-all duration-300"
+            className="inline-flex items-center justify-center gap-2 border border-white/40 backdrop-blur-sm bg-white/10 text-white px-6 py-2 text-xl font-semibold rounded-md shadow-2xl hover:bg-white/20 hover:scale-105 transition-all duration-300"
           >
             <LogIn className="w-6 h-6 mr-3" /> Log In
           </button>
           <button
             onClick={() => console.log("Start in One Click")}
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-12 py-6 text-xl font-semibold rounded-md shadow-2xl hover:scale-105 transition-all duration-300"
+            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-6 py-2 text-xl font-semibold rounded-md shadow-2xl hover:scale-105 transition-all duration-300"
           >
             <MousePointer className="w-6 h-6 mr-3" /> Start in One Click
           </button>

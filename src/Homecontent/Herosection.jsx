@@ -1,5 +1,6 @@
 // src/pages/Home.jsx
 import React from "react";
+import { Link } from "react-router-dom";
 import { TrendingUp, Rocket, Play } from "lucide-react";
 import backgroundVideo from "../assets/video.mp4"; // local video import
 
@@ -45,12 +46,18 @@ export default function Herosection() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mt-8">
-          <button className="inline-flex items-center justify-center gap-3 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-12 py-6 text-xl font-semibold rounded-md shadow-2xl hover:scale-105 transition-all duration-300">
-            <Rocket className="w-6 h-6" /> Start Trading in One Click
+          <button className="inline-flex items-center justify-center gap-3 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-1 py-2 text-xl font-semibold rounded-md shadow-2xl hover:scale-105 transition-all duration-300">
+           <div className="flex justify-center items-center px-3">  <Rocket className="w-6 h-6 " /> <span>Start Trading in One Click</span></div>
           </button>
-          <button className="inline-flex items-center justify-center gap-3 border border-white/40 backdrop-blur-sm bg-white/10 text-white px-12 py-6 text-xl font-semibold rounded-md shadow-2xl hover:scale-105 transition-all duration-300">
-            <Play className="w-6 h-6" /> Try Free Demo
-          </button>
+      <Link
+      to="/Freedemo"
+      className="inline-flex items-center justify-center gap-3 border border-white/40 backdrop-blur-sm bg-white/10 text-white px-1 py-2 text-xl font-semibold rounded-md shadow-2xl hover:scale-105 transition-all duration-300"
+    >
+      <div className="flex justify-center items-center px-3">
+        <Play className="w-6 h-6" />
+        <span>Try Free Demo</span>
+      </div>
+    </Link>
         </div>
 
         {/* Info Cards */}
@@ -88,3 +95,6 @@ export default function Herosection() {
     </section>
   );
 }
+
+
+

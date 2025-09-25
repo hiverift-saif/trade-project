@@ -10,6 +10,11 @@ import Blog from "./Pages/Blog";
 import Login from "./Pages/Login";
 import Registration from "./Pages/Registration";
 import Quickstart from "./Pages/Quickstart";
+import TradingDashboard from "./Freedemo/TradingDashboard";
+import TradeClosed from "./Freedemo/TradeClosed";
+import Maintrading from "./Freedemo/Maintrading";
+import Trading from "./Pages/Trading";
+
 // import { Home } from "lucide-react";
 // import Home from "./pages/Home";
 // import FreeDemo from "./pages/FreeDemo";
@@ -27,14 +32,18 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
              <Route path="/Quickstart" element={<Quickstart/>} />
-            {/* <Route path="/freedemo" element={<FreeDemo />} /> */}
-            {/* <Route path="/aboutus" element={<AboutUs />} /> */}
-            {/* <Route path="/blog" element={<Blog />} /> */}
-            {/* <Route path="/login" element={<Login />} /> */}
+            <Route path="/freedemo" element={<FreeDemo />} />
+            <Route path="/aboutus" element={<AboutUs />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/registration" element={<Registration />} />
+            <Route path="/TradingDashboard" element = {<TradingDashboard/>}/>
+            <Route path="/trade-closed" element={<TradeClosed />} />
+            <Route path="/Maintrading" element={<Maintrading />} />
+            <Route path="/Trading" element={<Trading />} />
           </Routes>
         </main>
-        {/* <Footer /> */}
+        <Footer />
       </div>
     </Router>
   );

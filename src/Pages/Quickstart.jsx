@@ -1,12 +1,14 @@
 import React from 'react'
-import Quickhero from '../assets/Quickcontent/Quickhero'
-import TradingSteps from '../assets/Quickcontent/TradingSteps'
+import Quickhero from '../Quickcontent/Quickhero'
+import TradingSteps from '../Quickcontent/TradingSteps'
+import CTASection from '../Quickcontent/CTASection'
 
 const Quickstart = () => {
   return (
     <div>
-      {/* <Quickhero/> */}
+      <Quickhero/>
       <TradingSteps/>
+      <CTASection/>
     </div>
   )
 }

@@ -74,25 +74,25 @@ const testimonials = [
 
 const stats = [
   {
-    icon: <Users className="w-8 h-8 text-white" />,
+    icon: <Users className="w-8 h-8 text-white " />,
     value: "50,000+",
     label: "Active Traders",
     gradient: "from-blue-400 to-indigo-400",
-    bgGradient: "from-blue-500 to-indigo-600",
+    bgGradient: "bg-gradient-to-r from-blue-500 to-indigo-600",
   },
   {
     icon: <DollarSign className="w-8 h-8 text-white" />,
     value: "$50M+",
     label: "Withdrawn",
     gradient: "from-green-400 to-emerald-400",
-    bgGradient: "from-green-500 to-emerald-600",
+    bgGradient: "bg-gradient-to-r from-green-500 to-emerald-600",
   },
   {
     icon: <Star className="w-8 h-8 text-white" />,
     value: "4.5★",
     label: "Average Rating",
     gradient: "from-yellow-400 to-orange-400",
-    bgGradient: "from-yellow-500 to-orange-600",
+    bgGradient: "bg-gradient-to-r from-yellow-500 to-orange-600",
   },
 ];
 

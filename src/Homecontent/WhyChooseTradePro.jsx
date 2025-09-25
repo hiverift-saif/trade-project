@@ -92,7 +92,7 @@ export default function WhyChooseTradePro() {
               className={`group relative p-6 bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 hover:border-gray-600/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/10`}
             >
               <div
-                className={`absolute inset-0 bg-gradient-to-br ${feature.hoverGradient} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-500`}
+                className={`absolute inset-0 bg-gradient-to-br ${feature.hoverGradient} opacity-0 group-hover:opacity-50 rounded-2xl transition-opacity duration-500`}
               ></div>
               <div className="relative flex flex-col items-center text-center space-y-4">
                 <div
