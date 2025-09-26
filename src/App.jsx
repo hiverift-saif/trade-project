@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./component/Navbar";
 import Footer from "./component/Footer";
-// import Home from "./Pages/Home";
 import Home from "./Pages/Home";
 import FreeDemo from "./Pages/FreeDemo";
 import AboutUs from "./Pages/AboutUs";
@@ -14,37 +13,38 @@ import TradingDashboard from "./Freedemo/TradingDashboard";
 import TradeClosed from "./Freedemo/TradeClosed";
 import Maintrading from "./Freedemo/Maintrading";
 import Trading from "./Pages/Trading";
-
-// import { Home } from "lucide-react";
-// import Home from "./pages/Home";
-// import FreeDemo from "./pages/FreeDemo";
-// import AboutUs from "./pages/AboutUs";
-// import Login from "./pages/Login";
-// import Registration from "./pages/Registration";
-// import Blog from "./pages/Blog";
+import ScrollToTop from "./Pages/ScrollToTop";
 
 function App() {
+  useEffect(() => {
+    // Disable browser scroll restoration
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    // Force scroll to top on page load
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <Router>
-      <div className="">
-        <Navbar />
-        <main className="">
-          <Routes>
-            <Route path="/" element={<Home />} />
-             <Route path="/Quickstart" element={<Quickstart/>} />
-            <Route path="/freedemo" element={<FreeDemo />} />
-            <Route path="/aboutus" element={<AboutUs />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/registration" element={<Registration />} />
-            <Route path="/TradingDashboard" element = {<TradingDashboard/>}/>
-            <Route path="/trade-closed" element={<TradeClosed />} />
-            <Route path="/Maintrading" element={<Maintrading />} />
-            <Route path="/Trading" element={<Trading />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+      <ScrollToTop />
+      <Navbar />
+      <main>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/Quickstart" element={<Quickstart />} />
+          <Route path="/freedemo" element={<FreeDemo />} />
+          <Route path="/aboutus" element={<AboutUs />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/registration" element={<Registration />} />
+          <Route path="/TradingDashboard" element={<TradingDashboard />} />
+          <Route path="/trade-closed" element={<TradeClosed />} />
+          <Route path="/Maintrading" element={<Maintrading />} />
+          <Route path="/Trading" element={<Trading />} />
+        </Routes>
+      </main>
+      <Footer />
     </Router>
   );
 }

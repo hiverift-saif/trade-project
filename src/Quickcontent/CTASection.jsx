@@ -1,5 +1,7 @@
 import React from "react";
 import { TrendingUp, Play } from "lucide-react";
+import { Link } from "react-router-dom";
+
 
 export default function CTASection() {
   return (
@@ -36,15 +38,20 @@ export default function CTASection() {
 
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+
+          <Link to='/Trading'>
             <button className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-5 py-2 text-2xl font-semibold rounded-md shadow-2xl hover:shadow-green-500/25 transition-all duration-300 hover:scale-105">
               <TrendingUp className="w-8 h-8 mr-2 group-hover:animate-pulse" />
               Start Trading Now
             </button>
+</Link>
 
+   <Link to="/TradingDashboard">
             <button className="inline-flex items-center justify-center gap-2   backdrop-blur-sm bg-white/10 text-white hover:bg-white/20 px-5 py-2 text-2xl font-semibold rounded-md shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105">
               <Play className="w-8 h-8 mr-2 group-hover:animate-pulse" />
               Try Free Demo
             </button>
+            </Link>
           </div>
 
           {/* Stats */}
