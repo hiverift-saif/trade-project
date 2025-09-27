@@ -149,10 +149,10 @@ export default function Trading() {
     setOpened((o) => [trade, ...o]);
   };
 
-  if (!activeAsset) return <div className="min-h-screen flex items-center justify-center bg-[#070b14] text-white">Loading…</div>;
+  if (!activeAsset) return <div className="h-screen flex items-center justify-center bg-[#070b14] text-white">Loading…</div>;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#070b14] text-white flex flex-col font-sans antialiased">
+    <div className="h-screen overflow-hidden bg-[#070b14] text-white flex flex-col font-sans antialiased">
       <TopBar
         balance={balance}
         onTopUp={onTopUp}
@@ -161,21 +161,18 @@ export default function Trading() {
         onToggleRightRail={() => setShowRightRail((s) => !s)}
       />
 
-      <div className="flex flex-1 min-h-0 pb-[80px] md:pb-0">
+      <div className="flex flex-1 min-h-0 pb-[60px] md:pb-0">
         <LeftSidebar
           isOpen={showLeftSidebar}
           onClose={() => setShowLeftSidebar(false)}
           activeMenu={activeMenu}
           setActiveMenu={setActiveMenu}
-          className={`fixed inset-y-0 left-0 z-30 w-full sm:w-80 bg-[#0a0e18] transform ${
-            showLeftSidebar ? 'translate-x-0' : '-translate-x-full'
-          } md:static md:w-20 md:transform-none transition-transform duration-300 ease-in-out md:border-r md:border-zinc-800/50`}
         />
 
         <main
-          className={`flex-1 min-w-0 min-h-0 flex flex-col w-full transition-all duration-300 ${
-            activeMenu && showLeftSidebar ? 'md:ml-64' : 'ml-0'
-          }`}
+          className={`flex-1 min-w-0 min-h-0 flex flex-col w-full ${
+            activeMenu ? 'md:ml-20' : 'ml-0'
+          } transition-all duration-300`}
         >
           <Toolbar
             assets={assets}
@@ -183,16 +180,15 @@ export default function Trading() {
             setActiveAsset={setActiveAsset}
             timeframe={timeframe}
             setTimeframe={setTimeframe}
-            className="sticky top-0 z-20 bg-[#070b14]"
           />
 
-          <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_24rem] min-h-0 w-full">
-            <div className="flex flex-col flex-1 min-h-[40vh] sm:min-h-[50vh] lg:h-full w-full">
+          <div className="flex-1 flex flex-col md:grid md:grid-cols-[1fr_20rem] min-h-0 w-full">
+            <div className="flex flex-col flex-1 min-h-[50vh] sm:min-h-[60vh] md:h-full w-full">
               <div className="flex items-center justify-between px-4 py-2 bg-[#0a0e18] border-b border-zinc-800/50 shadow-sm">
                 <div className="text-xs text-zinc-400 font-medium">Expiration time</div>
-                <div className="flex items-center gap-2 sm:gap-4">
-                  <div className="text-xs bg-zinc-800/70 px-2 sm:px-3 py-1 rounded font-medium">{activeAsset.symbol}</div>
-                  <div className="text-xs bg-zinc-900/70 px-2 sm:px-3 py-1 rounded font-mono">
+                <div className="flex items-center gap-4">
+                  <div className="text-xs bg-zinc-800/70 px-3 py-1 rounded font-medium">{activeAsset.symbol}</div>
+                  <div className="text-xs bg-zinc-900/70 px-3 py-1 rounded font-mono">
                     {latestPrice != null ? latestPrice.toFixed(activeAsset.precision) : '--'}
                   </div>
                 </div>
@@ -227,7 +223,7 @@ export default function Trading() {
               </div>
             </div>
 
-            <div className="flex flex-col min-h-0 bg-[#0b0f1a] md:border-l md:border-zinc-800/50 w-full md:w-[24rem]">
+            <div className="flex flex-col min-h-0 bg-[#0b0f1a] md:border-l md:border-zinc-800/50 w-full md:w-[20rem]">
               <TradePanel
                 asset={activeAsset}
                 amount={amount}
@@ -239,7 +235,6 @@ export default function Trading() {
                 onSell={() => place('SELL')}
                 isOpen={showTradeMobile}
                 onClose={() => setShowTradeMobile(false)}
-                className="md:sticky md:top-0"
               />
               <div className="px-4 md:block">
                 <TradesTabs opened={opened} closed={closed} />
@@ -248,16 +243,10 @@ export default function Trading() {
           </div>
         </main>
 
-        <RightRail
-          isOpen={showRightRail}
-          onClose={() => setShowRightRail(false)}
-          className={`fixed inset-y-0 right-0 z-30 w-full sm:w-80 bg-[#0a0e18] transform ${
-            showRightRail ? 'translate-x-0' : 'translate-x-full'
-          } md:static md:w-64 md:transform-none transition-transform duration-300 ease-in-out md:border-l md:border-zinc-800/50`}
-        />
+        <RightRail isOpen={showRightRail} onClose={() => setShowRightRail(false)} />
       </div>
 
-      <MobileBottomNav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a0e18] border-t border-zinc-800/50" />
+      <MobileBottomNav />
     </div>
   );
 }
