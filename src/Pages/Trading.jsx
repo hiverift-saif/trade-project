@@ -1,8 +1,12 @@
 'use client';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Chart from "react-apexcharts";
 
 import {
+  Check,
+  Settings,
+  Search,
+  Edit,
   Coins,
   User,
   Briefcase,
@@ -11,6 +15,7 @@ import {
   HelpCircle,
   BarChart2,
   ChevronDown,
+  ChevronRight,
   DollarSign,
   TrendingUp,
   TrendingDown,
@@ -22,26 +27,11 @@ import {
   ToggleRight,
   Menu,
   X,
+  GraduationCap,
+  FileText,
+  Activity,
+  Globe,
 } from "lucide-react";
-
-const api = {
-  async getAssets() {
-    return [
-      { id: "EURUSD-OTC", symbol: "EUR/USD OTC", precision: 5, payout: 0.92 },
-      { id: "BTCUSD", symbol: "BTC/USD", precision: 2, payout: 0.9 },
-      { id: "AAPL", symbol: "AAPL", precision: 2, payout: 0.88 },
-    ];
-  },
-  async getInitialSeries(assetId) {
-    const base = assetId === "EURUSD-OTC" ? 1.156 : assetId === "BTCUSD" ? 68000 : 175;
-    const now = Date.now();
-    const data = Array.from({ length: 200 }).map((_, i) => {
-      const time = Math.floor((now - (200 - i) * 1000) / 1000);
-      return { time, value: randomWalk(base, i) };
-    });
-    return data;
-  },
-};
 
 function randomWalk(base, i) {
   const noise = Math.sin(i / 9) * 0.0007 + Math.cos(i / 5) * 0.0003;
@@ -93,6 +83,8 @@ const Pill = ({ children, variant = "default" }) => (
 );
 
 function PriceChart({ data, precision }) {
+  const chartContainerRef = useRef(null);
+
   const series = React.useMemo(
     () => [
       {
@@ -144,14 +136,464 @@ function PriceChart({ data, precision }) {
     },
   };
 
+  useEffect(() => {
+    const container = chartContainerRef.current;
+    if (container) {
+      container.scrollLeft = 0; // Ensure chart starts from the left edge
+    }
+  }, [data]);
+
   return (
-    <div className="flex-1 h-full w-[200vw] sm:w-[150vw] md:w-full overflow-x-auto md:overflow-x-hidden">
+    <div
+      ref={chartContainerRef}
+      className="flex-1 h-full w-full overflow-x-hidden"
+    >
       <Chart options={options} series={series} type="area" height="100%" width="100%" />
     </div>
   );
 }
 
-function LeftSidebar({ isOpen, onClose }) {
+function TradingMenuTab({ isOpen, onClose }) {
+  const menuItems = [
+    { icon: Coins, label: "Quick Trading Real Account", active: false },
+    { icon: GraduationCap, label: "Quick Trading Demo Account", active: true },
+    { icon: FileText, label: "Shares Trading Real Account", active: false },
+    { icon: FileText, label: "Shares Trading Demo Account", active: false },
+    { icon: Activity, label: "Forex MT4 Real Account", active: false },
+    { icon: Activity, label: "Forex MT4 Demo Account", active: false },
+    { icon: Globe, label: "Forex MT5 Real Account", active: false },
+    { icon: Globe, label: "Forex MT5 Demo Account", active: false },
+  ];
+
+  return (
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <div
+        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:${isOpen ? 'block' : 'hidden'}`}
+      >
+        <div className="flex items-center justify-between mb-4 px-4 pt-4 md:hidden">
+          <div className="text-white font-bold text-lg">Trading Options</div>
+          <button onClick={onClose} className="text-zinc-400 hover:text-white">
+            <X size={20} />
+          </button>
+        </div>
+        <ul className="flex flex-col">
+          {menuItems.map((item, index) => (
+            <li key={index}>
+              <div
+                className={`flex items-center gap-3 px-4 py-3 text-zinc-200 hover:bg-indigo-900/50 transition-all duration-200 ${
+                  item.active ? 'bg-blue-600 text-white' : 'bg-[#0a0e18]'
+                } border-b border-zinc-800/50 last:border-b-0`}
+              >
+                <item.icon size={20} className="text-blue-300" />
+                <span className="flex-1">{item.label}</span>
+                {item.active && <ChevronRight size={16} className="text-white" />}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
+  );
+}
+
+function FinanceMenuTab({ isOpen, onClose }) {
+  const menuItems = [
+    { icon: Coins, label: "Account Balance", active: false },
+    { icon: DollarSign, label: "Transaction History", active: false },
+    { icon: Gift, label: "Bonuses", active: true },
+    { icon: Rocket, label: "Investment Options", active: false },
+  ];
+
+  return (
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <div
+        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:${isOpen ? 'block' : 'hidden'}`}
+      >
+        <div className="flex items-center justify-between mb-4 px-4 pt-4 md:hidden">
+          <div className="text-white font-bold text-lg">Finance Options</div>
+          <button onClick={onClose} className="text-zinc-400 hover:text-white">
+            <X size={20} />
+          </button>
+        </div>
+        <ul className="flex flex-col">
+          {menuItems.map((item, index) => (
+            <li key={index}>
+              <div
+                className={`flex items-center gap-3 px-4 py-3 text-zinc-200 hover:bg-indigo-900/50 transition-all duration-200 ${
+                  item.active ? 'bg-blue-600 text-white' : 'bg-[#0a0e18]'
+                } border-b border-zinc-800/50 last:border-b-0`}
+              >
+                <item.icon size={20} className="text-blue-300" />
+                <span className="flex-1">{item.label}</span>
+                {item.active && <ChevronRight size={16} className="text-white" />}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
+  );
+}
+
+function ProfileMenuTab({ isOpen, onClose }) {
+  const menuItems = [
+    { icon: User, label: "Personal Details", active: false },
+    { icon: Gift, label: "Achievements", active: true },
+    { icon: MessageSquare, label: "Messages", active: false },
+    { icon: Bell, label: "Notifications", active: false },
+  ];
+
+  return (
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <div
+        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:${isOpen ? 'block' : 'hidden'}`}
+      >
+        <div className="flex items-center justify-between mb-4 px-4 pt-4 md:hidden">
+          <div className="text-white font-bold text-lg">Profile Options</div>
+          <button onClick={onClose} className="text-zinc-400 hover:text-white">
+            <X size={20} />
+          </button>
+        </div>
+        <ul className="flex flex-col">
+          {menuItems.map((item, index) => (
+            <li key={index}>
+              <div
+                className={`flex items-center gap-3 px-4 py-3 text-zinc-200 hover:bg-indigo-900/50 transition-all duration-200 ${
+                  item.active ? 'bg-blue-600 text-white' : 'bg-[#0a0e18]'
+                } border-b border-zinc-800/50 last:border-b-0`}
+              >
+                <item.icon size={20} className="text-blue-300" />
+                <span className="flex-1">{item.label}</span>
+                {item.active && <ChevronRight size={16} className="text-white" />}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
+  );
+}
+
+function MarketMenuTab({ isOpen, onClose }) {
+  const menuItems = [
+    { icon: Briefcase, label: "Market", active: false },
+    { icon: Gift, label: "Purchase", active: true },
+    { icon: Zap, label: "Gem Lottery", active: false },
+    { icon: Coins, label: "Gems Missing", active: false },
+    { icon: Swords, label: "Social Reward", active: false },
+  ];
+
+  return (
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <div
+        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:${isOpen ? 'block' : 'hidden'}`}
+      >
+        <div className="flex items-center justify-between mb-4 px-4 pt-4 md:hidden">
+          <div className="text-white font-bold text-lg">Market Options</div>
+          <button onClick={onClose} className="text-zinc-400 hover:text-white">
+            <X size={20} />
+          </button>
+        </div>
+        <ul className="flex flex-col">
+          {menuItems.map((item, index) => (
+            <li key={index}>
+              <div
+                className={`flex items-center gap-3 px-4 py-3 text-zinc-200 hover:bg-indigo-900/50 transition-all duration-200 ${
+                  item.active ? 'bg-blue-600 text-white' : 'bg-[#0a0e18]'
+                } border-b border-zinc-800/50 last:border-b-0`}
+              >
+                <item.icon size={20} className="text-blue-300" />
+                <span className="flex-1">{item.label}</span>
+                {item.active && <ChevronRight size={16} className="text-white" />}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
+  );
+}
+
+function AchievementsMenuTab({ isOpen, onClose }) {
+  const menuItems = [
+    { icon: Trophy, label: "Achievement", active: false },
+    { icon: FileText, label: "History", active: true },
+    { icon: Activity, label: "Rating", active: false },
+    { icon: HelpCircle, label: "Community Help", active: false },
+  ];
+
+  return (
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <div
+        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:${isOpen ? 'block' : 'hidden'}`}
+      >
+        <div className="flex items-center justify-between mb-4 px-4 pt-4 md:hidden">
+          <div className="text-white font-bold text-lg">Achievements Options</div>
+          <button onClick={onClose} className="text-zinc-400 hover:text-white">
+            <X size={20} />
+          </button>
+        </div>
+        <ul className="flex flex-col">
+          {menuItems.map((item, index) => (
+            <li key={index}>
+              <div
+                className={`flex items-center gap-3 px-4 py-3 text-zinc-200 hover:bg-indigo-900/50 transition-all duration-200 ${
+                  item.active ? 'bg-blue-600 text-white' : 'bg-[#0a0e18]'
+                } border-b border-zinc-800/50 last:border-b-0`}
+              >
+                <item.icon size={20} className="text-blue-300" />
+                <span className="flex-1">{item.label}</span>
+                {item.active && <ChevronRight size={16} className="text-white" />}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
+  );
+}
+
+function ChatMenuTab({ isOpen, onClose }) {
+  const [activeTab, setActiveTab] = useState("Chats");
+
+  const chatItems = [
+    {
+      id: 1,
+      avatar: "https://pocketoption.com/uploads/users/9d/e3/d9/2_user.png",
+      title: "Support Chat (Online)",
+      time: "Yesterday, 15:09",
+      message: "Welcome to the Support Chat! Here you can get a quick...",
+      unread: 1,
+    },
+    {
+      id: 2,
+      avatar: "https://chat-po.site/uploads/avatars/default/chat-icon-en.png?v=1",
+      title: "General chat (English)",
+      time: "14:24",
+      message: "I was getting withdrawal faster than nowadays. for...",
+      unread: 2163,
+    },
+    {
+      id: 3,
+      avatar: "https://chat-po.site/uploads/avatars/default/chat-icon-analitics.png?v=1",
+      title: "Analytics",
+      time: "Yesterday, 22:40",
+      message: "EUR/JPY: Ichimoku indicators analysis See more",
+      unread: 15,
+    },
+    {
+      id: 4,
+      avatar: "https://chat-po.site/cabinet/images/avatars/10.png",
+      title: "Support",
+      time: "Yesterday, 15:09",
+      message: "You have a new message from support. See more",
+      unread: 1,
+    },
+    {
+      id: 5,
+      avatar: "https://chat-po.site/uploads/avatars/default/chat-icon-promo.png?v=1",
+      title: "Promo",
+      time: "28 Aug, 16:58",
+      message: "Limited Offer For ClientsUse FLASH100 and get a 100%...",
+      unread: 0,
+    },
+    {
+      id: 6,
+      avatar: "https://chat-po.site/uploads/avatars/default/chat-icon-news.png?v=1",
+      title: "News",
+      time: "16 Jul, 14:35",
+      message: "Risk-Free Trade with Ultrade\nWe’re introducing a new...",
+      unread: 0,
+    },
+  ];
+
+  const notificationItems = [];
+
+  return (
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <div
+        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:${isOpen ? 'block' : 'hidden'}`}
+      >
+        <div className="chat_main">
+          <div className="chat_main_header">
+            <div className="chat_main_actions flex items-center gap-2 p-2">
+              <button className="chat_btn chat_btn_icon p-1 rounded hover:bg-zinc-700">
+                <Check size={16} className="chat_icon text-zinc-400" />
+              </button>
+              <button className="chat_btn chat_btn_icon p-1 rounded hover:bg-zinc-700">
+                <Settings size={16} className="chat_icon text-zinc-400" />
+              </button>
+              <div className="chat_main_search flex items-center bg-zinc-800 rounded p-1">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="bg-transparent text-sm text-zinc-200 outline-none w-24"
+                />
+                <Search size={16} className="chat_icon text-zinc-400 ml-1" />
+              </div>
+              <button className="chat_btn chat_btn_icon p-1 rounded hover:bg-zinc-700">
+                <Edit size={16} className="chat_icon text-zinc-400" />
+              </button>
+            </div>
+            <div className="chat_main_navs mt-2">
+              <ul className="chat_tabs_nav flex space-x-4">
+                <li>
+                  <button
+                    className={`s-active ${activeTab === "Chats" ? "text-white" : "text-zinc-400"}`}
+                    onClick={() => setActiveTab("Chats")}
+                  >
+                    Chats <span className="chat_number bg-blue-600 text-white text-xs rounded-full px-1 ml-1">2</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className={`${activeTab === "Notifications" ? "text-white" : "text-zinc-400"}`}
+                    onClick={() => setActiveTab("Notifications")}
+                  >
+                    Notifications{" "}
+                    <span className="chat_number bg-blue-600 text-white text-xs rounded-full px-1 ml-1">2</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="os-host scroll_container os-theme-dark h-[calc(100%-4rem)] overflow-y-auto">
+            <div className="os-content p-2">
+              <div className={`chat_tab ${activeTab === "Chats" ? "s-tab_active" : "hidden"}`}>
+                <div className="chat_list">
+                  {chatItems.map((item) => (
+                    <div key={item.id} className="chat_list_inner flex items-center p-2 hover:bg-zinc-800/50 rounded">
+                      <div className="chat_list_image w-10 h-10">
+                        <div className="chat_avatar_circle w-10 h-10 rounded-full overflow-hidden">
+                          <div
+                            className="chat_avatar_circle_bg w-full h-full bg-cover"
+                            style={{ backgroundImage: `url(${item.avatar})` }}
+                          ></div>
+                        </div>
+                      </div>
+                      <div className="chat_list_content flex-1 ml-2">
+                        <div className="chat_list_main flex justify-between">
+                          <div className="chat_title one_line text-sm font-medium text-white">
+                            <span className="one_line">{item.title}</span>
+                          </div>
+                          <div className="chat_time text-xs text-zinc-400">{item.time}</div>
+                        </div>
+                        <div className="chat_list_message flex justify-between mt-1">
+                          <p className="one_line text-xs text-zinc-400">{item.message}</p>
+                          {item.unread > 0 && (
+                            <i className="chat_number bg-blue-600 text-white text-xs rounded-full px-1">{item.unread}</i>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className={`chat_tab ${activeTab === "Notifications" ? "s-tab_active" : "hidden"}`}>
+                <div className="text-zinc-400 text-sm p-2">No notifications yet.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function HelpMenuTab({ isOpen, onClose }) {
+  const menuItems = [
+    { icon: HelpCircle, label: "FAQ", active: false },
+    { icon: HelpCircle, label: "Community Help", active: true },
+  ];
+
+  return (
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <div
+        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:${isOpen ? 'block' : 'hidden'}`}
+      >
+        <div className="flex items-center justify-between mb-4 px-4 pt-4 md:hidden">
+          <div className="text-white font-bold text-lg">Help Options</div>
+          <button onClick={onClose} className="text-zinc-400 hover:text-white">
+            <X size={20} />
+          </button>
+        </div>
+        <ul className="flex flex-col">
+          {menuItems.map((item, index) => (
+            <li key={index}>
+              <div
+                className={`flex items-center gap-3 px-4 py-3 text-zinc-200 hover:bg-indigo-900/50 transition-all duration-200 ${
+                  item.active ? 'bg-blue-600 text-white' : 'bg-[#0a0e18]'
+                } border-b border-zinc-800/50 last:border-b-0`}
+              >
+                <item.icon size={20} className="text-blue-300" />
+                <span className="flex-1">{item.label}</span>
+                {item.active && <ChevronRight size={16} className="text-white" />}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
+  );
+}
+
+function LeftSidebar({ isOpen, onClose, activeMenu, setActiveMenu }) {
   const items = [
     { icon: BarChart2, label: "Trading", active: true },
     { icon: Coins, label: "Finance" },
@@ -161,13 +603,16 @@ function LeftSidebar({ isOpen, onClose }) {
     { icon: MessageSquare, label: "Chat" },
     { icon: HelpCircle, label: "Help" },
   ];
+
   return (
     <>
       {isOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={onClose} />
       )}
       <aside
-        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 md:w-20 md:static bg-[#0a0e18] border-r border-zinc-800/50 flex flex-col items-center py-4 gap-2 z-50 shadow-lg transition-transform duration-300 md:transform-none md:flex hidden md:flex`}
+        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 md:w-20 md:static bg-[#0a0e18] border-r border-zinc-800/50 flex flex-col items-center py-4 gap-2 z-50 shadow-lg transition-transform duration-300 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0`}
       >
         <div className="flex items-center justify-between px-4 mb-4 md:hidden">
           <div className="text-white font-bold text-lg">Menu</div>
@@ -177,7 +622,19 @@ function LeftSidebar({ isOpen, onClose }) {
         </div>
         <div className="flex flex-col items-center gap-2 w-full">
           {items.map((it, i) => (
-            <IconTab key={i} icon={it.icon} label={it.label} active={it.active} onClick={() => {}} />
+            <IconTab
+              key={i}
+              icon={it.icon}
+              label={it.label}
+              active={it.active}
+              onClick={() => {
+                if (activeMenu === it.label) {
+                  setActiveMenu(null); // Close if already open
+                } else {
+                  setActiveMenu(it.label); // Open new menu, closing others
+                }
+              }}
+            />
           ))}
         </div>
         <div className="mt-auto w-full flex flex-col items-center gap-3 py-3">
@@ -191,6 +648,13 @@ function LeftSidebar({ isOpen, onClose }) {
           </button>
         </div>
       </aside>
+      <TradingMenuTab isOpen={activeMenu === "Trading"} onClose={() => setActiveMenu(null)} />
+      <FinanceMenuTab isOpen={activeMenu === "Finance"} onClose={() => setActiveMenu(null)} />
+      <ProfileMenuTab isOpen={activeMenu === "Profile"} onClose={() => setActiveMenu(null)} />
+      <MarketMenuTab isOpen={activeMenu === "Market"} onClose={() => setActiveMenu(null)} />
+      <AchievementsMenuTab isOpen={activeMenu === "Achievements"} onClose={() => setActiveMenu(null)} />
+      <ChatMenuTab isOpen={activeMenu === "Chat"} onClose={() => setActiveMenu(null)} />
+      <HelpMenuTab isOpen={activeMenu === "Help"} onClose={() => setActiveMenu(null)} />
     </>
   );
 }
@@ -203,13 +667,16 @@ function RightRail({ isOpen, onClose }) {
     { icon: Trophy, label: "Tournaments" },
     { icon: ToggleRight, label: "Hotkeys" },
   ];
+
   return (
     <>
       {isOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={onClose} />
       )}
       <aside
-        className={`fixed top-14 right-0 h-[calc(100vh-3.5rem)] w-64 md:w-24 md:static bg-[#0a0e18] border-l border-zinc-800/50 flex flex-col items-center py-4 gap-2 z-50 shadow-lg transition-transform duration-300 md:transform-none md:flex hidden md:flex`}
+        className={`fixed top-14 right-0 h-[calc(100vh-3.5rem)] w-64 md:w-24 md:static bg-[#0a0e18] border-l border-zinc-800/50 flex flex-col items-center py-4 gap-2 z-50 shadow-lg transition-transform duration-300 ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        } md:translate-x-0 md:flex hidden md:flex`}
       >
         <div className="flex items-center justify-between px-4 mb-4 md:hidden">
           <div className="text-white font-bold text-lg">Tools</div>
@@ -285,15 +752,47 @@ function TopBar({ balance, onTopUp, onToggleTradeMobile, onToggleLeftSidebar, on
 }
 
 function Toolbar({ assets, activeAsset, setActiveAsset, timeframe, setTimeframe }) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <div className="flex items-center gap-4 px-4 py-2 border-b border-zinc-800/50 bg-[#0b0f1a] flex-wrap shadow-sm">
       <div className="flex items-center gap-2">
         <label className="text-xs text-zinc-400 font-medium">Asset</label>
-        <div className="relative">
-          <button className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-sm px-3 py-1 rounded transition-all duration-200">
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-sm px-3 py-1 rounded transition-all duration-200"
+          >
             {activeAsset.symbol}
             <ChevronDown size={16} />
           </button>
+          {isDropdownOpen && (
+            <div className="absolute top-full mt-1 bg-zinc-800 rounded-lg shadow-lg z-50 w-40 max-h-64 overflow-y-auto">
+              {assets.map((asset) => (
+                <button
+                  key={asset.id}
+                  onClick={() => {
+                    setActiveAsset(asset);
+                    setIsDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-zinc-100 hover:bg-zinc-700 transition-all duration-200"
+                >
+                  {asset.symbol}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -482,22 +981,50 @@ export default function Trading() {
   const [showTradeMobile, setShowTradeMobile] = useState(true);
   const [showLeftSidebar, setShowLeftSidebar] = useState(false);
   const [showRightRail, setShowRightRail] = useState(false);
+  const [activeMenu, setActiveMenu] = useState(null);
+
+  const getAssets = () => [
+    { id: "EURUSD-OTC", symbol: "EUR/USD OTC", precision: 5, payout: 0.92 },
+    { id: "BTCUSD", symbol: "BTC/USD", precision: 2, payout: 0.9 },
+    { id: "AAPL", symbol: "AAPL", precision: 2, payout: 0.88 },
+    { id: "EURKWD", symbol: "EUR/KWD", precision: 5, payout: 0.91 },
+    { id: "EURBHD", symbol: "EUR/BHD", precision: 5, payout: 0.91 },
+    { id: "EUROMR", symbol: "EUR/OMR", precision: 5, payout: 0.91 },
+    { id: "EURJOD", symbol: "EUR/JOD", precision: 5, payout: 0.91 },
+    { id: "EURGBP", symbol: "EUR/GBP", precision: 5, payout: 0.90 },
+  ];
+
+  const getInitialSeries = (assetId) => {
+    const basePrices = {
+      "EURUSD-OTC": 1.167,
+      "BTCUSD": 123000,
+      "AAPL": 255,
+      "EURKWD": 0.357,
+      "EURBHD": 0.440,
+      "EUROMR": 0.452,
+      "EURJOD": 0.830,
+      "EURGBP": 0.874,
+    };
+    const base = basePrices[assetId] || 1.167;
+    const now = Date.now();
+    const data = Array.from({ length: 200 }).map((_, i) => {
+      const time = Math.floor((now - (200 - i) * 1000) / 1000);
+      return { time, value: randomWalk(base, i) };
+    });
+    return data;
+  };
 
   useEffect(() => {
-    (async () => {
-      const _assets = await api.getAssets();
-      setAssets(_assets);
-      setActiveAsset(_assets[0]);
-    })();
+    const _assets = getAssets();
+    setAssets(_assets);
+    setActiveAsset(_assets[0]);
   }, []);
 
   useEffect(() => {
-    (async () => {
-      if (!activeAsset) return;
-      const series = await api.getInitialSeries(activeAsset.id);
-      setSeriesData(series);
-      setLatestPrice(series[series.length - 1]?.value ?? null);
-    })();
+    if (!activeAsset) return;
+    const series = getInitialSeries(activeAsset.id);
+    setSeriesData(series);
+    setLatestPrice(series[series.length - 1]?.value ?? null);
   }, [activeAsset]);
 
   useEffect(() => {
@@ -590,9 +1117,18 @@ export default function Trading() {
       />
 
       <div className="flex flex-1 min-h-0 pb-[60px] md:pb-0">
-        <LeftSidebar isOpen={showLeftSidebar} onClose={() => setShowLeftSidebar(false)} />
+        <LeftSidebar
+          isOpen={showLeftSidebar}
+          onClose={() => setShowLeftSidebar(false)}
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+        />
 
-        <main className="flex-1 min-w-0 min-h-0 flex flex-col">
+        <main
+          className={`flex-1 min-w-0 min-h-0 flex flex-col w-full ${
+            activeMenu ? 'md:ml-20' : 'ml-0'
+          } transition-all duration-300`}
+        >
           <Toolbar
             assets={assets}
             activeAsset={activeAsset}
@@ -601,8 +1137,8 @@ export default function Trading() {
             setTimeframe={setTimeframe}
           />
 
-          <div className="flex-1 flex flex-col md:grid md:grid-cols-[1fr_20rem] min-h-0">
-            <div className="flex flex-col flex-1 min-h-[50vh] sm:min-h-[60vh] md:h-full">
+          <div className="flex-1 flex flex-col md:grid md:grid-cols-[1fr_20rem] min-h-0 w-full">
+            <div className="flex flex-col flex-1 min-h-[50vh] sm:min-h-[60vh] md:h-full w-full">
               <div className="flex items-center justify-between px-4 py-2 bg-[#0a0e18] border-b border-zinc-800/50 shadow-sm">
                 <div className="text-xs text-zinc-400 font-medium">Expiration time</div>
                 <div className="flex items-center gap-4">
@@ -612,7 +1148,7 @@ export default function Trading() {
                   </div>
                 </div>
               </div>
-              <div className="flex-1 p-4 bg-[#0b0f1a] shadow-inner">
+              <div className="flex-1 p-0 bg-[#0b0f1a] shadow-inner w-full">
                 <PriceChart data={seriesData} precision={activeAsset.precision} />
               </div>
               <div className="md:hidden p-4 bg-[#0b0f1a] border-t border-zinc-800/50">
@@ -642,7 +1178,7 @@ export default function Trading() {
               </div>
             </div>
 
-            <div className="flex flex-col min-h-0 bg-[#0b0f1a] md:border-l md:border-zinc-800/50">
+            <div className="flex flex-col min-h-0 bg-[#0b0f1a] md:border-l md:border-zinc-800/50 w-full md:w-[20rem]">
               <TradePanel
                 asset={activeAsset}
                 amount={amount}
