@@ -2,16 +2,14 @@ import React from 'react';
 import { DollarSign, TrendingUp, TrendingDown, X } from 'lucide-react';
 import Stat from './Stat';
 
-function TradePanel({ asset, amount, setAmount, seconds, setSeconds, payout, onBuy, onSell, isOpen, onClose }) {
+function TradePanel({ asset, amount, setAmount, seconds, setSeconds, payout, onBuy, onSell, isOpen, onClose, className }) {
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={onClose} />
+        <div className="fixed inset-0 bg-black/60 z-40 md:hidden" onClick={onClose} />
       )}
       <div
-        className={`fixed bottom-0 left-0 right-0 md:static md:w-80 bg-[#0b0f1a] border-t md:border-t-0 md:border-l border-zinc-800/50 p-4 flex flex-col shadow-lg rounded-t-lg md:rounded-none z-50 transition-transform duration-300 md:transition-none md:transform-none ${
-          isOpen ? 'translate-y-0' : 'translate-y-full'
-        }`}
+        className={`fixed bottom-[60px] left-0 right-0 md:static md:w-[20rem] bg-[#0b0f1a] border-t md:border-t-0 md:border-l border-zinc-800/50 p-4 flex flex-col shadow-lg rounded-t-lg md:rounded-none z-50 transition-transform duration-300 ease-in-out md:transition-none md:transform-none max-h-[calc(100vh-120px)] md:max-h-[calc(100vh-3.5rem)] overflow-y-auto ${isOpen ? 'translate-y-0' : 'translate-y-full'} ${className || ''}`}
       >
         <div className="flex items-center justify-between mb-3 md:hidden">
           <div className="text-zinc-300 font-medium text-base">Trade Panel</div>
