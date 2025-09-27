@@ -1,976 +1,21 @@
-'use client';
-import React, { useEffect, useState, useRef } from "react";
-import Chart from "react-apexcharts";
-
-import {
-  Check,
-  Settings,
-  Search,
-  Edit,
-  Coins,
-  User,
-  Briefcase,
-  Trophy,
-  MessageSquare,
-  HelpCircle,
-  BarChart2,
-  ChevronDown,
-  ChevronRight,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  Bell,
-  Swords,
-  Zap,
-  Gift,
-  Rocket,
-  ToggleRight,
-  Menu,
-  X,
-  GraduationCap,
-  FileText,
-  Activity,
-  Globe,
-} from "lucide-react";
-
-function randomWalk(base, i) {
-  const noise = Math.sin(i / 9) * 0.0007 + Math.cos(i / 5) * 0.0003;
-  const drift = (Math.random() - 0.5) * (base > 1000 ? 40 : base > 10 ? 0.02 : 0.0012);
-  const v = base + noise + drift;
-  return Number(v.toFixed(base > 1000 ? 0 : base > 10 ? 2 : 5));
-}
-
-const formatMoney = (n) => new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(n);
-
-const IconTab = ({ icon: Icon, label, active, small, onClick }) => (
-  <button
-    onClick={onClick}
-    className={`flex flex-col items-center gap-1.5 p-2 rounded-lg transition-all duration-200 ${
-      small ? 'text-[10px]' : 'text-[11px]'
-    } ${
-      active
-        ? 'text-white bg-zinc-800/50 border border-zinc-700'
-        : 'text-zinc-400 hover:text-white hover:bg-zinc-800/30'
-    } ${small ? 'w-12' : 'w-16'}`}
-  >
-    <Icon
-      size={small ? 16 : 18}
-      className={`transition-transform duration-200 ${active ? 'scale-110' : 'hover:scale-110'}`}
-    />
-    <span className={`truncate ${small ? 'w-12' : 'w-16'} font-medium text-center`}>{label}</span>
-  </button>
-);
-
-const Stat = ({ label, value, accent }) => (
-  <div className="flex items-center justify-between text-sm py-1">
-    <span className="text-zinc-400">{label}</span>
-    <span className={accent ? accent : "text-zinc-200"}>{value}</span>
-  </div>
-);
-
-const Pill = ({ children, variant = "default" }) => (
-  <span
-    className={`px-2 py-1 rounded-full text-xs ${
-      variant === "green"
-        ? "bg-emerald-500/15 text-emerald-300"
-        : variant === "red"
-        ? "bg-red-500/15 text-red-300"
-        : "bg-zinc-700/60 text-zinc-200"
-    }`}
-  >
-    {children}
-  </span>
-);
-
-function PriceChart({ data, precision }) {
-  const chartContainerRef = useRef(null);
-
-  const series = React.useMemo(
-    () => [
-      {
-        name: "Price",
-        data: data.map((p) => [p.time * 1000, p.value]),
-      },
-    ],
-    [data]
-  );
-
-  const options = {
-    chart: {
-      type: 'area',
-      height: '100%',
-      background: '#0b0f1a',
-      animations: {
-        enabled: true,
-        easing: 'linear',
-        dynamicAnimation: {
-          speed: 1000,
-        },
-      },
-      toolbar: { show: false },
-      zoom: { enabled: true },
-    },
-    theme: { mode: 'dark' },
-    dataLabels: { enabled: false },
-    stroke: { curve: 'smooth', width: 2 },
-    grid: {
-      borderColor: '#161a27',
-      xaxis: { lines: { show: true } },
-      yaxis: { lines: { show: true } },
-    },
-    xaxis: {
-      type: 'datetime',
-      labels: { datetimeUTC: false },
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-    },
-    yaxis: {
-      opposite: true,
-      labels: { formatter: (val) => val.toFixed(precision) },
-      axisBorder: { show: false },
-    },
-    tooltip: { x: { format: 'dd MMM yyyy HH:mm:ss' } },
-    fill: {
-      type: 'gradient',
-      gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.1, stops: [0, 100] },
-    },
-  };
-
-  useEffect(() => {
-    const container = chartContainerRef.current;
-    if (container) {
-      container.scrollLeft = 0; // Ensure chart starts from the left edge
-    }
-  }, [data]);
-
-  return (
-    <div
-      ref={chartContainerRef}
-      className="flex-1 h-full w-full overflow-x-hidden"
-    >
-      <Chart options={options} series={series} type="area" height="100%" width="100%" />
-    </div>
-  );
-}
-
-function TradingMenuTab({ isOpen, onClose }) {
-  const menuItems = [
-    { icon: Coins, label: "Quick Trading Real Account", active: false },
-    { icon: GraduationCap, label: "Quick Trading Demo Account", active: true },
-    { icon: FileText, label: "Shares Trading Real Account", active: false },
-    { icon: FileText, label: "Shares Trading Demo Account", active: false },
-    { icon: Activity, label: "Forex MT4 Real Account", active: false },
-    { icon: Activity, label: "Forex MT4 Demo Account", active: false },
-    { icon: Globe, label: "Forex MT5 Real Account", active: false },
-    { icon: Globe, label: "Forex MT5 Demo Account", active: false },
-  ];
-
-  return (
-    <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 md:hidden"
-          onClick={onClose}
-        />
-      )}
-      <div
-        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:${isOpen ? 'block' : 'hidden'}`}
-      >
-        <div className="flex items-center justify-between mb-4 px-4 pt-4 md:hidden">
-          <div className="text-white font-bold text-lg">Trading Options</div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white">
-            <X size={20} />
-          </button>
-        </div>
-        <ul className="flex flex-col">
-          {menuItems.map((item, index) => (
-            <li key={index}>
-              <div
-                className={`flex items-center gap-3 px-4 py-3 text-zinc-200 hover:bg-indigo-900/50 transition-all duration-200 ${
-                  item.active ? 'bg-blue-600 text-white' : 'bg-[#0a0e18]'
-                } border-b border-zinc-800/50 last:border-b-0`}
-              >
-                <item.icon size={20} className="text-blue-300" />
-                <span className="flex-1">{item.label}</span>
-                {item.active && <ChevronRight size={16} className="text-white" />}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </>
-  );
-}
-
-function FinanceMenuTab({ isOpen, onClose }) {
-  const menuItems = [
-    { icon: Coins, label: "Account Balance", active: false },
-    { icon: DollarSign, label: "Transaction History", active: false },
-    { icon: Gift, label: "Bonuses", active: true },
-    { icon: Rocket, label: "Investment Options", active: false },
-  ];
-
-  return (
-    <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 md:hidden"
-          onClick={onClose}
-        />
-      )}
-      <div
-        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:${isOpen ? 'block' : 'hidden'}`}
-      >
-        <div className="flex items-center justify-between mb-4 px-4 pt-4 md:hidden">
-          <div className="text-white font-bold text-lg">Finance Options</div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white">
-            <X size={20} />
-          </button>
-        </div>
-        <ul className="flex flex-col">
-          {menuItems.map((item, index) => (
-            <li key={index}>
-              <div
-                className={`flex items-center gap-3 px-4 py-3 text-zinc-200 hover:bg-indigo-900/50 transition-all duration-200 ${
-                  item.active ? 'bg-blue-600 text-white' : 'bg-[#0a0e18]'
-                } border-b border-zinc-800/50 last:border-b-0`}
-              >
-                <item.icon size={20} className="text-blue-300" />
-                <span className="flex-1">{item.label}</span>
-                {item.active && <ChevronRight size={16} className="text-white" />}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </>
-  );
-}
-
-function ProfileMenuTab({ isOpen, onClose }) {
-  const menuItems = [
-    { icon: User, label: "Personal Details", active: false },
-    { icon: Gift, label: "Achievements", active: true },
-    { icon: MessageSquare, label: "Messages", active: false },
-    { icon: Bell, label: "Notifications", active: false },
-  ];
-
-  return (
-    <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 md:hidden"
-          onClick={onClose}
-        />
-      )}
-      <div
-        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:${isOpen ? 'block' : 'hidden'}`}
-      >
-        <div className="flex items-center justify-between mb-4 px-4 pt-4 md:hidden">
-          <div className="text-white font-bold text-lg">Profile Options</div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white">
-            <X size={20} />
-          </button>
-        </div>
-        <ul className="flex flex-col">
-          {menuItems.map((item, index) => (
-            <li key={index}>
-              <div
-                className={`flex items-center gap-3 px-4 py-3 text-zinc-200 hover:bg-indigo-900/50 transition-all duration-200 ${
-                  item.active ? 'bg-blue-600 text-white' : 'bg-[#0a0e18]'
-                } border-b border-zinc-800/50 last:border-b-0`}
-              >
-                <item.icon size={20} className="text-blue-300" />
-                <span className="flex-1">{item.label}</span>
-                {item.active && <ChevronRight size={16} className="text-white" />}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </>
-  );
-}
-
-function MarketMenuTab({ isOpen, onClose }) {
-  const menuItems = [
-    { icon: Briefcase, label: "Market", active: false },
-    { icon: Gift, label: "Purchase", active: true },
-    { icon: Zap, label: "Gem Lottery", active: false },
-    { icon: Coins, label: "Gems Missing", active: false },
-    { icon: Swords, label: "Social Reward", active: false },
-  ];
-
-  return (
-    <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 md:hidden"
-          onClick={onClose}
-        />
-      )}
-      <div
-        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:${isOpen ? 'block' : 'hidden'}`}
-      >
-        <div className="flex items-center justify-between mb-4 px-4 pt-4 md:hidden">
-          <div className="text-white font-bold text-lg">Market Options</div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white">
-            <X size={20} />
-          </button>
-        </div>
-        <ul className="flex flex-col">
-          {menuItems.map((item, index) => (
-            <li key={index}>
-              <div
-                className={`flex items-center gap-3 px-4 py-3 text-zinc-200 hover:bg-indigo-900/50 transition-all duration-200 ${
-                  item.active ? 'bg-blue-600 text-white' : 'bg-[#0a0e18]'
-                } border-b border-zinc-800/50 last:border-b-0`}
-              >
-                <item.icon size={20} className="text-blue-300" />
-                <span className="flex-1">{item.label}</span>
-                {item.active && <ChevronRight size={16} className="text-white" />}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </>
-  );
-}
-
-function AchievementsMenuTab({ isOpen, onClose }) {
-  const menuItems = [
-    { icon: Trophy, label: "Achievement", active: false },
-    { icon: FileText, label: "History", active: true },
-    { icon: Activity, label: "Rating", active: false },
-    { icon: HelpCircle, label: "Community Help", active: false },
-  ];
-
-  return (
-    <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 md:hidden"
-          onClick={onClose}
-        />
-      )}
-      <div
-        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:${isOpen ? 'block' : 'hidden'}`}
-      >
-        <div className="flex items-center justify-between mb-4 px-4 pt-4 md:hidden">
-          <div className="text-white font-bold text-lg">Achievements Options</div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white">
-            <X size={20} />
-          </button>
-        </div>
-        <ul className="flex flex-col">
-          {menuItems.map((item, index) => (
-            <li key={index}>
-              <div
-                className={`flex items-center gap-3 px-4 py-3 text-zinc-200 hover:bg-indigo-900/50 transition-all duration-200 ${
-                  item.active ? 'bg-blue-600 text-white' : 'bg-[#0a0e18]'
-                } border-b border-zinc-800/50 last:border-b-0`}
-              >
-                <item.icon size={20} className="text-blue-300" />
-                <span className="flex-1">{item.label}</span>
-                {item.active && <ChevronRight size={16} className="text-white" />}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </>
-  );
-}
-
-function ChatMenuTab({ isOpen, onClose }) {
-  const [activeTab, setActiveTab] = useState("Chats");
-
-  const chatItems = [
-    {
-      id: 1,
-      avatar: "https://pocketoption.com/uploads/users/9d/e3/d9/2_user.png",
-      title: "Support Chat (Online)",
-      time: "Yesterday, 15:09",
-      message: "Welcome to the Support Chat! Here you can get a quick...",
-      unread: 1,
-    },
-    {
-      id: 2,
-      avatar: "https://chat-po.site/uploads/avatars/default/chat-icon-en.png?v=1",
-      title: "General chat (English)",
-      time: "14:24",
-      message: "I was getting withdrawal faster than nowadays. for...",
-      unread: 2163,
-    },
-    {
-      id: 3,
-      avatar: "https://chat-po.site/uploads/avatars/default/chat-icon-analitics.png?v=1",
-      title: "Analytics",
-      time: "Yesterday, 22:40",
-      message: "EUR/JPY: Ichimoku indicators analysis See more",
-      unread: 15,
-    },
-    {
-      id: 4,
-      avatar: "https://chat-po.site/cabinet/images/avatars/10.png",
-      title: "Support",
-      time: "Yesterday, 15:09",
-      message: "You have a new message from support. See more",
-      unread: 1,
-    },
-    {
-      id: 5,
-      avatar: "https://chat-po.site/uploads/avatars/default/chat-icon-promo.png?v=1",
-      title: "Promo",
-      time: "28 Aug, 16:58",
-      message: "Limited Offer For ClientsUse FLASH100 and get a 100%...",
-      unread: 0,
-    },
-    {
-      id: 6,
-      avatar: "https://chat-po.site/uploads/avatars/default/chat-icon-news.png?v=1",
-      title: "News",
-      time: "16 Jul, 14:35",
-      message: "Risk-Free Trade with Ultrade\nWe’re introducing a new...",
-      unread: 0,
-    },
-  ];
-
-  const notificationItems = [];
-
-  return (
-    <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 md:hidden"
-          onClick={onClose}
-        />
-      )}
-      <div
-        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:${isOpen ? 'block' : 'hidden'}`}
-      >
-        <div className="chat_main">
-          <div className="chat_main_header">
-            <div className="chat_main_actions flex items-center gap-2 p-2">
-              <button className="chat_btn chat_btn_icon p-1 rounded hover:bg-zinc-700">
-                <Check size={16} className="chat_icon text-zinc-400" />
-              </button>
-              <button className="chat_btn chat_btn_icon p-1 rounded hover:bg-zinc-700">
-                <Settings size={16} className="chat_icon text-zinc-400" />
-              </button>
-              <div className="chat_main_search flex items-center bg-zinc-800 rounded p-1">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="bg-transparent text-sm text-zinc-200 outline-none w-24"
-                />
-                <Search size={16} className="chat_icon text-zinc-400 ml-1" />
-              </div>
-              <button className="chat_btn chat_btn_icon p-1 rounded hover:bg-zinc-700">
-                <Edit size={16} className="chat_icon text-zinc-400" />
-              </button>
-            </div>
-            <div className="chat_main_navs mt-2">
-              <ul className="chat_tabs_nav flex space-x-4">
-                <li>
-                  <button
-                    className={`s-active ${activeTab === "Chats" ? "text-white" : "text-zinc-400"}`}
-                    onClick={() => setActiveTab("Chats")}
-                  >
-                    Chats <span className="chat_number bg-blue-600 text-white text-xs rounded-full px-1 ml-1">2</span>
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className={`${activeTab === "Notifications" ? "text-white" : "text-zinc-400"}`}
-                    onClick={() => setActiveTab("Notifications")}
-                  >
-                    Notifications{" "}
-                    <span className="chat_number bg-blue-600 text-white text-xs rounded-full px-1 ml-1">2</span>
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="os-host scroll_container os-theme-dark h-[calc(100%-4rem)] overflow-y-auto">
-            <div className="os-content p-2">
-              <div className={`chat_tab ${activeTab === "Chats" ? "s-tab_active" : "hidden"}`}>
-                <div className="chat_list">
-                  {chatItems.map((item) => (
-                    <div key={item.id} className="chat_list_inner flex items-center p-2 hover:bg-zinc-800/50 rounded">
-                      <div className="chat_list_image w-10 h-10">
-                        <div className="chat_avatar_circle w-10 h-10 rounded-full overflow-hidden">
-                          <div
-                            className="chat_avatar_circle_bg w-full h-full bg-cover"
-                            style={{ backgroundImage: `url(${item.avatar})` }}
-                          ></div>
-                        </div>
-                      </div>
-                      <div className="chat_list_content flex-1 ml-2">
-                        <div className="chat_list_main flex justify-between">
-                          <div className="chat_title one_line text-sm font-medium text-white">
-                            <span className="one_line">{item.title}</span>
-                          </div>
-                          <div className="chat_time text-xs text-zinc-400">{item.time}</div>
-                        </div>
-                        <div className="chat_list_message flex justify-between mt-1">
-                          <p className="one_line text-xs text-zinc-400">{item.message}</p>
-                          {item.unread > 0 && (
-                            <i className="chat_number bg-blue-600 text-white text-xs rounded-full px-1">{item.unread}</i>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className={`chat_tab ${activeTab === "Notifications" ? "s-tab_active" : "hidden"}`}>
-                <div className="text-zinc-400 text-sm p-2">No notifications yet.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
-function HelpMenuTab({ isOpen, onClose }) {
-  const menuItems = [
-    { icon: HelpCircle, label: "FAQ", active: false },
-    { icon: HelpCircle, label: "Community Help", active: true },
-  ];
-
-  return (
-    <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 md:hidden"
-          onClick={onClose}
-        />
-      )}
-      <div
-        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:${isOpen ? 'block' : 'hidden'}`}
-      >
-        <div className="flex items-center justify-between mb-4 px-4 pt-4 md:hidden">
-          <div className="text-white font-bold text-lg">Help Options</div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white">
-            <X size={20} />
-          </button>
-        </div>
-        <ul className="flex flex-col">
-          {menuItems.map((item, index) => (
-            <li key={index}>
-              <div
-                className={`flex items-center gap-3 px-4 py-3 text-zinc-200 hover:bg-indigo-900/50 transition-all duration-200 ${
-                  item.active ? 'bg-blue-600 text-white' : 'bg-[#0a0e18]'
-                } border-b border-zinc-800/50 last:border-b-0`}
-              >
-                <item.icon size={20} className="text-blue-300" />
-                <span className="flex-1">{item.label}</span>
-                {item.active && <ChevronRight size={16} className="text-white" />}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </>
-  );
-}
-
-function LeftSidebar({ isOpen, onClose, activeMenu, setActiveMenu }) {
-  const items = [
-    { icon: BarChart2, label: "Trading", active: true },
-    { icon: Coins, label: "Finance" },
-    { icon: User, label: "Profile" },
-    { icon: Briefcase, label: "Market" },
-    { icon: Trophy, label: "Achievements" },
-    { icon: MessageSquare, label: "Chat" },
-    { icon: HelpCircle, label: "Help" },
-  ];
-
-  return (
-    <>
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={onClose} />
-      )}
-      <aside
-        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 md:w-20 md:static bg-[#0a0e18] border-r border-zinc-800/50 flex flex-col items-center py-4 gap-2 z-50 shadow-lg transition-transform duration-300 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0`}
-      >
-        <div className="flex items-center justify-between px-4 mb-4 md:hidden">
-          <div className="text-white font-bold text-lg">Menu</div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white">
-            <X size={20} />
-          </button>
-        </div>
-        <div className="flex flex-col items-center gap-2 w-full">
-          {items.map((it, i) => (
-            <IconTab
-              key={i}
-              icon={it.icon}
-              label={it.label}
-              active={it.active}
-              onClick={() => {
-                if (activeMenu === it.label) {
-                  setActiveMenu(null); // Close if already open
-                } else {
-                  setActiveMenu(it.label); // Open new menu, closing others
-                }
-              }}
-            />
-          ))}
-        </div>
-        <div className="mt-auto w-full flex flex-col items-center gap-3 py-3">
-          <button className="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 text-xs w-16 justify-center transition-all duration-200 md:w-full md:justify-start md:px-4">
-            <Gift size={16} />
-            <span className="md:inline hidden">Bonus</span>
-          </button>
-          <button className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs w-16 justify-center transition-all duration-200 md:w-full md:justify-start md:px-4">
-            <Rocket size={16} />
-            <span className="md:inline hidden">Upgrade</span>
-          </button>
-        </div>
-      </aside>
-      <TradingMenuTab isOpen={activeMenu === "Trading"} onClose={() => setActiveMenu(null)} />
-      <FinanceMenuTab isOpen={activeMenu === "Finance"} onClose={() => setActiveMenu(null)} />
-      <ProfileMenuTab isOpen={activeMenu === "Profile"} onClose={() => setActiveMenu(null)} />
-      <MarketMenuTab isOpen={activeMenu === "Market"} onClose={() => setActiveMenu(null)} />
-      <AchievementsMenuTab isOpen={activeMenu === "Achievements"} onClose={() => setActiveMenu(null)} />
-      <ChatMenuTab isOpen={activeMenu === "Chat"} onClose={() => setActiveMenu(null)} />
-      <HelpMenuTab isOpen={activeMenu === "Help"} onClose={() => setActiveMenu(null)} />
-    </>
-  );
-}
-
-function RightRail({ isOpen, onClose }) {
-  const items = [
-    { icon: Bell, label: "Signals" },
-    { icon: Swords, label: "Social" },
-    { icon: Zap, label: "Express" },
-    { icon: Trophy, label: "Tournaments" },
-    { icon: ToggleRight, label: "Hotkeys" },
-  ];
-
-  return (
-    <>
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={onClose} />
-      )}
-      <aside
-        className={`fixed top-14 right-0 h-[calc(100vh-3.5rem)] w-64 md:w-24 md:static bg-[#0a0e18] border-l border-zinc-800/50 flex flex-col items-center py-4 gap-2 z-50 shadow-lg transition-transform duration-300 ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        } md:translate-x-0 md:flex hidden md:flex`}
-      >
-        <div className="flex items-center justify-between px-4 mb-4 md:hidden">
-          <div className="text-white font-bold text-lg">Tools</div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white">
-            <X size={20} />
-          </button>
-        </div>
-        <div className="flex flex-col items-center gap-2 w-full">
-          {items.map((it, i) => (
-            <IconTab key={i} icon={it.icon} label={it.label} onClick={() => {}} />
-          ))}
-        </div>
-        <div className="mt-auto text-zinc-400 text-[11px] font-medium">Full screen</div>
-      </aside>
-    </>
-  );
-}
-
-function MobileBottomNav() {
-  return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0a0e18] border-t border-zinc-800/50 flex justify-around items-center h-[60px] z-40 shadow-lg">
-      <IconTab icon={BarChart2} label="Trade" small onClick={() => {}} />
-      <IconTab icon={Coins} label="Finance" small onClick={() => {}} />
-      <IconTab icon={User} label="Profile" small onClick={() => {}} />
-      <IconTab icon={MessageSquare} label="Chat" small onClick={() => {}} />
-      <IconTab icon={Bell} label="Alerts" small onClick={() => {}} />
-    </nav>
-  );
-}
-
-function TopBar({ balance, onTopUp, onToggleTradeMobile, onToggleLeftSidebar, onToggleRightRail }) {
-  return (
-    <header className="h-14 bg-[#0a0e18] border-b border-zinc-800/50 flex items-center justify-between px-4 shadow-md z-50">
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onToggleLeftSidebar}
-          className="md:hidden text-zinc-400 hover:text-white transition-all duration-200"
-        >
-          <Menu size={20} />
-        </button>
-        <div className="text-white font-bold tracking-wide text-lg">TradeX</div>
-        <span className="text-zinc-500 text-sm">Demo</span>
-      </div>
-      <div className="flex items-center gap-3">
-        <button className="px-3 py-1 rounded-lg bg-sky-600/20 text-sky-300 text-sm hover:bg-sky-600/30 flex items-center gap-2 transition-all duration-200">
-          <Gift size={16} />
-          <span className="hidden sm:inline">Get 50% Bonus</span>
-        </button>
-        <div className="px-3 py-1 rounded-lg bg-zinc-800 text-zinc-200 text-sm font-medium">
-          ${formatMoney(balance)} <span className="text-zinc-400 ml-1">USD</span>
-        </div>
-        <button
-          onClick={onTopUp}
-          className="px-3 py-1 rounded-lg bg-emerald-600 text-white text-sm hover:bg-emerald-500 transition-all duration-200 font-medium"
-        >
-          TOP UP
-        </button>
-        <button
-          onClick={onToggleTradeMobile}
-          className="md:hidden px-2 py-1 rounded bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-all duration-200"
-        >
-          Trade
-        </button>
-        <button
-          onClick={onToggleRightRail}
-          className="md:hidden px-2 py-1 rounded bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-all duration-200"
-        >
-          <Menu size={20} />
-        </button>
-      </div>
-    </header>
-  );
-}
-
-function Toolbar({ assets, activeAsset, setActiveAsset, timeframe, setTimeframe }) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  return (
-    <div className="flex items-center gap-4 px-4 py-2 border-b border-zinc-800/50 bg-[#0b0f1a] flex-wrap shadow-sm">
-      <div className="flex items-center gap-2">
-        <label className="text-xs text-zinc-400 font-medium">Asset</label>
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-sm px-3 py-1 rounded transition-all duration-200"
-          >
-            {activeAsset.symbol}
-            <ChevronDown size={16} />
-          </button>
-          {isDropdownOpen && (
-            <div className="absolute top-full mt-1 bg-zinc-800 rounded-lg shadow-lg z-50 w-40 max-h-64 overflow-y-auto">
-              {assets.map((asset) => (
-                <button
-                  key={asset.id}
-                  onClick={() => {
-                    setActiveAsset(asset);
-                    setIsDropdownOpen(false);
-                  }}
-                  className="w-full text-left px-4 py-2 text-sm text-zinc-100 hover:bg-zinc-700 transition-all duration-200"
-                >
-                  {asset.symbol}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <label className="text-xs text-zinc-400 font-medium">Timeframe</label>
-        {[
-          { key: "M1", label: "M1" },
-          { key: "M4", label: "M4" },
-          { key: "M5", label: "M5" },
-          { key: "M15", label: "M15" },
-        ].map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTimeframe(t.key)}
-            className={`px-3 py-1 rounded text-xs border font-medium ${
-              timeframe === t.key
-                ? "bg-zinc-800 text-white border-zinc-700"
-                : "bg-transparent text-zinc-400 border-zinc-700 hover:text-zinc-200 hover:border-zinc-600"
-            } transition-all duration-200`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function TradesTabs({ opened, closed }) {
-  const [tab, setTab] = useState("Opened");
-  return (
-    <div className="mt-4">
-      <div className="flex items-center justify-between px-3">
-        <div className="text-zinc-300 font-medium text-base">Trades</div>
-        <div className="flex text-sm">
-          {[
-            { k: "Opened", c: opened.length },
-            { k: "Closed", c: closed.length },
-          ].map((t) => (
-            <button
-              key={t.k}
-              onClick={() => setTab(t.k)}
-              className={`px-4 py-2 border-b-2 font-medium ${
-                tab === t.k ? "border-sky-500 text-white" : "border-transparent text-zinc-400 hover:text-zinc-200"
-              } transition-all duration-200`}
-            >
-              {t.k}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="h-44 sm:h-52 md:h-full overflow-auto p-3 space-y-2">
-        {(tab === "Opened" ? opened : closed).length === 0 ? (
-          <div className="text-zinc-500 text-sm font-medium">No {tab.toLowerCase()} trades</div>
-        ) : (
-          <ul className="space-y-3">
-            {(tab === "Opened" ? opened : closed).map((t) => (
-              <li
-                key={t.id}
-                className="bg-zinc-900/60 border border-zinc-800/50 rounded-lg p-3 flex items-center justify-between shadow-sm"
-              >
-                <div className="flex items-center gap-3">
-                  <Pill variant={t.side === "BUY" ? "green" : "red"}>{t.side}</Pill>
-                  <div>
-                    <div className="text-zinc-200 text-sm font-medium">{t.asset.symbol}</div>
-                    <div className="text-xs text-zinc-500">
-                      Amt ${formatMoney(t.amount)} • Payout {Math.round(t.payout * 100)}%
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  {t.closed ? (
-                    <div className={`${t.profit >= 0 ? "text-emerald-400" : "text-red-400"} font-medium`}>
-                      {t.profit >= 0 ? "+" : ""}${formatMoney(t.profit)}
-                    </div>
-                  ) : (
-                    <div className="text-zinc-400 text-sm font-medium">{t.remaining}s</div>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function TradePanel({ asset, amount, setAmount, seconds, setSeconds, payout, onBuy, onSell, isOpen, onClose }) {
-  return (
-    <>
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={onClose} />
-      )}
-      <div
-        className={`fixed bottom-0 left-0 right-0 md:static md:w-80 bg-[#0b0f1a] border-t md:border-t-0 md:border-l border-zinc-800/50 p-4 flex flex-col shadow-lg rounded-t-lg md:rounded-none z-50 transition-transform duration-300 md:transition-none md:transform-none ${
-          isOpen ? 'translate-y-0' : 'translate-y-full'
-        }`}
-      >
-        <div className="flex items-center justify-between mb-3 md:hidden">
-          <div className="text-zinc-300 font-medium text-base">Trade Panel</div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white">
-            <X size={20} />
-          </button>
-        </div>
-        <div className="text-sm text-zinc-400 font-medium mb-1">Time</div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setSeconds(Math.max(5, seconds - 5))}
-            className="px-3 py-2 rounded bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-all duration-200 font-medium"
-          >
-            -
-          </button>
-          <div className="flex-1 px-4 py-2 rounded bg-zinc-900 border border-zinc-700 text-zinc-100 text-center tracking-widest font-mono">
-            {new Date(seconds * 1000).toISOString().substring(14, 19)}
-          </div>
-          <button
-            onClick={() => setSeconds(seconds + 5)}
-            className="px-3 py-2 rounded bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-all duration-200 font-medium"
-          >
-            +
-          </button>
-        </div>
-
-        <div className="text-sm text-zinc-400 font-medium mt-4 mb-1">Amount</div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 flex-1 px-4 py-2 rounded bg-zinc-900 border border-zinc-700 text-zinc-100">
-            <DollarSign size={16} className="text-zinc-500" />
-            <input
-              className="bg-transparent w-full outline-none font-mono"
-              value={amount}
-              onChange={(e) => setAmount(Number(e.target.value || 0))}
-              type="number"
-              min={1}
-            />
-          </div>
-          <button
-            onClick={() => setAmount(10)}
-            className="text-xs px-3 py-2 rounded bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-all duration-200 font-medium"
-          >
-            $10
-          </button>
-          <button
-            onClick={() => setAmount(50)}
-            className="text-xs px-3 py-2 rounded bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-all duration-200 font-medium"
-          >
-            $50
-          </button>
-        </div>
-
-        <div className="mt-4">
-          <Stat label="Payout" value={`${Math.round(payout * 100)}%`} accent="text-emerald-400 font-medium" />
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <button
-            onClick={onBuy}
-            className="h-12 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md"
-          >
-            <TrendingUp size={18} /> BUY
-          </button>
-          <button
-            onClick={onSell}
-            className="h-12 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md"
-          >
-            <TrendingDown size={18} /> SELL
-          </button>
-        </div>
-      </div>
-    </>
-  );
-}
+import React, { useEffect, useState } from 'react';
+import TopBar from '../components/TopBar';
+import LeftSidebar from '../components/LeftSidebar';
+import RightRail from '../components/RightRail';
+import MobileBottomNav from '../components/MobileBottomNav';
+import Toolbar from '../components/Toolbar';
+import PriceChart from '../components/PriceChart';
+import TradePanel from '../components/TradePanel';
+import TradesTabs from '../components/TradesTabs';
+import { randomWalk } from '../utils/randomWalk';
+import { formatMoney } from '../utils/formatMoney';
 
 export default function Trading() {
   const [assets, setAssets] = useState([]);
   const [activeAsset, setActiveAsset] = useState(null);
   const [seriesData, setSeriesData] = useState([]);
   const [latestPrice, setLatestPrice] = useState(null);
-  const [timeframe, setTimeframe] = useState("M4");
+  const [timeframe, setTimeframe] = useState('M4');
 
   const [amount, setAmount] = useState(10);
   const [seconds, setSeconds] = useState(60);
@@ -984,26 +29,26 @@ export default function Trading() {
   const [activeMenu, setActiveMenu] = useState(null);
 
   const getAssets = () => [
-    { id: "EURUSD-OTC", symbol: "EUR/USD OTC", precision: 5, payout: 0.92 },
-    { id: "BTCUSD", symbol: "BTC/USD", precision: 2, payout: 0.9 },
-    { id: "AAPL", symbol: "AAPL", precision: 2, payout: 0.88 },
-    { id: "EURKWD", symbol: "EUR/KWD", precision: 5, payout: 0.91 },
-    { id: "EURBHD", symbol: "EUR/BHD", precision: 5, payout: 0.91 },
-    { id: "EUROMR", symbol: "EUR/OMR", precision: 5, payout: 0.91 },
-    { id: "EURJOD", symbol: "EUR/JOD", precision: 5, payout: 0.91 },
-    { id: "EURGBP", symbol: "EUR/GBP", precision: 5, payout: 0.90 },
+    { id: 'EURUSD-OTC', symbol: 'EUR/USD OTC', precision: 5, payout: 0.92 },
+    { id: 'BTCUSD', symbol: 'BTC/USD', precision: 2, payout: 0.9 },
+    { id: 'AAPL', symbol: 'AAPL', precision: 2, payout: 0.88 },
+    { id: 'EURKWD', symbol: 'EUR/KWD', precision: 5, payout: 0.91 },
+    { id: 'EURBHD', symbol: 'EUR/BHD', precision: 5, payout: 0.91 },
+    { id: 'EUROMR', symbol: 'EUR/OMR', precision: 5, payout: 0.91 },
+    { id: 'EURJOD', symbol: 'EUR/JOD', precision: 5, payout: 0.91 },
+    { id: 'EURGBP', symbol: 'EUR/GBP', precision: 5, payout: 0.90 },
   ];
 
   const getInitialSeries = (assetId) => {
     const basePrices = {
-      "EURUSD-OTC": 1.167,
-      "BTCUSD": 123000,
-      "AAPL": 255,
-      "EURKWD": 0.357,
-      "EURBHD": 0.440,
-      "EUROMR": 0.452,
-      "EURJOD": 0.830,
-      "EURGBP": 0.874,
+      'EURUSD-OTC': 1.167,
+      BTCUSD: 123000,
+      AAPL: 255,
+      EURKWD: 0.357,
+      EURBHD: 0.440,
+      EUROMR: 0.452,
+      EURJOD: 0.830,
+      EURGBP: 0.874,
     };
     const base = basePrices[assetId] || 1.167;
     const now = Date.now();
@@ -1064,7 +109,7 @@ export default function Trading() {
           setClosed((c) => {
             const updates = toClose.map((t) => {
               const closePrice = latestPrice ?? t.openPrice;
-              const win = t.side === "BUY" ? closePrice > t.openPrice : closePrice < t.openPrice;
+              const win = t.side === 'BUY' ? closePrice > t.openPrice : closePrice < t.openPrice;
               const profit = win ? Math.round(t.amount * t.payout * 100) / 100 : -t.amount;
               return { ...t, closed: true, closePrice, profit };
             });
@@ -1072,7 +117,7 @@ export default function Trading() {
           });
           const pnl = toClose.reduce((acc, t) => {
             const closePrice = latestPrice ?? t.openPrice;
-            const win = t.side === "BUY" ? closePrice > t.openPrice : closePrice < t.openPrice;
+            const win = t.side === 'BUY' ? closePrice > t.openPrice : closePrice < t.openPrice;
             const profit = win ? Math.round(t.amount * t.payout * 100) / 100 : -t.amount;
             return acc + profit;
           }, 0);
@@ -1104,10 +149,10 @@ export default function Trading() {
     setOpened((o) => [trade, ...o]);
   };
 
-  if (!activeAsset) return <div className="h-screen flex items-center justify-center bg-[#070b14] text-white">Loading…</div>;
+  if (!activeAsset) return <div className="min-h-screen flex items-center justify-center bg-[#070b14] text-white">Loading…</div>;
 
   return (
-    <div className="h-screen overflow-hidden bg-[#070b14] text-white flex flex-col font-sans antialiased">
+    <div className="min-h-screen overflow-hidden bg-[#070b14] text-white flex flex-col font-sans antialiased">
       <TopBar
         balance={balance}
         onTopUp={onTopUp}
@@ -1116,18 +161,21 @@ export default function Trading() {
         onToggleRightRail={() => setShowRightRail((s) => !s)}
       />
 
-      <div className="flex flex-1 min-h-0 pb-[60px] md:pb-0">
+      <div className="flex flex-1 min-h-0 pb-[80px] md:pb-0">
         <LeftSidebar
           isOpen={showLeftSidebar}
           onClose={() => setShowLeftSidebar(false)}
           activeMenu={activeMenu}
           setActiveMenu={setActiveMenu}
+          className={`fixed inset-y-0 left-0 z-30 w-full sm:w-80 bg-[#0a0e18] transform ${
+            showLeftSidebar ? 'translate-x-0' : '-translate-x-full'
+          } md:static md:w-20 md:transform-none transition-transform duration-300 ease-in-out md:border-r md:border-zinc-800/50`}
         />
 
         <main
-          className={`flex-1 min-w-0 min-h-0 flex flex-col w-full ${
-            activeMenu ? 'md:ml-20' : 'ml-0'
-          } transition-all duration-300`}
+          className={`flex-1 min-w-0 min-h-0 flex flex-col w-full transition-all duration-300 ${
+            activeMenu && showLeftSidebar ? 'md:ml-64' : 'ml-0'
+          }`}
         >
           <Toolbar
             assets={assets}
@@ -1135,16 +183,17 @@ export default function Trading() {
             setActiveAsset={setActiveAsset}
             timeframe={timeframe}
             setTimeframe={setTimeframe}
+            className="sticky top-0 z-20 bg-[#070b14]"
           />
 
-          <div className="flex-1 flex flex-col md:grid md:grid-cols-[1fr_20rem] min-h-0 w-full">
-            <div className="flex flex-col flex-1 min-h-[50vh] sm:min-h-[60vh] md:h-full w-full">
+          <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_24rem] min-h-0 w-full">
+            <div className="flex flex-col flex-1 min-h-[40vh] sm:min-h-[50vh] lg:h-full w-full">
               <div className="flex items-center justify-between px-4 py-2 bg-[#0a0e18] border-b border-zinc-800/50 shadow-sm">
                 <div className="text-xs text-zinc-400 font-medium">Expiration time</div>
-                <div className="flex items-center gap-4">
-                  <div className="text-xs bg-zinc-800/70 px-3 py-1 rounded font-medium">{activeAsset.symbol}</div>
-                  <div className="text-xs bg-zinc-900/70 px-3 py-1 rounded font-mono">
-                    {latestPrice != null ? latestPrice.toFixed(activeAsset.precision) : "--"}
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <div className="text-xs bg-zinc-800/70 px-2 sm:px-3 py-1 rounded font-medium">{activeAsset.symbol}</div>
+                  <div className="text-xs bg-zinc-900/70 px-2 sm:px-3 py-1 rounded font-mono">
+                    {latestPrice != null ? latestPrice.toFixed(activeAsset.precision) : '--'}
                   </div>
                 </div>
               </div>
@@ -1178,7 +227,7 @@ export default function Trading() {
               </div>
             </div>
 
-            <div className="flex flex-col min-h-0 bg-[#0b0f1a] md:border-l md:border-zinc-800/50 w-full md:w-[20rem]">
+            <div className="flex flex-col min-h-0 bg-[#0b0f1a] md:border-l md:border-zinc-800/50 w-full md:w-[24rem]">
               <TradePanel
                 asset={activeAsset}
                 amount={amount}
@@ -1186,10 +235,11 @@ export default function Trading() {
                 seconds={seconds}
                 setSeconds={setSeconds}
                 payout={activeAsset.payout}
-                onBuy={() => place("BUY")}
-                onSell={() => place("SELL")}
+                onBuy={() => place('BUY')}
+                onSell={() => place('SELL')}
                 isOpen={showTradeMobile}
                 onClose={() => setShowTradeMobile(false)}
+                className="md:sticky md:top-0"
               />
               <div className="px-4 md:block">
                 <TradesTabs opened={opened} closed={closed} />
@@ -1198,10 +248,16 @@ export default function Trading() {
           </div>
         </main>
 
-        <RightRail isOpen={showRightRail} onClose={() => setShowRightRail(false)} />
+        <RightRail
+          isOpen={showRightRail}
+          onClose={() => setShowRightRail(false)}
+          className={`fixed inset-y-0 right-0 z-30 w-full sm:w-80 bg-[#0a0e18] transform ${
+            showRightRail ? 'translate-x-0' : 'translate-x-full'
+          } md:static md:w-64 md:transform-none transition-transform duration-300 ease-in-out md:border-l md:border-zinc-800/50`}
+        />
       </div>
 
-      <MobileBottomNav />
+      <MobileBottomNav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a0e18] border-t border-zinc-800/50" />
     </div>
   );
 }
