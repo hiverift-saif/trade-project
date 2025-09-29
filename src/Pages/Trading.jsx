@@ -22,10 +22,22 @@ export default function Trading() {
   const [opened, setOpened] = useState([]);
   const [closed, setClosed] = useState([]);
 
-  const [showTradeMobile, setShowTradeMobile] = useState(true); // Restored to true for mobile
-  const [showLeftSidebar, setShowLeftSidebar] = useState(true);
+  const [showTradeMobile, setShowTradeMobile] = useState(true);
+  const [showLeftSidebar, setShowLeftSidebar] = useState(false); // Default false for mobile
   const [showRightRail, setShowRightRail] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
+
+  // Lock/unlock background scroll on mobile when LeftSidebar is open
+  useEffect(() => {
+    if (showLeftSidebar) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [showLeftSidebar]);
 
   const getAssets = () => [
     { id: 'EURUSD-OTC', symbol: 'EUR/USD OTC', precision: 5, payout: 0.92 },
@@ -93,11 +105,10 @@ export default function Trading() {
   useEffect(() => {
     const id = setInterval(() => {
       setOpened((curr) => {
-        const now = Date.now();
         const still = [];
         const toClose = [];
         for (const t of curr) {
-          const remaining = Math.max(0, Math.floor((t.expiresAt - now) / 1000));
+          const remaining = Math.max(0, Math.floor((t.expiresAt - Date.now()) / 1000));
           if (remaining <= 0) {
             toClose.push(t);
           } else {
@@ -151,7 +162,7 @@ export default function Trading() {
   if (!activeAsset) return <div className="min-h-screen flex items-center justify-center bg-[#070b14] text-white">Loading…</div>;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#070b14] text-white flex flex-col font-sans antialiased">
+    <div className="min-h-screen overflow-hidden bg-[#070b14] text-white flex flex-col font-sans antialiased relative">
       <TopBar
         balance={balance}
         onTopUp={onTopUp}
@@ -160,16 +171,17 @@ export default function Trading() {
         onToggleRightRail={() => setShowRightRail((s) => !s)}
       />
 
-      <div className="flex flex-1 min-h-0 pb-[60px] md:pb-0">
+      <div className="flex flex-1 min-h-0 pb-[60px] md:pb-0 relative">
         <LeftSidebar
           isOpen={showLeftSidebar}
           onClose={() => setShowLeftSidebar(false)}
           activeMenu={activeMenu}
           setActiveMenu={setActiveMenu}
+          setShowLeftSidebar={setShowLeftSidebar}
         />
 
         <main
-          className={`flex-1 min-w-0 min-h-0 flex flex-col w-full transition-all duration-300 md:${activeMenu ? 'ml-[20rem]' : 'ml-[5rem]'}`}
+          className={`flex-1 min-w-0 min-h-0 flex flex-col w-full transition-all duration-300 ${showLeftSidebar ? '' : 'ml-0'} md:${showLeftSidebar ? '' : ''} z-10`}
         >
           <Toolbar
             assets={assets}
@@ -180,9 +192,9 @@ export default function Trading() {
             className="sticky top-0 z-20 bg-[#070b14]"
           />
 
-          <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_20rem] min-h-0 w-full h-full">
-            <div className="flex flex-col flex-1 min-h-[40vh] sm:min-h-[50vh] lg:h-full w-full min-w-0">
-              <div className="flex items-center justify-between px-4 py-2 bg-[#0a0e18] border-b border-zinc-800/50 shadow-sm">
+          <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_20rem] min-h-0 w-full h-full relative z-10">
+            <div className="flex flex-col flex-1 min-h-[40vh] sm:min-h-[50vh] lg:h-full w-full min-w-0 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2 bg-[#0a0e18] border-b border-zinc-800/50 shadow-sm z-20">
                 <div className="text-xs text-zinc-400 font-medium">Expiration time</div>
                 <div className="flex items-center gap-2 sm:gap-4">
                   <div className="text-xs bg-zinc-800/70 px-2 sm:px-3 py-1 rounded font-medium">{activeAsset.symbol}</div>
@@ -233,7 +245,7 @@ export default function Trading() {
                 onSell={() => place('SELL')}
                 isOpen={showTradeMobile}
                 onClose={() => setShowTradeMobile(false)}
-                className="md:sticky md:top-0 z-30"
+                className="md:sticky md:top-0 z-30 md:max-h-[calc(100vh-3.5rem)] md:overflow-y-auto"
               />
               <div className="px-4 md:block">
                 <TradesTabs opened={opened} closed={closed} />
@@ -247,7 +259,7 @@ export default function Trading() {
           onClose={() => setShowRightRail(false)}
           className={`fixed inset-y-0 right-0 z-30 w-full sm:w-80 bg-[#0a0e18] transform ${
             showRightRail ? 'translate-x-0' : 'translate-x-full'
-          } md:static md:w-64 md:transform-none transition-transform duration-300 ease-in-out md:border-l md:border-zinc-800/50`}
+          } md:static  md:transform-none transition-transform duration-300 ease-in-out md:border-l md:border-zinc-800/50`}
         />
       </div>
     </div>

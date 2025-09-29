@@ -58,14 +58,16 @@ function PriceChart({ data, precision }) {
   useEffect(() => {
     const container = chartContainerRef.current;
     if (container) {
-      container.scrollLeft = 0; // Ensure chart starts from the left edge
+      container.scrollLeft = 0; // Reset scroll to start
+      container.style.marginLeft = '0'; // Explicitly remove any margin
     }
   }, [data]);
 
   return (
     <div
       ref={chartContainerRef}
-      className="flex-1 h-full w-full overflow-x-hidden"
+      className="flex-1 h-full w-full overflow-hidden z-0" // Changed z-10 to z-0
+      style={{ marginLeft: '0' }} // Inline style to ensure no left margin
     >
       <Chart options={options} series={series} type="area" height="100%" width="100%" />
     </div>

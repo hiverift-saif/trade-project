@@ -17,14 +17,14 @@ function TradingMenuTab({ isOpen, onClose }) {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-50 md:hidden"
+          className="fixed inset-0 bg-black/50 z-60 md:hidden"
           onClick={onClose}
         />
       )}
       <div
         className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 md:w-80 md:static md:flex md:flex-col ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:${isOpen ? 'block' : 'hidden'}`}
+        } md:${isOpen ? 'block' : 'hidden'} overflow-y-auto z-60`}
       >
         <div className="flex items-center justify-between mb-4 px-4 pt-4 md:hidden">
           <div className="text-white font-bold text-lg">Trading Options</div>
@@ -32,7 +32,7 @@ function TradingMenuTab({ isOpen, onClose }) {
             <X size={20} />
           </button>
         </div>
-        <ul className="flex flex-col">
+        <ul className="flex flex-col h-full">
           {menuItems.map((item, index) => (
             <li key={index}>
               <div
