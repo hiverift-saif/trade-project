@@ -9,7 +9,8 @@ import TradesTabs from '../components/TradesTabs';
 import { randomWalk } from '../utils/randomWalk';
 import { formatMoney } from '../utils/formatMoney';
 import SignalsWidget from '../components/SignalsWidget';
-import { Menu, Gift ,X } from 'lucide-react';
+import SocialTrading from '../components/SocialTradingModal'; // Updated to use SocialTrading
+import { Menu, Gift,X } from 'lucide-react';
 
 export default function Trading() {
   const [assets, setAssets] = useState([]);
@@ -18,6 +19,7 @@ export default function Trading() {
   const [latestPrice, setLatestPrice] = useState(null);
   const [timeframe, setTimeframe] = useState('M4');
   const [showSignals, setShowSignals] = useState(false);
+  const [showSocialModal, setShowSocialModal] = useState(false); // Toggle for SocialTrading
 
   const [amount, setAmount] = useState(10);
   const [seconds, setSeconds] = useState(60);
@@ -31,7 +33,7 @@ export default function Trading() {
   const [activeMenu, setActiveMenu] = useState(null);
 
   useEffect(() => {
-    if (showLeftSidebar || showRightRail || showSignals) {
+    if (showLeftSidebar || showRightRail || showSignals || showSocialModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
@@ -39,7 +41,7 @@ export default function Trading() {
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [showLeftSidebar, showRightRail, showSignals]);
+  }, [showLeftSidebar, showRightRail, showSignals, showSocialModal]);
 
   const getAssets = () => [
     { id: 'EURUSD-OTC', symbol: 'EUR/USD OTC', precision: 5, payout: 0.92 },
@@ -183,7 +185,7 @@ export default function Trading() {
         />
 
         <main
-          className={`flex-1 min-w-0 min-h-0 flex flex-col w-full transition-all duration-300 ${showLeftSidebar ? 'ml-[20rem]' : ''} ${showRightRail ? '' : 'mr-0'} ${showSignals ? 'mr-[20rem]' : ''} md:${showLeftSidebar ? '' : ''} z-10`}
+          className={`flex-1 min-w-0 min-h-0 flex flex-col w-full transition-all duration-300 ${showLeftSidebar ? '' : ''} ${showRightRail ? '' : 'mr-0'} ${showSignals ? 'mr-[20rem]' : ''} ${showSocialModal ? 'mr-[20rem]' : ''} md:${showLeftSidebar ? '' : ''} z-10`}
         >
           <Toolbar
             assets={assets}
@@ -260,6 +262,7 @@ export default function Trading() {
           isOpen={showRightRail}
           onClose={() => setShowRightRail(false)}
           onSignalsClick={() => setShowSignals(true)}
+          onSocialClick={() => setShowSocialModal((prev) => !prev)} // Toggle SocialTrading
           className={`fixed inset-y-0 right-0 z-50 w-16 md:w-24 bg-[#0a0e18] border-l border-zinc-800/50 transform ${
             showRightRail ? 'translate-x-0' : 'translate-x-full'
           } md:static md:transform-none transition-transform duration-300 ease-in-out`}
@@ -269,7 +272,7 @@ export default function Trading() {
         {showSignals && (
           <div className="fixed inset-0 bg-black/50 z-60 flex justify-end">
             <div
-              className={`w-80 bg-[#0a0e18] border-l border-zinc-800 shadow-lg transform transition-transform duration-300 ease-in-out ${
+              className={`w-80 bg-[#0a0e18] border-l border-zinc-800 shadow-lg transform transition-transform duration-300 ease-in-out mt-[70px] ${
                 showSignals ? 'translate-x-0' : 'translate-x-full'
               } h-full overflow-y-auto`}
             >
@@ -282,6 +285,19 @@ export default function Trading() {
               <div className="p-4">
                 <SignalsWidget />
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* SocialTrading as Right Sliding Panel */}
+        {showSocialModal && (
+          <div className="fixed inset-0 bg-black/50 z-60 flex justify-end">
+            <div
+              className={`w-80 bg-[#0a0e18] border-l border-zinc-800 shadow-lg transform transition-transform duration-300 ease-in-out mt-[70px] ${
+                showSocialModal ? 'translate-x-0' : 'translate-x-full'
+              } h-full overflow-y-auto`}
+            >
+              <SocialTrading isOpen={showSocialModal} onClose={() => setShowSocialModal(false)} />
             </div>
           </div>
         )}
