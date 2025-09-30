@@ -8,6 +8,8 @@ import TradePanel from '../components/TradePanel';
 import TradesTabs from '../components/TradesTabs';
 import { randomWalk } from '../utils/randomWalk';
 import { formatMoney } from '../utils/formatMoney';
+import SignalsWidget from '../components/SignalsWidget';
+import { Menu, Gift ,X } from 'lucide-react';
 
 export default function Trading() {
   const [assets, setAssets] = useState([]);
@@ -15,6 +17,7 @@ export default function Trading() {
   const [seriesData, setSeriesData] = useState([]);
   const [latestPrice, setLatestPrice] = useState(null);
   const [timeframe, setTimeframe] = useState('M4');
+  const [showSignals, setShowSignals] = useState(false);
 
   const [amount, setAmount] = useState(10);
   const [seconds, setSeconds] = useState(60);
@@ -23,13 +26,12 @@ export default function Trading() {
   const [closed, setClosed] = useState([]);
 
   const [showTradeMobile, setShowTradeMobile] = useState(true);
-  const [showLeftSidebar, setShowLeftSidebar] = useState(false); // Default false for mobile
-  const [showRightRail, setShowRightRail] = useState(false);
+  const [showLeftSidebar, setShowLeftSidebar] = useState(false);
+  const [showRightRail, setShowRightRail] = useState(true);
   const [activeMenu, setActiveMenu] = useState(null);
 
-  // Lock/unlock background scroll on mobile when LeftSidebar is open
   useEffect(() => {
-    if (showLeftSidebar) {
+    if (showLeftSidebar || showRightRail || showSignals) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
@@ -37,7 +39,7 @@ export default function Trading() {
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [showLeftSidebar]);
+  }, [showLeftSidebar, showRightRail, showSignals]);
 
   const getAssets = () => [
     { id: 'EURUSD-OTC', symbol: 'EUR/USD OTC', precision: 5, payout: 0.92 },
@@ -171,7 +173,7 @@ export default function Trading() {
         onToggleRightRail={() => setShowRightRail((s) => !s)}
       />
 
-      <div className="flex flex-1 min-h-0 pb-[60px] md:pb-0 relative">
+      <div className="flex flex-1 min-h-0 pb-0 md:pb-0 relative">
         <LeftSidebar
           isOpen={showLeftSidebar}
           onClose={() => setShowLeftSidebar(false)}
@@ -181,7 +183,7 @@ export default function Trading() {
         />
 
         <main
-          className={`flex-1 min-w-0 min-h-0 flex flex-col w-full transition-all duration-300 ${showLeftSidebar ? '' : 'ml-0'} md:${showLeftSidebar ? '' : ''} z-10`}
+          className={`flex-1 min-w-0 min-h-0 flex flex-col w-full transition-all duration-300 ${showLeftSidebar ? 'ml-[20rem]' : ''} ${showRightRail ? '' : 'mr-0'} ${showSignals ? 'mr-[20rem]' : ''} md:${showLeftSidebar ? '' : ''} z-10`}
         >
           <Toolbar
             assets={assets}
@@ -193,7 +195,7 @@ export default function Trading() {
           />
 
           <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_20rem] min-h-0 w-full h-full relative z-10">
-            <div className="flex flex-col flex-1 min-h-[40vh] sm:min-h-[50vh] lg:h-full w-full min-w-0 overflow-hidden">
+            <div className="flex flex-col flex-1 min-h-[40vh] sm:min-h[50vh] lg:h-full w-full min-w-0 overflow-hidden">
               <div className="flex items-center justify-between px-4 py-2 bg-[#0a0e18] border-b border-zinc-800/50 shadow-sm z-20">
                 <div className="text-xs text-zinc-400 font-medium">Expiration time</div>
                 <div className="flex items-center gap-2 sm:gap-4">
@@ -257,10 +259,32 @@ export default function Trading() {
         <RightRail
           isOpen={showRightRail}
           onClose={() => setShowRightRail(false)}
-          className={`fixed inset-y-0 right-0 z-30 w-full sm:w-80 bg-[#0a0e18] transform ${
+          onSignalsClick={() => setShowSignals(true)}
+          className={`fixed inset-y-0 right-0 z-50 w-16 md:w-24 bg-[#0a0e18] border-l border-zinc-800/50 transform ${
             showRightRail ? 'translate-x-0' : 'translate-x-full'
-          } md:static  md:transform-none transition-transform duration-300 ease-in-out md:border-l md:border-zinc-800/50`}
+          } md:static md:transform-none transition-transform duration-300 ease-in-out`}
         />
+
+        {/* SignalsWidget as Right Sliding Panel */}
+        {showSignals && (
+          <div className="fixed inset-0 bg-black/50 z-60 flex justify-end">
+            <div
+              className={`w-80 bg-[#0a0e18] border-l border-zinc-800 shadow-lg transform transition-transform duration-300 ease-in-out ${
+                showSignals ? 'translate-x-0' : 'translate-x-full'
+              } h-full overflow-y-auto`}
+            >
+              <div className="flex justify-between items-center p-4 border-b border-zinc-700">
+                <h2 className="text-white font-medium">Signals</h2>
+                <button onClick={() => setShowSignals(false)} className="text-zinc-400 hover:text-white">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-4">
+                <SignalsWidget />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

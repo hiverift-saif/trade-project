@@ -4,7 +4,7 @@ import { formatMoney } from '../utils/formatMoney';
 
 function TopBar({ balance, onTopUp, onToggleTradeMobile, onToggleLeftSidebar, onToggleRightRail }) {
   return (
-    <header className="h-14 bg-[#0a0e18] border-b border-zinc-800/50 flex items-center justify-between px-4 shadow-md z-50">
+    <header className="h-14 bg-[#0a0e18] border-b border-zinc-800/50 flex items-center justify-between px-4 shadow-md z-50 relative">
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleLeftSidebar}
@@ -12,10 +12,19 @@ function TopBar({ balance, onTopUp, onToggleTradeMobile, onToggleLeftSidebar, on
         >
           <Menu size={20} />
         </button>
-        <div className="text-white font-bold tracking-wide text-lg">TradeX</div>
-        <span className="text-zinc-500 text-sm">Demo</span>
+
+{/* Logo */}
+< div className=" items-center hidden md:flex">
+  <div className="flex-shrink-0 flex items-center">
+    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-green-500 rounded-md flex items-center justify-center mr-2">
+      <span className="text-white font-bold">TP</span>
+    </div>
+    <span className="text-xl font-semibold text-white">Trade Pro</span>
+  </div>
+</div>
+
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <button className="px-3 py-1 rounded-lg bg-sky-600/20 text-sky-300 text-sm hover:bg-sky-600/30 flex items-center gap-2 transition-all duration-200">
           <Gift size={16} />
           <span className="hidden sm:inline">Get 50% Bonus</span>
@@ -31,16 +40,16 @@ function TopBar({ balance, onTopUp, onToggleTradeMobile, onToggleLeftSidebar, on
         </button>
         <button
           onClick={onToggleTradeMobile}
-          className="md:hidden px-2 py-1 rounded bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-all duration-200"
+          className="md:hidden px-3 py-2 rounded bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-all duration-200"
         >
           Trade
         </button>
-        <button
+        {/* <button
           onClick={onToggleRightRail}
-          className="md:hidden px-2 py-1 rounded bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-all duration-200"
+          className="md:hidden px-3 py-2 rounded bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-all duration-200"
         >
           <Menu size={20} />
-        </button>
+        </button> */}
       </div>
     </header>
   );
