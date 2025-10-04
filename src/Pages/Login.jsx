@@ -1,6 +1,6 @@
 // src/pages/Login.jsx
 import React, { useState } from "react";
-import { Mail, Lock } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
@@ -10,6 +10,8 @@ export default function Login() {
     password: "",
     remember: false,
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -40,6 +42,7 @@ export default function Login() {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email */}
           <div className="relative">
             <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <input
@@ -53,19 +56,28 @@ export default function Login() {
             />
           </div>
 
+          {/* Password */}
           <div className="relative">
             <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full pl-10 pr-3 py-3 rounded-xl bg-gray-800/60 text-white border border-gray-700/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 outline-none transition-all duration-300"
+              className="w-full pl-10 pr-10 py-3 rounded-xl bg-gray-800/60 text-white border border-gray-700/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 outline-none transition-all duration-300"
             />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
           </div>
 
+          {/* Remember Me */}
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
@@ -77,6 +89,7 @@ export default function Login() {
             <label className="text-gray-300 text-sm">Remember Me</label>
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             className="w-full py-3 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 rounded-xl text-white font-semibold text-lg shadow-2xl transition-all duration-300 hover:scale-105"
@@ -85,6 +98,7 @@ export default function Login() {
           </button>
         </form>
 
+        {/* Sign Up Link */}
         <div className="mt-4 text-center text-gray-400 text-sm">
           Don't have an account?{" "}
           <button
@@ -95,6 +109,7 @@ export default function Login() {
           </button>
         </div>
 
+        {/* Forgot Password */}
         <div className="mt-2 text-center text-gray-400 text-sm">
           <a href="/forgot-password" className="text-blue-400 font-medium hover:underline">
             Forgot Password?

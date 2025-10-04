@@ -25,7 +25,7 @@ function TradesTabs({ opened, closed }) {
           ))}
         </div>
       </div>
-      <div className="h-44 sm:h-52 md:h-full overflow-auto p-3 space-y-2">
+      <div className="h-[300px] sm:h-52 md:h-full overflow-auto p-3 space-y-2">
         {(tab === "Opened" ? opened : closed).length === 0 ? (
           <div className="text-zinc-500 text-sm font-medium">No {tab.toLowerCase()} trades</div>
         ) : (

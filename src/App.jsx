@@ -25,6 +25,8 @@ function App() {
     window.scrollTo(0, 0);
   }, []);
 
+  
+
   return (
     <Router>
       <ScrollToTop />
@@ -41,7 +43,7 @@ function App() {
           <Route path="/TradingDashboard" element={<TradingDashboard />} />
           <Route path="/trade-closed" element={<TradeClosed />} />
           <Route path="/Maintrading" element={<Maintrading />} />
-          <Route path="/Trading" element={<Trading />} />
+          <Route path="/Trading/*" element={<Trading />} /> {/* Fixed: Added /* for nested routes */}
         </Routes>
       </main>
       <Footer />
