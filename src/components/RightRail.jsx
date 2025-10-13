@@ -151,25 +151,39 @@ function RightRail({ isOpen, onClose }) {
       </aside>
 
       {/* Mobile Buttons (Bottom Bar) - Smaller size, perfect layout */}
-      <div
-        className="fixed bottom-0 left-0 right-0 bg-[#0a0e18] border-t border-zinc-800/50 flex justify-around items-center py-2 px-1 z-50 md:hidden shadow-lg"
+<div
+  className="fixed bottom-0 left-0 right-0 bg-[#0a0e18] border-t border-zinc-800/50 
+  flex justify-between items-center py-2 px-2 z-50 md:hidden shadow-lg"
+>
+  {items.map((item, index) => (
+    <div
+      key={index}
+      className="flex flex-col items-center justify-center flex-1 min-w-0 gap-0.5"
+    >
+      <button
+        onClick={item.onClick}
+        className={`p-2 rounded-full transition-all duration-200 flex items-center justify-center w-10 h-10 
+        ${
+          activeRailItem === item.label
+            ? 'bg-indigo-600 text-white shadow-md'
+            : 'bg-zinc-800/40 hover:bg-zinc-700/50 text-zinc-300'
+        }`}
       >
-        {items.map((item, index) => (
-          <div key={index} className="flex flex-col items-center flex-1 gap-0.5">
-            <button
-              onClick={item.onClick}
-              className={`p-1.5 rounded-full bg-zinc-800/30 hover:bg-zinc-700/50 transition-all duration-200 flex items-center justify-center w-9 h-9 ${
-                activeRailItem === item.label ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-300'
-              }`}
-            >
-              <item.icon size={18} />
-            </button>
-            <span className={`text-[10px] text-zinc-400 leading-tight ${activeRailItem === item.label ? 'text-white font-medium' : ''} transition-colors duration-200 truncate w-16 text-center`}>
-              {item.label}
-            </span>
-          </div>
-        ))}
-      </div>
+        <item.icon size={18} />
+      </button>
+      <span
+        className={`text-[10px] leading-tight truncate w-full text-center transition-colors duration-200 ${
+          activeRailItem === item.label
+            ? 'text-white font-medium'
+            : 'text-zinc-400'
+        }`}
+      >
+        {item.label}
+      </span>
+    </div>
+  ))}
+</div>
+
 
       {/* Render Sub-Panels like LeftSidebar's renderSubMenu */}
       {renderRailSubPanel('Signals')}

@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Chart from 'react-apexcharts';
 import { TrendingUp, TrendingDown, Clock, BarChart2, Settings, Zap, Layers, Star, Check } from 'lucide-react';
 
 const PriceChart = () => {
-  // Helper functions
+  // Helper functions (unchanged)
   const getDurationMs = (tf) => {
     const map = {
       '5s': 5 * 1000,
@@ -149,7 +149,6 @@ const PriceChart = () => {
         const ema26 = ema(closes.slice(0, i + 1), 26);
         const macdLine = ema12[i] - ema26[i];
         macd.push(macdLine);
-        // Signal line (EMA9 of MACD)
         const signal = ema(macd.slice(0, i + 1), 9);
         macdSignal.push(signal[i]);
         macdHistogram.push(macdLine - signal[i]);
@@ -174,9 +173,9 @@ const PriceChart = () => {
     }));
   };
 
-  // State
+  // State (unchanged)
   const [timeframe, setTimeframe] = useState('1m');
-  const [chartType, setChartType] = useState('line'); // Default to line chart
+  const [chartType, setChartType] = useState('line');
   const [indicators, setIndicators] = useState({
     sma20: false, sma50: false, bb: false, rsi: false, macd: false,
     ac: false, adx: false, all: false, aro: false, atr: false, ao: false,
@@ -192,7 +191,10 @@ const PriceChart = () => {
   const [startPrice, setStartPrice] = useState(45000);
   const [xaxisRange, setXaxisRange] = useState({ min: undefined, max: undefined });
 
-  // Regenerate data when timeframe changes
+  const latestRangeRef = useRef({ min: undefined, max: undefined });
+  const zoomDebounceTimer = useRef(null);
+
+  // Effects (unchanged)
   useEffect(() => {
     const newData = generateInitialData(timeframe);
     setCandleData(newData);
@@ -201,7 +203,6 @@ const PriceChart = () => {
     setCurrentPrice(newData[newData.length - 1]?.y[3] || 45000);
   }, [timeframe]);
 
-  // Set initial start price only once after data load
   useEffect(() => {
     if (candleData.length > 0 && startPrice === 45000) {
       setStartPrice(candleData[0].y[0]);
@@ -209,7 +210,6 @@ const PriceChart = () => {
     }
   }, [candleData]);
 
-  // Live chart animation - update last candle only
   useEffect(() => {
     const interval = setInterval(() => {
       setCandleData((prevData) => {
@@ -217,10 +217,15 @@ const PriceChart = () => {
         setCurrentPrice(newData[newData.length - 1].y[3]);
         return newData;
       });
-    }, 1000); // Update every 1 second for smoother animation
-
+    }, 1000);
     return () => clearInterval(interval);
   }, [timeframe]);
+
+  useEffect(() => {
+    return () => {
+      if (zoomDebounceTimer.current) clearTimeout(zoomDebounceTimer.current);
+    };
+  }, []);
 
   const enrichedData = useMemo(() => computeEnrichedData(candleData, indicators), [candleData, indicators]);
 
@@ -234,7 +239,7 @@ const PriceChart = () => {
           } else if (type === 'bars') {
             return {
               x: d.x,
-              y: [d.y[2], d.y[1]],  // [low, high] for rangeBar to mimic candlestick bars
+              y: [d.y[2], d.y[1]],
               color: d.isGreen ? '#00ff88' : '#ff4444'
             };
           } else {
@@ -294,7 +299,6 @@ const PriceChart = () => {
           });
         }
       }
-      // Add RSI as a separate series (but since it's oscillator, perhaps in subplot, but for now add to main if enabled)
       if (indicatorsObj.rsi) {
         const hasRsi = enriched.some(d => d.rsi !== null);
         if (hasRsi) {
@@ -308,7 +312,6 @@ const PriceChart = () => {
           });
         }
       }
-      // MACD
       if (indicatorsObj.macd) {
         const hasMacd = enriched.some(d => d.macd !== null);
         if (hasMacd) {
@@ -341,12 +344,11 @@ const PriceChart = () => {
   const changePercent = ((priceChange / startPrice) * 100).toFixed(2);
   const isPositive = priceChange >= 0;
 
-  const priceColor = chartType === 'line' ? "#1e90ff" : "#00ff88"; // Blue for line chart to match the image
+  const priceColor = chartType === 'line' ? "#1e90ff" : "#00ff88";
 
-  // Compute dynamic column width based on visible points - wider on zoom
   const getColumnWidth = () => {
     if (xaxisRange.min === undefined || xaxisRange.max === undefined) {
-      return '100%'; // Default for full view
+      return '100%';
     }
     const visiblePoints = enrichedData.filter(d => 
       d.x.getTime() >= xaxisRange.min && d.x.getTime() <= xaxisRange.max
@@ -364,7 +366,6 @@ const PriceChart = () => {
 
   const columnWidth = getColumnWidth();
 
-  // Handle indicator changes
   const handleIndicatorChange = (key) => {
     setIndicators(prev => ({ ...prev, [key]: !prev[key] }));
     if (!['sma20', 'sma50', 'bb', 'rsi', 'macd'].includes(key)) {
@@ -377,7 +378,6 @@ const PriceChart = () => {
     console.log('Applied indicators:', indicators);
   };
 
-  // Indicators data
   const indicatorsData = [
     { type: 'sma20', name: 'SMA 20' },
     { type: 'sma50', name: 'SMA 50' },
@@ -428,24 +428,23 @@ const PriceChart = () => {
     });
   };
 
-  // Dynamic chart height based on screen size
   const getChartHeight = () => {
     if (typeof window !== 'undefined') {
-      if (window.innerWidth < 640) return 300; // Mobile
-      if (window.innerWidth < 1024) return 400; // Tablet
-      return 689; // Desktop
+      if (window.innerWidth < 640) return 300;
+      if (window.innerWidth < 1024) return 400;
+      return 689;
     }
-    return 400; // Default
+    return 400;
   };
 
   const chartHeight = getChartHeight();
 
-  // ApexCharts options for main chart - line chart specific adjustments to match provided canvas style
   const mainChartOptions = useMemo(() => ({
     chart: {
+      id: 'price-chart',
       type: chartType === 'candles' ? 'candlestick' : chartType === 'line' ? 'line' : 'rangeBar',
       height: chartHeight,
-      width: '100%', // Responsive width
+      width: '100%',
       zoom: {
         type: 'x',
         enabled: true,
@@ -479,7 +478,7 @@ const PriceChart = () => {
           reset: true
         }
       },
-      background: chartType === 'line' ? '#1f2937' : '#000', // Gray-800 (#1f2937) for line chart
+      background: chartType === 'line' ? '#1f2937' : '#000',
       foreColor: '#e0e0e0',
       animations: {
         enabled: true,
@@ -494,19 +493,29 @@ const PriceChart = () => {
           speed: 350
         }
       },
+      redrawOnParentResize: false,
+      redrawOnWindowResize: false,
       events: {
         zoomed: (chartContext, { xaxis }) => {
-          setXaxisRange({ min: xaxis.min, max: xaxis.max });
+          latestRangeRef.current = { min: xaxis.min, max: xaxis.max };
+          if (zoomDebounceTimer.current) clearTimeout(zoomDebounceTimer.current);
+          zoomDebounceTimer.current = setTimeout(() => {
+            setXaxisRange(latestRangeRef.current);
+          }, 120);
         },
         panned: (chartContext, { xaxis }) => {
-          setXaxisRange({ min: xaxis.min, max: xaxis.max });
+          latestRangeRef.current = { min: xaxis.min, max: xaxis.max };
+          if (zoomDebounceTimer.current) clearTimeout(zoomDebounceTimer.current);
+          zoomDebounceTimer.current = setTimeout(() => {
+            setXaxisRange(latestRangeRef.current);
+          }, 120);
         }
       },
       responsive: [{
         breakpoint: 480,
         options: {
           chart: {
-            height: 250, // Smaller on mobile
+            height: 250,
             width: '100%'
           },
           plotOptions: {
@@ -519,7 +528,7 @@ const PriceChart = () => {
         breakpoint: 768,
         options: {
           chart: {
-            height: 350, // Tablet
+            height: 350,
             width: '100%'
           },
           plotOptions: {
@@ -532,7 +541,7 @@ const PriceChart = () => {
         breakpoint: 1024,
         options: {
           chart: {
-            height: 500, // Larger desktop
+            height: 500,
             width: '100%'
           },
           plotOptions: {
@@ -562,7 +571,7 @@ const PriceChart = () => {
         columnWidth: columnWidth
       },
       line: {
-        width: chartType === 'line' ? 3 : 2, // Thicker line for line chart
+        width: chartType === 'line' ? 3 : 2,
         curve: 'smooth'
       }
     },
@@ -573,9 +582,9 @@ const PriceChart = () => {
       labels: {
         style: {
           colors: '#888',
-          fontSize: '12px' // Responsive font size
+          fontSize: '12px'
         },
-        rotate: -45, // Rotate labels on small screens
+        rotate: -45,
         maxHeight: 80
       },
       axisBorder: {
@@ -626,14 +635,13 @@ const PriceChart = () => {
       }
     },
     colors: [priceColor]
-  }), [chartType, xaxisRange, priceColor, columnWidth, chartHeight]);
+  }), [chartType, priceColor, columnWidth, chartHeight, xaxisRange.min, xaxisRange.max]);
 
-  // Volume chart options - adjusted for style
   const volumeChartOptions = useMemo(() => ({
     chart: {
       type: 'bar',
-      height: showVolume ? (window.innerWidth < 640 ? 50 : 80) : 0, // Responsive height
-      width: '100%', // Responsive width
+      height: showVolume ? (typeof window !== 'undefined' && window.innerWidth < 640 ? 50 : 80) : 0,
+      width: '100%',
       stacked: false,
       animations: {
         enabled: true,
@@ -644,7 +652,7 @@ const PriceChart = () => {
           speed: 350
         }
       },
-      background: chartType === 'line' ? '#1f2937' : '#000', // Gray-800 for line chart
+      background: chartType === 'line' ? '#1f2937' : '#000',
       foreColor: '#e0e0e0',
       zoom: {
         type: 'x',
@@ -654,7 +662,9 @@ const PriceChart = () => {
         enabled: true,
         type: 'x'
       },
-      toolbar: { show: false }
+      toolbar: { show: false },
+      redrawOnParentResize: false,
+      redrawOnWindowResize: false
     },
     plotOptions: {
       bar: {
@@ -664,7 +674,7 @@ const PriceChart = () => {
           ranges: [{
             from: 0,
             to: Infinity,
-            color: chartType === 'line' ? '#666' : '#4a5568' // Gray for line chart
+            color: chartType === 'line' ? '#666' : '#4a5568'
           }]
         },
         borderRadius: 2
@@ -696,7 +706,7 @@ const PriceChart = () => {
       }
     },
     dataLabels: { enabled: false }
-  }), [showVolume, xaxisRange, columnWidth, chartType]);
+  }), [showVolume, xaxisRange.min, xaxisRange.max, columnWidth, chartType]);
 
   const volumeChartSeries = useMemo(() => [
     {
@@ -713,7 +723,7 @@ const PriceChart = () => {
   return (
     <div className="min-h-screen bg-black text-white p-2 sm:p-4">
       <div className="max-w-full mx-auto space-y-4">
-        {/* Header with Price - Enhanced responsive flex with better spacing */}
+        {/* Header with Price */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-gray-900/80 backdrop-blur-sm p-4 rounded-lg gap-3 border border-gray-800/50 shadow-lg">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
             <span className="text-xl sm:text-3xl font-bold text-green-400 tracking-wide">${currentPrice.toLocaleString()}</span>
@@ -729,9 +739,9 @@ const PriceChart = () => {
           </div>
         </div>
 
-        {/* Top Toolbar - Compact professional layout: flex-wrap for mobile, reduced padding and sizes */}
-        <div className="flex flex-row flex-wrap items-center gap-1 sm:gap-2 bg-gray-900/80 backdrop-blur-sm p-1 sm:p-3 rounded-lg border border-gray-800/50 shadow-lg overflow-hidden">
-          {/* Timeframe Selector - Smaller on mobile */}
+        {/* Top Toolbar */}
+        <div className="flex flex-row flex-wrap items-center gap-1 sm:gap-2 bg-gray-900/80 backdrop-blur-sm p-1 sm:p-3 rounded-lg border border-gray-800/50 shadow-lg ">
+          {/* Timeframe Selector */}
           <div className="flex items-center gap-1 bg-gray-800/50 border border-gray-700/50 rounded-md p-1.5 sm:p-2 flex-shrink-0 min-w-[70px] sm:min-w-0">
             <Clock size={14} className="text-gray-400 flex-shrink-0" />
             <select 
@@ -743,7 +753,7 @@ const PriceChart = () => {
             </select>
           </div>
 
-          {/* Chart Type - Tighter segmented control, smaller padding on mobile */}
+          {/* Chart Type */}
           <div className="flex items-center gap-0 bg-gray-800/50 border border-gray-700/50 rounded-md overflow-hidden flex-shrink-0">
             <BarChart2 size={14} className="text-gray-400 p-1 sm:p-2 bg-gray-800/50 flex-shrink-0" />
             <button 
@@ -766,60 +776,61 @@ const PriceChart = () => {
             </button>
           </div>
 
-          {/* Spacer for alignment on larger screens */}
+          {/* Spacer */}
           <div className="flex-1 sm:flex-none" />
 
-          {/* Indicators - Adjusted for mobile: full width if needed, smaller sizes */}
-          <div className="relative flex-shrink-0 w-full sm:w-auto sm:ml-2">
-            <button 
-              onClick={() => setShowIndicatorsMenu(!showIndicatorsMenu)} 
-              className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium px-2 sm:px-4 py-1.5 sm:py-2 rounded-md bg-gray-800/50 border border-gray-700/50 text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 shadow-sm w-full sm:w-auto truncate"
+          {/* Indicators */}
+   {/* Indicators */}
+{/* <div className="relative flex-shrink-0 w-full sm:w-auto sm:ml-2">
+  <button 
+    onClick={() => setShowIndicatorsMenu(!showIndicatorsMenu)} 
+    className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium px-2 sm:px-4 py-1.5 sm:py-2 rounded-md bg-gray-800/50 border border-gray-700/50 text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 shadow-sm w-full sm:w-auto truncate"
+  >
+    <Layers size={14} className="flex-shrink-0" />
+    <span className="hidden sm:inline">Indicators</span>
+    <Check size={12} className={`ml-auto sm:ml-2 flex-shrink-0 text-green-400 ${Object.values(indicators).filter(Boolean).length > 0 ? 'opacity-100' : 'opacity-0'}`} />
+  </button>
+  {showIndicatorsMenu && (
+    <div className="absolute top-full left-0 mt-1 sm:mt-2 w-full sm:w-96 max-w-[90vw] bg-gray-800/95 backdrop-blur-sm rounded-lg shadow-xl p-2 sm:p-4 border border-gray-700/50 z-50 max-h-72 sm:max-h-80 overflow-y-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+        {indicatorsData.slice(0, 10).map((indicator) => (
+          <div key={indicator.type} className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 hover:bg-gray-700/50 rounded-md transition-all duration-200 cursor-pointer">
+            <button
+              className={`flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full text-gray-400 hover:text-yellow-500 transition-all duration-200 ${favorites.has(indicator.type) ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/30' : 'border border-gray-600/50'}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(indicator.type);
+              }}
             >
-              <Layers size={14} className="flex-shrink-0" />
-              <span className="hidden sm:inline">Indicators</span>
-              <Check size={12} className={`ml-auto sm:ml-2 flex-shrink-0 text-green-400 ${Object.values(indicators).filter(Boolean).length > 0 ? 'opacity-100' : 'opacity-0'}`} />
+              <Star size={10} className="sm:size-12" />
             </button>
-            {showIndicatorsMenu && (
-              <div className="absolute top-full left-0 mt-1 sm:mt-2 w-full sm:w-96 bg-gray-800/95 backdrop-blur-sm rounded-lg shadow-xl p-2 sm:p-4 border border-gray-700/50 z-20 max-h-72 sm:max-h-80 overflow-y-auto">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
-                  {indicatorsData.slice(0, 10).map((indicator) => (
-                    <div key={indicator.type} className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 hover:bg-gray-700/50 rounded-md transition-all duration-200 cursor-pointer">
-                      <button
-                        className={`fav flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full text-gray-400 hover:text-yellow-500 transition-all duration-200 ${favorites.has(indicator.type) ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/30' : 'border border-gray-600/50'}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(indicator.type);
-                        }}
-                      >
-                        <Star size={10} className="sm:size-12" />
-                      </button>
-                      <label className="flex items-center gap-2 sm:gap-3 cursor-pointer flex-1">
-                        <input 
-                          type="checkbox"
-                          checked={indicators[indicator.type]}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            handleIndicatorChange(indicator.type);
-                          }}
-                          className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200 flex-shrink-0"
-                        />
-                        <span className="text-xs sm:text-sm font-medium text-gray-200 truncate">{indicator.name}</span>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div className="text-xs text-gray-400 mb-3 sm:mb-4">More indicators available in pro version...</div>
-                <button 
-                  onClick={handleApplyIndicators}
-                  className="w-full text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium shadow-md"
-                >
-                  Apply Changes
-                </button>
-              </div>
-            )}
+            <label className="flex items-center gap-2 sm:gap-3 cursor-pointer flex-1">
+              <input 
+                type="checkbox"
+                checked={indicators[indicator.type]}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  handleIndicatorChange(indicator.type);
+                }}
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200 flex-shrink-0"
+              />
+              <span className="text-xs sm:text-sm font-medium text-gray-200 truncate">{indicator.name}</span>
+            </label>
           </div>
+        ))}
+      </div>
+      <div className="text-xs text-gray-400 mb-3 sm:mb-4">More indicators available in pro version...</div>
+      <button 
+        onClick={handleApplyIndicators}
+        className="w-full text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium shadow-md"
+      >
+        Apply Changes
+      </button>
+    </div>
+  )}
+</div> */}
 
-          {/* Volume - Smaller on mobile */}
+          {/* Volume */}
           <button 
             onClick={() => setShowVolume(!showVolume)} 
             className={`flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium px-2 sm:px-4 py-1.5 sm:py-2 rounded-md ${showVolume ? 'bg-green-600 text-white shadow-md' : 'bg-gray-800/50 border border-gray-700/50 text-gray-300 hover:text-white hover:bg-gray-700/50'} transition-all duration-200 flex-shrink-0 sm:ml-1 w-full sm:w-auto`}
@@ -828,31 +839,79 @@ const PriceChart = () => {
             <span className="truncate">{showVolume ? 'Vol On' : 'Vol Off'}</span>
           </button>
         </div>
-
-        {/* Chart Container - Enhanced with better padding, shadows, and full responsiveness */}
-        <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-2 sm:p-4 border border-gray-800/50 shadow-xl w-full overflow-hidden">
-          <div className="chart-container w-full relative" id="chart-1">
-            <Chart
-              key={chartType}  
-              options={mainChartOptions}
-              series={mainChartSeries}
-              type={mainChartOptions.chart.type}
-              height={mainChartOptions.chart.height}
-              width={mainChartOptions.chart.width}
-            />
-          </div>
-          {showVolume && (
-            <div className="mt-2 pt-2 border-t border-gray-800/50">
-              <Chart
-                options={volumeChartOptions}
-                series={volumeChartSeries}
-                type="bar"
-                height={volumeChartOptions.chart.height}
-                width={volumeChartOptions.chart.width}
+<div className="relative flex-shrink-0 w-full sm:w-auto sm:ml-2">
+  <button 
+    onClick={() => setShowIndicatorsMenu(!showIndicatorsMenu)} 
+    className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium px-2 sm:px-4 py-1.5 sm:py-2 rounded-md bg-gray-800/50 border border-gray-700/50 text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-200 shadow-sm w-full sm:w-auto truncate"
+  >
+    <Layers size={14} className="flex-shrink-0" />
+    <span className="hidden sm:inline">Indicators</span>
+    <Check size={12} className={`ml-auto sm:ml-2 flex-shrink-0 text-green-400 ${Object.values(indicators).filter(Boolean).length > 0 ? 'opacity-100' : 'opacity-0'}`} />
+  </button>
+  {showIndicatorsMenu && (
+    <div className="absolute top-full left-0 mt-1 sm:mt-2 w-full sm:w-96 max-w-[90vw] bg-gray-800/95 backdrop-blur-sm rounded-lg shadow-xl p-2 sm:p-4 border border-gray-700/50 z-50 max-h-72 sm:max-h-80 overflow-y-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+        {indicatorsData.slice(0, 10).map((indicator) => (
+          <div key={indicator.type} className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 hover:bg-gray-700/50 rounded-md transition-all duration-200 cursor-pointer">
+            <button
+              className={`flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full text-gray-400 hover:text-yellow-500 transition-all duration-200 ${favorites.has(indicator.type) ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/30' : 'border border-gray-600/50'}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(indicator.type);
+              }}
+            >
+              <Star size={10} className="sm:size-12" />
+            </button>
+            <label className="flex items-center gap-2 sm:gap-3 cursor-pointer flex-1">
+              <input 
+                type="checkbox"
+                checked={indicators[indicator.type]}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  handleIndicatorChange(indicator.type);
+                }}
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200 flex-shrink-0"
               />
-            </div>
-          )}
-        </div>
+              <span className="text-xs sm:text-sm font-medium text-gray-200 truncate">{indicator.name}</span>
+            </label>
+          </div>
+        ))}
+      </div>
+      <div className="text-xs text-gray-400 mb-3 sm:mb-4">More indicators available in pro version...</div>
+      <button 
+        onClick={handleApplyIndicators}
+        className="w-full text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium shadow-md"
+      >
+        Apply Changes
+      </button>
+    </div>
+  )}
+</div>
+        {/* Chart Container */}
+  <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-2 sm:p-4 border border-gray-800/50 shadow-xl w-full">
+  <div className="w-full relative">
+    <Chart
+      key={chartType}  
+      options={mainChartOptions}
+      series={mainChartSeries}
+      type={mainChartOptions.chart.type}
+      height={mainChartOptions.chart.height}
+      width={mainChartOptions.chart.width}
+    />
+  </div>
+  {showVolume && (
+    <div className="mt-2 pt-2 border-t border-gray-800/50">
+      <Chart
+        key={`${chartType}-${timeframe}`}
+        options={volumeChartOptions}
+        series={volumeChartSeries}
+        type="bar"
+        height={volumeChartOptions.chart.height}
+        width={volumeChartOptions.chart.width}
+      />
+    </div>
+  )}
+</div>
       </div>
     </div>
   );
