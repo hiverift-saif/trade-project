@@ -47,7 +47,7 @@ export default function Register() {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center relative bg-gradient-to-br from-black via-gray-900 to-gray-800 overflow-hidden">
+    <section className=" px-5 py-20 flex items-center justify-center relative bg-gradient-to-br from-black via-gray-900 to-gray-800 overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>

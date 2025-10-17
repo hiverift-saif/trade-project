@@ -12,6 +12,7 @@ export default function Navbar() {
      { name: "Quickstart", path: "/Quickstart" },
     { name: "Free Demo", path: "/freedemo" },
     { name: "Trading", path: "/Trading" },
+    { name: "Affiliates", path: "/affiliates" },
     { name: "About Us", path: "/aboutus" },
     { name: "Blog", path: "/blog" },
 

@@ -417,11 +417,10 @@ export default function Trading() {
                     className="sticky top-0 z-20 bg-[#070b14]"
                   />
                   <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_20rem] min-h-0 w-full h-full relative z-10">
-                    <div className="flex flex-col flex-1 min-h-[40vh] sm:min-h-[50vh] lg:h-full w-full min-w-0 overflow-visible relative">
+                    <div className="flex flex-col flex-1 min-h-[50vh] sm:min-h-[60vh] lg:h-full w-full min-w-0 overflow-visible relative">
                       <div className="flex items-center justify-between px-4 py-2 bg-[#0a0e18] border-b border-zinc-800/50 shadow-sm z-20">
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-zinc-400 font-medium">Expiration time</span>
-                        
                         </div>
                         <div className="flex items-center gap-2 sm:gap-4">
                           <div className="text-xs bg-zinc-800/70 px-2 sm:px-3 py-1 rounded font-medium">{activeAsset.symbol}</div>
@@ -430,7 +429,7 @@ export default function Trading() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex-1 p-0 bg-[#0b0f1a] shadow-inner w-full min-w-0 overflow-hidde">
+                      <div className="flex-1 p-0 bg-[#0b0f1a] shadow-inner w-full min-w-0 overflow-auto relative" style={{ minHeight: '500px' }}>
                         <PriceChart
                           data={seriesData}
                           precision={activeAsset.precision}
@@ -489,15 +488,15 @@ export default function Trading() {
             <Route path="*" element={<div className="p-4 text-white">404 - Page Not Found</div>} />
           </Routes>
         </main>
-      <RightRail
-  isOpen={showRightRail}
-  onClose={() => setShowRightRail(false)}
-  activeMenu={activeMenu}
-  setActiveMenu={setActiveMenu}
-  setShowRightRail={setShowRightRail}
-  setShowSignals={setShowSignals}
-  setShowSocialModal={setShowSocialModal}
-/>
+        <RightRail
+          isOpen={showRightRail}
+          onClose={() => setShowRightRail(false)}
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+          setShowRightRail={setShowRightRail}
+          setShowSignals={setShowSignals}
+          setShowSocialModal={setShowSocialModal}
+        />
         {showSignals && (
           <div className="fixed inset-0 bg-black/50 z-60 flex justify-end">
             <div

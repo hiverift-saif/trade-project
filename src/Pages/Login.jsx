@@ -28,7 +28,7 @@ export default function Login() {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center relative bg-gradient-to-b from-gray-900 to-black overflow-hidden">
+    <section className=" py-10 px-5  h-[600px] flex items-center justify-center relative bg-gradient-to-b from-gray-900 to-black overflow-hidden">
       {/* Background shapes */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
