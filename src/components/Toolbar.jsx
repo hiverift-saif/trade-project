@@ -18,14 +18,14 @@ function Toolbar({ assets, activeAsset, setActiveAsset, timeframe, setTimeframe 
   return (
     <div className="flex items-center gap-4 flex-wrap justify-end text-wh">
       <div className="relative" ref={dropdownRef}>
-        <button
+        {/* <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm px-3 py-1 rounded"
         >
           {activeAsset.symbol}
           <ChevronDown size={14} />
-        </button>
-        {isDropdownOpen && (
+        </button> */}
+        {/* {isDropdownOpen && (
           <div className="absolute right-0 mt-1 bg-zinc-800 rounded-lg shadow-lg z-50 w-36 max-h-64 overflow-y-auto">
             {assets.map((asset) => (
 
@@ -44,10 +44,10 @@ function Toolbar({ assets, activeAsset, setActiveAsset, timeframe, setTimeframe 
               
             ))}
           </div>
-        )}
+        )} */}
       </div>
 
-      <div className="flex items-center gap-2 ">
+      {/* <div className="flex items-center gap-2 ">
         {["M1", "M5", "M15", "H1", "H4"].map((t) => (
           <button
             key={t}
@@ -61,7 +61,7 @@ function Toolbar({ assets, activeAsset, setActiveAsset, timeframe, setTimeframe 
             {t}
           </button>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 }

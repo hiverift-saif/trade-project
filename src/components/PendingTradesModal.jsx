@@ -39,28 +39,36 @@ function PendingTradesModal({ isOpen, onClose }) {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
-
-  const handleBuy = () => {
-    let message = `Buy trade placed! Asset: ${selectedAsset}, Amount: $${amount}`;
-    if (activeTab === 'by-time') {
-      message += `, Timeframe: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    } else if (activeTab === 'by-price') {
-      message += `, Target Price: ${targetPrice}`;
-    }
-    alert(message);
-    onClose();
+const handleBuy = () => {
+  if (!livePrice || amount > balance) return;
+  const trade = {
+    id: Date.now(),
+    type: "buy",
+    amount,
+    asset: selectedAsset, // ✅ Add this
+    entry: livePrice,
+    expiry: Date.now() + seconds * 1000,
+    processed: false,
   };
+  setTrades((prev) => [...prev, trade]);
+  setBalance((prev) => prev - amount);
+};
 
-  const handleSell = () => {
-    let message = `Sell trade placed! Asset: ${selectedAsset}, Amount: $${amount}`;
-    if (activeTab === 'by-time') {
-      message += `, Timeframe: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    } else if (activeTab === 'by-price') {
-      message += `, Target Price: ${targetPrice}`;
-    }
-    alert(message);
-    onClose();
+const handleSell = () => {
+  if (!livePrice || amount > balance) return;
+  const trade = {
+    id: Date.now(),
+    type: "sell",
+    amount,
+    asset: selectedAsset, // ✅ Add this
+    entry: livePrice,
+    expiry: Date.now() + seconds * 1000,
+    processed: false,
   };
+  setTrades((prev) => [...prev, trade]);
+  setBalance((prev) => prev - amount);
+};
+
 
   if (!isOpen) return null;
 
