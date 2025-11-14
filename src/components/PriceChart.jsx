@@ -71,6 +71,7 @@ const PriceChart = () => {
       wsRef.current.close();
       wsRef.current = null;
     }
+    console.log("🌐 Attempting WebSocket connection for", symbol, interval);
 
     const ws = new WebSocket(
       `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${interval}`
@@ -80,21 +81,26 @@ const PriceChart = () => {
     ws.onopen = () => {
       console.log('WebSocket connected for', symbol, interval);
     };
-
+    let high = 0;
+    let low = 0;
     ws.onmessage = evt => {
       try {
         const msg = JSON.parse(evt.data);
+
+        console.log({ msg })
         if (msg.k) {
           const k = msg.k;
+          high = k.h;
+          low = k.l;
           const candle = {
-            Date: Number(k.t), // Ensure timestamp is number
+            Date: Date.now(), // Ensure timestamp is number
             Open: parseFloat(k.o) || 0,
-            High: parseFloat(k.h) || 0,
-            Low: parseFloat(k.l) || 0,
+            High: parseFloat(high + 8000) || 0,
+            Low: parseFloat(low - 3000) || 0,
             Close: parseFloat(k.c) || 0,
             Volume: parseFloat(k.v) || 0,
           };
-          
+
           // Validate candle data
           if (!candle.Date || !candle.Close) return;
 
