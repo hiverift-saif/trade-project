@@ -1,20 +1,12 @@
 // src/App.jsx
 import React, { useEffect } from "react";
-import { Toaster } from "react-hot-toast";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  useLocation,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 // Components
-import ProtectedRoute from "./components/ProtectedRoute";
-
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./Pages/ScrollToTop";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Pages
 import Home from "./Pages/Home";
@@ -34,16 +26,22 @@ import AffiliateSignup from "./Pages/AffiliateSignup";
 import AffiliateLogin from "./Pages/AffiliateLogin";
 
 // Affiliate Dashboard Pages
-import Links from "./AffiliateDashboard/links";
-import Payments from "./AffiliateDashboard/payments";
-import Telegram from "./AffiliateDashboard/telegram";
-import Support from "./AffiliateDashboard/support";
-import Subaffiliate from "./AffiliateDashboard/subaffiliate";
-import Statistics from "./AffiliateDashboard/statistics";
-import Promo from "./AffiliateDashboard/promo";
-import Programs from "./AffiliateDashboard/programs";
-import Profile from "./AffiliateDashboard/profile";
+import Links from "./AffiliateDashboard/Links";
+import Payments from "./AffiliateDashboard/Payments";
+import Telegram from "./AffiliateDashboard/Telegram";
+import Support from "./AffiliateDashboard/Support";
+import Subaffiliate from "./AffiliateDashboard/Subaffiliate";
+import Statistics from "./AffiliateDashboard/Statistics";
+import Promo from "./AffiliateDashboard/Promo";
+import Programs from "./AffiliateDashboard/Programs";
+import Profile from "./AffiliateDashboard/Profile";
 import Dashboard from "./AffiliateDashboard/Dashboard";
+import Analytics from "./AffiliateDashboard/Analytics";
+
+// Referral
+import RefrelSignUp from "./Refrel/RefrelSignUp";
+import TermsAndConditions from "./Refrel/TermsAndConditions";
+import SubAffiliateSignUp from "./Refrel/SubAffiliateSignUp";
 
 // Finance Pages
 import DepositPage from "./Pages/finance/DepositPage";
@@ -57,9 +55,6 @@ import FinanceLayout from "./layout/FinanceLayout";
 import PaymentDetailsPage from "./Pages/finance/PaymentDetailsPage";
 
 // Profile Pages
-// import TradingProfilePage from "./Pages/profile/TradingProfile";
-// import TradingHistoryPage from "./Pages/profile/TradingHistoryPage";
-
 import ProfileLayout from "./layout/ProfileLayout";
 import { TradingHistoryPage } from "./Pages/Profile/TradingHistoryPage";
 import TradingProfilePage from "./Pages/Profile/TradingProfile";
@@ -67,58 +62,37 @@ import ProfilePage from "./Pages/Profile/ProfilePage";
 
 function AppContent() {
   const location = useLocation();
-
-  const hideNavbarRoutes = [
-    "/profile/Profile",
-    "/profile/Trading-Profile",
-    "/profile/Trading-History",
-  ];
-
-  const hideNavbar = hideNavbarRoutes.includes(location.pathname);
+  const path = location.pathname.toLowerCase();
 
   useEffect(() => {
-    // Disable browser scroll restoration
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
     }
-    // Force scroll to top on page load
     window.scrollTo(0, 0);
   }, [location]);
 
-  // Dashboard paths where Navbar and Footer should be hidden
-  const dashboardPaths = [
-    "/dashboard",
-    "/programs",
-    "/promo",
-    "/statistics",
-    "/sub-affiliate",
-    "/support",
-    "/telegram",
-    "/payments",
-    "/links",
-  ];
+  // Hide navbar routes
+  const hideNavbar =
+    path.startsWith("/dashboard") ||
+    path.startsWith("/trading") ||
+    path.startsWith("/finance") ||
+    path.startsWith("/profile");
 
-  const isDashboardRoute = dashboardPaths.includes(
-    location.pathname.toLowerCase()
-  );
+  // Hide footer routes
+  const hideFooter =
+    hideNavbar ||
+    ["/login", "/registration", "/affiliatelogin", "/affiliatesignup"].includes(path);
 
-  // Check if it's a finance or profile route (don't show default navbar/footer)
-  const isFinanceRoute = location.pathname.toLowerCase().startsWith("/finance");
-  const isProfileRoute = location.pathname.toLowerCase().startsWith("/profile");
-  const isTradingRoute = location.pathname.toLowerCase().startsWith("/trading"); // 👈 NEW
   return (
     <div className="min-h-screen flex flex-col">
       <ScrollToTop />
-      {!hideNavbar &&
-        !isDashboardRoute &&
-        !isFinanceRoute &&
-        !isTradingRoute && ( // 👈 ADD THIS
-          <Navbar />
-        )}
+
+      {!hideNavbar && <Navbar />}
 
       <main className="flex-1">
         <Routes>
-          {/* Public Pages */}
+
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/quickstart" element={<Quickstart />} />
           <Route path="/freedemo" element={<FreeDemo />} />
@@ -129,9 +103,13 @@ function AppContent() {
           <Route path="/tradingdashboard" element={<TradingDashboard />} />
           <Route path="/trade-closed" element={<TradeClosed />} />
           <Route path="/maintrading" element={<Maintrading />} />
-          {/* <Route path="/trading/*" element={<Trading />} /> */}
           <Route path="/affiliates" element={<Affiliates />} />
           <Route path="/affiliatesignup" element={<AffiliateSignup />} />
+          <Route path="/RefrelSignUp/:id" element={<RefrelSignUp />} />
+          <Route path="/SubAffiliateSignUp" element={<SubAffiliateSignUp />} />
+          <Route path="/affiliatelogin" element={<AffiliateLogin />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+
           <Route
             path="/trading/*"
             element={
@@ -140,23 +118,22 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-          <Route path="/affiliatelogin" element={<AffiliateLogin />} />
 
-          {/* Affiliate Dashboard Pages */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/programs" element={<Programs />} />
-          <Route path="/promo" element={<Promo />} />
-          <Route path="/statistics" element={<Statistics />} />
-          <Route path="/sub-affiliate" element={<Subaffiliate />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/telegram" element={<Telegram />} />
-          <Route path="/payments" element={<Payments />} />
-          <Route path="/links" element={<Links />} />
+          {/* Affiliate Dashboard (Protected) */}
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/programs" element={<ProtectedRoute><Programs /></ProtectedRoute>} />
+          <Route path="/promo" element={<ProtectedRoute><Promo /></ProtectedRoute>} />
+          <Route path="/statistics" element={<ProtectedRoute><Statistics /></ProtectedRoute>} />
+          <Route path="/sub-affiliate" element={<ProtectedRoute><Subaffiliate /></ProtectedRoute>} />
+          <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
+          <Route path="/telegram" element={<ProtectedRoute><Telegram /></ProtectedRoute>} />
+          <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
+          <Route path="/links" element={<ProtectedRoute><Links /></ProtectedRoute>} />
+          <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
 
-          {/* Finance Section with Sidebar Layout */}
+          {/* Finance Section */}
           <Route path="/finance" element={<FinanceLayout />}>
-            {/* Default route - redirect to deposit */}
             <Route index element={<Navigate to="/finance/deposit" replace />} />
             <Route path="deposit" element={<DepositPage />} />
             <Route path="deposit/:method" element={<PaymentDetailsPage />} />
@@ -167,26 +144,20 @@ function AppContent() {
             <Route path="mysafe" element={<MySafePage />} />
           </Route>
 
-          {/* Profile Section with Sidebar Layout */}
-
+          {/* Profile Section */}
           <Route path="/profile" element={<ProfileLayout />}>
-            {/* Default route (redirect to /profile/Profile if user goes to /profile) */}
             <Route index element={<Navigate to="/profile/Profile" replace />} />
-
-            {/* Separate profile page */}
             <Route path="Profile" element={<ProfilePage />} />
-
-            {/* Trading routes */}
             <Route path="Trading-Profile" element={<TradingProfilePage />} />
             <Route path="Trading-History" element={<TradingHistoryPage />} />
           </Route>
 
-          {/* Deposit Method Page (outside layout) */}
+          {/* Outside Method Page */}
           <Route path="/deposit/:method" element={<PaymentMethodPage />} />
         </Routes>
       </main>
- {!isDashboardRoute && !isFinanceRoute && !isProfileRoute && !isTradingRoute && <Footer />}
 
+      {!hideFooter && <Footer />}
     </div>
   );
 }

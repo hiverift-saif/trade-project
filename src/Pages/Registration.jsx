@@ -4,10 +4,8 @@ import { User, Mail, Smartphone, Lock, Key, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../api/authApi";
 import toast from "react-hot-toast";
-
 export default function Registration() {
   const navigate = useNavigate();
-
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -16,28 +14,22 @@ export default function Registration() {
     confirmPassword: "",
     terms: false,
   });
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
   // Auto-focus first input on load
   useEffect(() => {
     document.getElementById("fullName")?.focus();
   }, []);
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     let val = type === "checkbox" ? checked : value;
-
     // Restrict mobile to 10 digits only
     if (name === "mobile") {
       val = val.replace(/\D/g, "").slice(0, 10);
     }
-
     setForm((prev) => ({ ...prev, [name]: val }));
   };
-
   // Strong password validation
   const isStrongPassword = (pwd) =>
     pwd.length >= 8 &&
@@ -45,66 +37,52 @@ export default function Registration() {
     /[a-z]/.test(pwd) &&
     /\d/.test(pwd) &&
     /[!@#$%^&*]/.test(pwd);
-
  const handleSubmit = async (e) => {
   e.preventDefault();
-
   // ------------------------------
-  // 🔍 VALIDATIONS
+  // :magnifying_glass: VALIDATIONS
   // ------------------------------
   if (!form.fullName.trim()) {
     return toast.error("Full Name is required");
   }
-
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(form.email)) {
     return toast.error("Enter a valid email");
   }
-
   if (form.mobile.length !== 10) {
     return toast.error("Mobile number must be 10 digits");
   }
-
   if (!form.password.trim() || !form.confirmPassword.trim()) {
     return toast.error("Password fields cannot be empty");
   }
-
   if (form.password !== form.confirmPassword) {
     return toast.error("Passwords do not match");
   }
-
   if (form.password.length < 8) {
     return toast.error("Password must be at least 8 characters long");
   }
-
   if (!/[A-Z]/.test(form.password)) {
     return toast.error("Password must include an uppercase letter");
   }
-
   if (!/[a-z]/.test(form.password)) {
     return toast.error("Password must include a lowercase letter");
   }
-
   if (!/\d/.test(form.password)) {
     return toast.error("Password must include a number");
   }
-
   if (!/[!@#$%^&*]/.test(form.password)) {
     return toast.error(
       "Password must include a special character (!@#$%^&*)"
     );
   }
-
   if (!form.terms) {
     return toast.error("You must accept the terms & conditions");
   }
-
   // ------------------------------
-  // 🔥 API CALL
+  // :fire: API CALL
   // ------------------------------
   setLoading(true);
   const toastId = toast.loading("Creating your account...");
-
   try {
     const res = await registerUser({
       fullName: form.fullName,
@@ -112,10 +90,8 @@ export default function Registration() {
       mobile: form.mobile,
       password: form.password,
     });
-
     toast.dismiss(toastId);
-    toast.success("Registration Successful! 🎉");
-
+    toast.success("Registration Successful! :tada:");
     // Save user
     localStorage.setItem(
       "user",
@@ -126,16 +102,13 @@ export default function Registration() {
         mobile: res?.data?.user?.phone || form.mobile,
       })
     );
-
     // Save token
     if (res?.data?.access_token) {
       localStorage.setItem("authToken", res.data.access_token);
     }
-
     navigate("/login");
   } catch (err) {
     toast.dismiss(toastId);
-
     toast.error(
       err?.response?.data?.message || "Registration failed! Try again."
     );
@@ -143,15 +116,12 @@ export default function Registration() {
     setLoading(false);
   }
 };
-
-
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black px-5 py-10">
       <div className="w-full max-w-md p-8 bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-xl rounded-3xl border border-gray-700/50 shadow-2xl">
         <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-white via-blue-100 to-green-100 bg-clip-text text-transparent">
           Create Account
         </h2>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Full Name */}
           <div className="relative">
@@ -170,7 +140,6 @@ export default function Registration() {
               className="w-full pl-10 pr-3 py-3 rounded-xl bg-gray-800/60 text-white border border-gray-700/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 outline-none transition"
             />
           </div>
-
           {/* Email */}
           <div className="relative">
             <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
@@ -188,7 +157,6 @@ export default function Registration() {
               className="w-full pl-10 pr-3 py-3 rounded-xl bg-gray-800/60 text-white border border-gray-700/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 outline-none transition"
             />
           </div>
-
           {/* Mobile */}
           <div className="relative">
             <Smartphone className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
@@ -207,7 +175,6 @@ export default function Registration() {
               className="w-full pl-10 pr-3 py-3 rounded-xl bg-gray-800/60 text-white border border-gray-700/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 outline-none transition"
             />
           </div>
-
           {/* Password */}
           <div className="relative">
             <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
@@ -237,7 +204,6 @@ export default function Registration() {
               )}
             </button>
           </div>
-
           {/* Confirm Password */}
           <div className="relative">
             <Key className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
@@ -269,7 +235,6 @@ export default function Registration() {
               )}
             </button>
           </div>
-
           {/* Terms */}
           <div className="flex items-center space-x-2">
             <input
@@ -293,7 +258,6 @@ export default function Registration() {
               </a>
             </label>
           </div>
-
           {/* Submit Button */}
           <button
             type="submit"
@@ -307,7 +271,6 @@ export default function Registration() {
             {loading ? "Registering..." : "Register"}
           </button>
         </form>
-
         <p className="mt-6 text-center text-gray-400 text-sm">
           Already have an account?{" "}
           <button
@@ -321,3 +284,25 @@ export default function Registration() {
     </section>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

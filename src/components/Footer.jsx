@@ -1,6 +1,25 @@
 import { Mail, Phone, ExternalLink, MessageCircle, Instagram, Facebook, Youtube, Shield, Award, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
+
 
 export default function Footer() {
+
+
+    const links = [
+    { name: "Terms & Conditions", path: "/terms-and-conditions" },
+    { name: "Privacy Policy", path: "/" },
+    { name: "AML & KYC", path: "/" },
+    { name: "Payment Policy", path: "/" },
+    { name: "Contact", path: "/" },
+  ];
+
+    const tradingLinks = [
+    { name: "Forex Trading", path: "/trading/forex", color: "hover:text-blue-400" },
+    { name: "Stock Trading", path: "/trading/stocks", color: "hover:text-green-400" },
+    { name: "Commodities", path: "/trading/commodities", color: "hover:text-yellow-400" },
+    { name: "Crypto Trading", path: "/trading/crypto", color: "hover:text-purple-400" },
+    { name: "Trading Signals", path: "/trading/signals", color: "hover:text-pink-400" },
+  ];
   return (
     <footer className="bg-gradient-to-b from-black to-gray-900 text-white relative overflow-hidden">
       {/* Background SVG overlay */}
@@ -42,40 +61,40 @@ export default function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold text-white mb-4">Quick Links</h3>
-            <ul className="space-y-3">
-              {["Terms & Conditions", "Privacy Policy", "AML & KYC", "Payment Policy", "Contact"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-gray-300 hover:text-white transition-colors flex items-center group">
-                    <ExternalLink className="w-3 h-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+     <div className="space-y-6">
+      <h3 className="text-xl font-bold text-white mb-4">Quick Links</h3>
+      <ul className="space-y-3">
+        {links.map((link) => (
+          <li key={link.name}>
+            <Link
+              to={link.path}
+              className="text-gray-300 hover:text-white transition-colors flex items-center group"
+            >
+              <ExternalLink className="w-3 h-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+              {link.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
 
           {/* Trading Links */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold text-white mb-4">Trading</h3>
-            <ul className="space-y-3 text-gray-300">
-              {[
-                ["Forex Trading", "hover:text-blue-400"],
-                ["Stock Trading", "hover:text-green-400"],
-                ["Commodities", "hover:text-yellow-400"],
-                ["Crypto Trading", "hover:text-purple-400"],
-                ["Trading Signals", "hover:text-pink-400"],
-              ].map(([name, color]) => (
-                <li key={name}>
-                  <a href="#" className={`flex items-center group transition-colors ${color}`}>
-                    <ExternalLink className="w-3 h-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    {name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+    <div className="space-y-6">
+      <h3 className="text-xl font-bold text-white mb-4">Trading</h3>
+      <ul className="space-y-3 text-gray-300">
+        {tradingLinks.map(({ name, path, color }) => (
+          <li key={name}>
+            <Link
+              to={path}
+              className={`flex items-center group transition-colors ${color}`}
+            >
+              <ExternalLink className="w-3 h-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+              {name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
 
           {/* Social & Hours */}
           <div className="space-y-6">
