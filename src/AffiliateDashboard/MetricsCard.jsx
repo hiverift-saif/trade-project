@@ -1,17 +1,19 @@
-// src/components/MetricsCard.jsx
-import React from 'react';
+import React from "react";
 
 function MetricsCard({ title, value, icon: Icon, iconColor }) {
   return (
-    <div className="text-card-foreground flex flex-col gap-6 rounded-xl border bg-gray-900/50 border-gray-800">
-      <div className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-gray-400 text-sm mb-2">{title}</p>
-            <p className="text-3xl text-white">{value}</p>
-          </div>
-          <Icon className={`w-12 h-12 ${iconColor}`} aria-hidden="true" />
-        </div>
+    <div className="bg-gray-900 p-4 sm:p-6 rounded-xl border border-gray-800 shadow-md flex items-center justify-between ">
+      <div>
+        <p className="text-xs sm:text-sm text-gray-400">{title}</p>
+        <h2 className="text-lg sm:text-2xl font-bold text-white mt-1">
+          {value}
+        </h2>
+      </div>
+
+      <div
+        className={`p-2 sm:p-3 rounded-lg bg-gray-800 ${iconColor}`}
+      >
+        <Icon className="w-4 h-4 sm:w-6 sm:h-6" />
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ export const navItems = [
   { icon: User, label: 'Profile', link: '/profile', active: false },
   { icon: ChartColumn, label: 'Statistics', link: '/statistics', active: false },
   { icon: Link2, label: 'Links', link: '/links', active: false },
+   { icon: Link2, label: 'Analytics ', link: '/Analytics ', active: false },
   { icon: CreditCard, label: 'Payments', link: '/payments', active: false },
   { icon: Image, label: 'Promo Materials', link: '/promo', active: false },
   { icon: Send, label: 'Telegram Bot', link: '/telegram', active: false },

@@ -9,9 +9,9 @@ function CommissionsCard({ amount }) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-gray-400 mb-2">Total Commissions Earned</p>
-            <p className="text-4xl text-white">{amount}</p>
+            <p className="text-xl text-white md:text-4xl">{amount}</p>
           </div>
-          <TrendingUp className="w-16 h-16 text-green-400" aria-hidden="true" />
+          <TrendingUp className="w-10 h-10 md:w-16 md:h-16 text-green-400" aria-hidden="true" />
         </div>
       </div>
     </div>
