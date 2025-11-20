@@ -11,5 +11,11 @@ const isLoggedIn = localStorage.getItem("affiliate_user");
   }
 
   // Agar login hua hai to page dikhao
+  const token = localStorage.getItem("authToken");
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
   return children;
 }
