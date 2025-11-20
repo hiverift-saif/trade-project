@@ -10,13 +10,13 @@ function Subaffiliate() {
   ];
 
   const handleCopyLink = () => {
-    navigator.clipboard.write('https://www.equ.com/affilates/signup?pid=50000');
+    navigator.clipboard.write('http://localhost:5173/SubAffiliateSignUp');
     alert('Referral link copied to clipboard!');
   };
 
   return (
     <Layout pageTitle="Sub Affiliate Program">
-      <div className="space-y-6 max-w-[1380px]">
+      <div className="space-y-6 ">
         <div className="rounded-xl border bg-gray-900/50 border-gray-800 p-6">
           <div className="space-y-4">
             <div>
@@ -26,7 +26,7 @@ function Subaffiliate() {
                   type="text"
                   className="flex h-10 w-full rounded-md border px-3 py-2 text-base bg-gray-800/50 border-gray-700 text-white focus:ring-2 focus:ring-blue-500/50 outline-none"
                   readOnly
-                  value="https://www.e.com/affilates/signup?pid=50000"
+                  value="http://localhost:5173/SubAffiliateSignUp"
                 />
                 <button
                   onClick={handleCopyLink}

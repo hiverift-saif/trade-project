@@ -1,88 +1,95 @@
 // src/App.jsx
-import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import React, { useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 // Components
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import ScrollToTop from './Pages/ScrollToTop';
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import ScrollToTop from "./Pages/ScrollToTop";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Pages
-import Home from './Pages/Home';
-import FreeDemo from './Pages/FreeDemo';
-import AboutUs from './Pages/AboutUs';
-import Blog from './Pages/Blog';
-import Login from './Pages/Login';
-import Registration from './Pages/Registration';
-import Quickstart from './Pages/Quickstart';
-import TradingDashboard from './Freedemo/TradingDashboard';
-import TradeClosed from './Freedemo/TradeClosed';
-import Maintrading from './Freedemo/Maintrading';
-import Trading from './Pages/Trading';
-import Affiliates from './Pages/Affiliates';
-import AffiliateSignup from './Pages/AffiliateSignup';
-import AffiliateLogin from './Pages/AffiliateLogin';
-
+import Home from "./Pages/Home";
+import FreeDemo from "./Pages/FreeDemo";
+import AboutUs from "./Pages/AboutUs";
+import Blog from "./Pages/Blog";
+import Login from "./Pages/Login";
+import Registration from "./Pages/Registration";
+import Quickstart from "./Pages/Quickstart";
+import TradingDashboard from "./Freedemo/TradingDashboard";
+import TradeClosed from "./Freedemo/TradeClosed";
+import Maintrading from "./Freedemo/Maintrading";
+import Trading from "./Pages/Trading";
+import Affiliates from "./Pages/Affiliates";
+import AffiliateSignup from "./Pages/AffiliateSignup";
+import AffiliateLogin from "./Pages/AffiliateLogin";
 
 // Affiliate Dashboard Pages
-import Links from './AffiliateDashboard/links';
-import Payments from './AffiliateDashboard/payments';
-import Telegram from './AffiliateDashboard/telegram';
-import Support from './AffiliateDashboard/support';
-import Subaffiliate from './AffiliateDashboard/subaffiliate';
-import Statistics from './AffiliateDashboard/statistics';
-import Promo from './AffiliateDashboard/promo';
-import Programs from './AffiliateDashboard/programs';
-import Profile from './AffiliateDashboard/profile';
-import Dashboard from './AffiliateDashboard/Dashboard';
-
-
-// import Dashboard from './AffiliateDashboard/Dashboard';
-// import Profile from './AffiliateDashboard/profile';
-// import Programs from './AffiliateDashboard/programs';
-// import Promo from './AffiliateDashboard/promo';
-// import Statistics from './AffiliateDashboard/statistics';
-// import Subaffiliate from './AffiliateDashboard/subaffiliate';
-// import Support from './AffiliateDashboard/support';
-// import Telegram from './AffiliateDashboard/telegram';
-// import Payments from './AffiliateDashboard/payments';
-// import Links from './AffiliateDashboard/links'; // Make sure this exists
+import Links from "./AffiliateDashboard/Links";
+import Payments from "./AffiliateDashboard/payments";
+import Telegram from "./AffiliateDashboard/Telegram";
+import Support from "./AffiliateDashboard/support";
+import Subaffiliate from "./AffiliateDashboard/subaffiliate";
+import Statistics from "./AffiliateDashboard/statistics";
+import Promo from "./AffiliateDashboard/promo";
+import Programs from "./AffiliateDashboard/programs";
+import Profile from "./AffiliateDashboard/profile";
+import Dashboard from "./AffiliateDashboard/Dashboard";
+import RefrelSignUp from "./Refrel/RefrelSignUp";
+import TermsAndConditions from "./Refrel/TermsAndConditions";
+import Analytics from "./AffiliateDashboard/Analytics";
+import SubAffiliateSignUp from "./Refrel/SubAffiliateSignUp";
 
 function AppContent() {
   const location = useLocation();
+  const path = location.pathname.toLowerCase();
 
   useEffect(() => {
-    // Disable browser scroll restoration
-    if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
     }
-    // Force scroll to top on page load
     window.scrollTo(0, 0);
   }, [location]);
 
-  // Dashboard paths where Navbar and Footer should be hidden
+  // ✅ Navbar hide routes (dashboard + trading)
   const dashboardPaths = [
-    '/dashboard',
-    '/profile',
-    '/programs',
-    '/promo',
-    '/statistics',
-    '/sub-affiliate',
-    '/support',
-    '/telegram',
-    '/payments',
-    '/links',
+    "/dashboard",
+    "/profile",
+    "/programs",
+    "/promo",
+    "/statistics",
+    "/sub-affiliate",
+    "/support",
+    "/telegram",
+    "/payments",
+    "/links",
+    "/analytics",
   ];
 
-  const isDashboardRoute = dashboardPaths.includes(location.pathname.toLowerCase());
+  const isDashboardOrTradingRoute =
+    dashboardPaths.includes(path) || path.startsWith("/trading");
+
+  // ✅ Footer hide routes (dashboard + trading + login/register)
+  const hideFooterPaths = [
+    "/login",
+    "/registration",
+    "/affiliatelogin",
+    "/affiliatesignup",
+  ];
+
+  const shouldHideFooter =
+    isDashboardOrTradingRoute || hideFooterPaths.includes(path);
 
   return (
     <div className="min-h-screen flex flex-col">
       <ScrollToTop />
-      {!isDashboardRoute && <Navbar />}
+
+      {/* ✅ Navbar hide only for dashboard or trading */}
+      {!isDashboardOrTradingRoute && <Navbar />}
+
       <main className="flex-1">
         <Routes>
-          {/* Public Pages */}
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/quickstart" element={<Quickstart />} />
           <Route path="/freedemo" element={<FreeDemo />} />
@@ -96,22 +103,109 @@ function AppContent() {
           <Route path="/trading/*" element={<Trading />} />
           <Route path="/affiliates" element={<Affiliates />} />
           <Route path="/affiliatesignup" element={<AffiliateSignup />} />
-          <Route path="/affiliatelogin" element={<AffiliateLogin />} />
+          <Route path="/RefrelSignUp/:id" element={<RefrelSignUp />} />
+          <Route path="/SubAffiliateSignUp" element={<SubAffiliateSignUp />} />
 
-          {/* Affiliate Dashboard Pages */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/programs" element={<Programs />} />
-          <Route path="/promo" element={<Promo />} />
-          <Route path="/statistics" element={<Statistics />} />
-          <Route path="/sub-affiliate" element={<Subaffiliate />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/telegram" element={<Telegram />} />
-          <Route path="/payments" element={<Payments />} />
-          <Route path="/links" element={<Links />} />
+          <Route path="/affiliatelogin" element={<AffiliateLogin />} />
+          <Route
+            path="/terms-and-conditions"
+            element={<TermsAndConditions />}
+          />
+
+          {/* ✅ Protected Affiliate Dashboard Routes */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/programs"
+            element={
+              <ProtectedRoute>
+                <Programs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/promo"
+            element={
+              <ProtectedRoute>
+                <Promo />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/statistics"
+            element={
+              <ProtectedRoute>
+                <Statistics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sub-affiliate"
+            element={
+              <ProtectedRoute>
+                <Subaffiliate />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/support"
+            element={
+              <ProtectedRoute>
+                <Support />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/telegram"
+            element={
+              <ProtectedRoute>
+                <Telegram />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payments"
+            element={
+              <ProtectedRoute>
+                <Payments />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/links"
+            element={
+              <ProtectedRoute>
+                <Links />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <Analytics />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
-      {!isDashboardRoute && <Footer />}
+
+      {/* ✅ Footer hide based on login/register + dashboard + trading */}
+      {!shouldHideFooter && <Footer />}
     </div>
   );
 }

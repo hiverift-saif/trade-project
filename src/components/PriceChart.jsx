@@ -52,13 +52,13 @@ const PriceChart = () => {
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       return data.map(d => ({
-        Date: Number(d[0]), // Ensure timestamp is number
+        Date: Number(d[0]),
         Open: parseFloat(d[1]) || 0,
         High: parseFloat(d[2]) || 0,
         Low: parseFloat(d[3]) || 0,
         Close: parseFloat(d[4]) || 0,
         Volume: parseFloat(d[5]) || 0,
-      })).filter(d => d.Open && d.High && d.Low && d.Close); // Filter invalid data
+      })).filter(d => d.Open && d.High && d.Low && d.Close);
     } catch (err) {
       console.error('Error fetching historical data:', err);
       return [];
@@ -87,20 +87,18 @@ const PriceChart = () => {
         if (msg.k) {
           const k = msg.k;
           const candle = {
-            Date: Number(k.t), // Ensure timestamp is number
+            Date: Number(k.t),
             Open: parseFloat(k.o) || 0,
             High: parseFloat(k.h) || 0,
             Low: parseFloat(k.l) || 0,
             Close: parseFloat(k.c) || 0,
             Volume: parseFloat(k.v) || 0,
           };
-          
-          // Validate candle data
+
           if (!candle.Date || !candle.Close) return;
 
           setLatestPrice(candle);
 
-          // Update chart series
           const valueSeries = valueSeriesRef.current;
           const volumeSeries = volumeSeriesRef.current;
           const sbSeries = sbSeriesRef.current;
@@ -111,7 +109,7 @@ const PriceChart = () => {
               data[data.length - 1] = candle;
             } else {
               data.push(candle);
-              if (data.length > 1000) data.shift(); // Limit data size
+              if (data.length > 1000) data.shift();
             }
             valueSeries.data.setAll(data);
             volumeSeries.data.setAll(data);
@@ -146,12 +144,10 @@ const PriceChart = () => {
 
       const events = eventsMap[activeAsset.symbol] || [];
 
-      // Initialize chart if not already
       if (!rootRef.current && chartRef.current) {
         const root = am5.Root.new(chartRef.current);
         rootRef.current = root;
 
-        // Custom theme to hide minor scrollbar grid
         const myTheme = am5.Theme.new(root);
         myTheme.rule("Grid", ["scrollbar", "minor"]).setAll({
           visible: false,
@@ -160,12 +156,10 @@ const PriceChart = () => {
         root.setThemes([am5themes_Animated.new(root), myTheme]);
         root.numberFormatter.set("numberFormat", "#,###.00");
 
-        // Create stock chart
         const stockChart = root.container.children.push(
           am5stock.StockChart.new(root, { paddingRight: 0 })
         );
 
-        // Create main stock panel
         const mainPanel = stockChart.panels.push(
           am5stock.StockPanel.new(root, {
             wheelY: "zoomX",
@@ -174,7 +168,6 @@ const PriceChart = () => {
           })
         );
 
-        // Create value axis
         const valueAxis = mainPanel.yAxes.push(
           am5xy.ValueAxis.new(root, {
             renderer: am5xy.AxisRendererY.new(root, { pan: "zoom" }),
@@ -194,7 +187,6 @@ const PriceChart = () => {
         );
         dateAxisRef.current = dateAxis;
 
-        // Add candlestick series
         const valueSeries = mainPanel.series.push(
           am5xy.CandlestickSeries.new(root, {
             name: activeAsset.name,
@@ -216,12 +208,10 @@ const PriceChart = () => {
 
         stockChart.set("stockSeries", valueSeries);
 
-        // Add stock legend
         const valueLegend = mainPanel.plotContainer.children.push(
           am5stock.StockLegend.new(root, { stockChart })
         );
 
-        // Create volume axis
         const volumeAxisRenderer = am5xy.AxisRendererY.new(root, {
           inside: true,
           pan: "zoom",
@@ -239,7 +229,6 @@ const PriceChart = () => {
           })
         );
 
-        // Add volume series
         const volumeSeries = mainPanel.series.push(
           am5xy.ColumnSeries.new(root, {
             name: "Volume",
@@ -268,7 +257,6 @@ const PriceChart = () => {
         stockChart.set("volumeSeries", volumeSeries);
         valueLegend.data.setAll([valueSeries, volumeSeries]);
 
-        // Add cursor
         mainPanel.set(
           "cursor",
           am5xy.XYCursor.new(root, {
@@ -279,7 +267,6 @@ const PriceChart = () => {
           })
         );
 
-        // Add scrollbar
         const scrollbar = mainPanel.set(
           "scrollbarX",
           am5xy.XYChartScrollbar.new(root, {
@@ -317,7 +304,6 @@ const PriceChart = () => {
           fillOpacity: 0.3,
         });
 
-        // Series type switcher
         const seriesSwitcher = am5stock.SeriesTypeControl.new(root, {
           stockChart: stockChart,
         });
@@ -394,7 +380,6 @@ const PriceChart = () => {
           }
         }
 
-        // Custom tooltip for events
         const tooltip = am5.Tooltip.new(root, {
           getStrokeFromSprite: false,
           getFillFromSprite: false,
@@ -407,7 +392,6 @@ const PriceChart = () => {
         });
         tooltipRef.current = tooltip;
 
-        // Function to add event markers
         const makeEvent = (date, letter, color, description) => {
           const dataItem = dateAxis.createAxisRange(
             dateAxis.makeDataItem({ value: date })
@@ -450,10 +434,8 @@ const PriceChart = () => {
           );
         };
 
-        // Add events
         events.forEach(event => makeEvent(event.date, event.letter, event.color, event.description));
 
-        // Stock toolbar
         const toolbarContainer = document.getElementById('amchart-controls');
         if (toolbarContainer) {
           am5stock.StockToolbar.new(root, {
@@ -476,12 +458,10 @@ const PriceChart = () => {
         volumeSeriesRef.current = volumeSeries;
         sbSeriesRef.current = sbSeries;
 
-        // Set initial data
         valueSeries.data.setAll(historical);
         volumeSeries.data.setAll(historical);
         sbSeries.data.setAll(historical);
       } else {
-        // Update existing chart
         const root = rootRef.current;
         const dateAxis = dateAxisRef.current;
         const sbDateAxis = sbDateAxisRef.current;
@@ -500,12 +480,10 @@ const PriceChart = () => {
           sbDateAxis.set("baseInterval", { timeUnit, count });
         }
 
-        // Clear existing event markers
         if (dateAxis) {
           dateAxis.axisRanges.clear();
         }
 
-        // Re-add events
         const makeEvent = (date, letter, color, description) => {
           const dataItem = dateAxis.createAxisRange(
             dateAxis.makeDataItem({ value: date })
@@ -550,13 +528,11 @@ const PriceChart = () => {
 
         events.forEach(event => makeEvent(event.date, event.letter, event.color, event.description));
 
-        // Update data
         if (valueSeries) valueSeries.data.setAll(historical);
         if (volumeSeries) volumeSeries.data.setAll(historical);
         if (sbSeries) sbSeries.data.setAll(historical);
       }
 
-      // Setup WebSocket
       setupWebSocket(activeAsset.symbol, apiInterval);
     };
 
@@ -570,7 +546,6 @@ const PriceChart = () => {
     };
   }, [activeAsset, timeframe]);
 
-  // Dispose chart on unmount
   useEffect(() => {
     return () => {
       if (rootRef.current) {
@@ -594,7 +569,7 @@ const PriceChart = () => {
       </div>
       <div
         ref={chartRef}
-        className="w-full bg-white shadow-lg rounded-lg h-[400px] sm:h-[500px] md:h-[600px]"
+        className="w-full bg-white shadow-lg rounded-lg h-[300px] sm:h-[400px] md:h-[400px] lg:h-[600px]"
       />
       {latestPrice && (
         <div className="mt-2 text-center">
