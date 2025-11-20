@@ -20,64 +20,76 @@ export default function Login() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      return toast.error("All fields required");
+  // ------------------------------
+  // 🔍 VALIDATIONS
+  // ------------------------------
+  if (!formData.email.trim()) {
+    return toast.error("Email is required");
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(formData.email)) {
+    return toast.error("Enter a valid email");
+  }
+
+  if (!formData.password.trim()) {
+    return toast.error("Password is required");
+  }
+
+  if (formData.password.length < 6) {
+    return toast.error("Password must be at least 6 characters");
+  }
+
+  // ------------------------------
+  // 🔥 API CALL
+  // ------------------------------
+  setLoading(true);
+  const toastId = toast.loading("Logging in...");
+
+  try {
+    const res = await loginUser({
+      email: formData.email,
+      password: formData.password,
+    });
+
+    toast.dismiss(toastId);
+
+    toast.success("Login Successful! 🎉");
+
+    const token = res?.data?.access_token;
+    const loginUserData = res?.data?.user;
+
+    // Save Token
+    if (token) {
+      localStorage.setItem("authToken", token);
     }
 
-    setLoading(true);
-    const toastId = toast.loading("Logging in...");
-
-    try {
-      const res = await loginUser({
-        email: formData.email,
-        password: formData.password,
-      });
-      console.log("LOGIN USER DATA => ", res.data.user);
-
-      toast.dismiss(toastId);
-
-      console.log("Login Response:", res);
-
-      // Extract token & user
-      const token = res?.data?.access_token;
-      const loginUserData = res?.data?.user;
-
-      if (!token) {
-        toast.error("Token not found in response");
-        return;
-      }
-      // 🔥 Load registration user to get fullName
-      const oldUser = JSON.parse(localStorage.getItem("user") || "{}");
-
-      // Save token & user
-      localStorage.setItem("authToken", token);
+    // Save User
+    if (loginUserData) {
       localStorage.setItem(
         "user",
         JSON.stringify({
           id: loginUserData?.id,
-          name: loginUserData?.name || oldUser?.name || "User",
+          name: loginUserData?.name || "User",
           email: loginUserData?.email,
-          mobile: loginUserData?.phone || oldUser?.mobile || "Not Provided",
-          role: loginUserData?.role || "user",
+          mobile: loginUserData?.phone || "Not Provided",
         })
       );
-
-      toast.success(res.message || "Login successful!");
-
-      // Correct redirect
-      navigate("/trading");
-    } catch (err) {
-      toast.dismiss(toastId);
-      toast.error(
-        err?.response?.data?.message || err.message || "Login failed"
-      );
-    } finally {
-      setLoading(false);
     }
-  };
+
+    // Redirect
+    navigate("/trading");
+  } catch (err) {
+    toast.dismiss(toastId);
+    toast.error(err?.response?.data?.message || "Login failed!");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black px-5 py-10">

@@ -46,95 +46,104 @@ export default function Registration() {
     /\d/.test(pwd) &&
     /[!@#$%^&*]/.test(pwd);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log("Registration form submitted");
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    // ------------------------------
-    // 🔍 VALIDATIONS
-    // ------------------------------
+  // ------------------------------
+  // 🔍 VALIDATIONS
+  // ------------------------------
+  if (!form.fullName.trim()) {
+    return toast.error("Full Name is required");
+  }
 
-    if (!form.fullName.trim()) return toast.error("Full name is required");
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(form.email)) {
+    return toast.error("Enter a valid email");
+  }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      return toast.error("Enter a valid email");
+  if (form.mobile.length !== 10) {
+    return toast.error("Mobile number must be 10 digits");
+  }
 
-    if (form.mobile.length !== 10)
-      return toast.error("Enter a 10-digit mobile number");
+  if (!form.password.trim() || !form.confirmPassword.trim()) {
+    return toast.error("Password fields cannot be empty");
+  }
 
-    if (form.password !== form.confirmPassword)
-      return toast.error("Passwords do not match");
+  if (form.password !== form.confirmPassword) {
+    return toast.error("Passwords do not match");
+  }
 
-    if (!isStrongPassword(form.password))
-      return toast.error(
-        "Password must be 8+ chars with uppercase, lowercase, number & symbol"
-      );
+  if (form.password.length < 8) {
+    return toast.error("Password must be at least 8 characters long");
+  }
 
-    if (!form.terms)
-      return toast.error("You must accept the terms and conditions");
+  if (!/[A-Z]/.test(form.password)) {
+    return toast.error("Password must include an uppercase letter");
+  }
 
-    // ------------------------------
-    // 🔥 API CALL
-    // ------------------------------
-    setLoading(true);
-    const toastId = toast.loading("Creating your account...");
+  if (!/[a-z]/.test(form.password)) {
+    return toast.error("Password must include a lowercase letter");
+  }
 
-    try {
-      const res = await registerUser({
-        fullName: form.fullName,
-        email: form.email,
-        mobile: form.mobile,
-        password: form.password,
-      });
+  if (!/\d/.test(form.password)) {
+    return toast.error("Password must include a number");
+  }
 
-      console.log("REGISTER SUCCESS:", res);
+  if (!/[!@#$%^&*]/.test(form.password)) {
+    return toast.error(
+      "Password must include a special character (!@#$%^&*)"
+    );
+  }
 
-      toast.dismiss(toastId);
-      toast.success(res.message || "Registration successful!");
+  if (!form.terms) {
+    return toast.error("You must accept the terms & conditions");
+  }
 
-      // ------------------------------
-      // 🔐 SAVE USER + TOKEN
-      // ------------------------------
-      const user = res?.data?.user;
-      const token = res?.data?.token;
+  // ------------------------------
+  // 🔥 API CALL
+  // ------------------------------
+  setLoading(true);
+  const toastId = toast.loading("Creating your account...");
 
-      if (user) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            id: user?.id,
-            name: user?.name || form.fullName, // Registration name save hoga
-            email: user?.email,
-            mobile: user?.phone || form.mobile || "Not Provided",
-            role: user?.role || "user",
-          })
-        );
-      }
+  try {
+    const res = await registerUser({
+      fullName: form.fullName,
+      email: form.email,
+      mobile: form.mobile,
+      password: form.password,
+    });
 
-      if (token) {
-        localStorage.setItem("authToken", token);
-      }
+    toast.dismiss(toastId);
+    toast.success("Registration Successful! 🎉");
 
-      // ------------------------------
-      // 🔁 Redirect to Login
-      // ------------------------------
-      navigate("/login");
-    } catch (err) {
-      console.error("REGISTER ERROR:", err);
-      toast.dismiss(toastId);
+    // Save user
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        id: res?.data?.user?.id,
+        name: res?.data?.user?.name || form.fullName,
+        email: res?.data?.user?.email,
+        mobile: res?.data?.user?.phone || form.mobile,
+      })
+    );
 
-      const msg =
-        err?.response?.data?.message || err?.message || "Registration failed";
-
-      if (err?.status === 409) {
-        toast.error("Email or mobile already registered");
-      } else {
-        toast.error(msg);
-      }
-    } finally {
-      setLoading(false);
+    // Save token
+    if (res?.data?.access_token) {
+      localStorage.setItem("authToken", res.data.access_token);
     }
-  };
+
+    navigate("/login");
+  } catch (err) {
+    toast.dismiss(toastId);
+
+    toast.error(
+      err?.response?.data?.message || "Registration failed! Try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black px-5 py-10">

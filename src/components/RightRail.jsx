@@ -131,7 +131,7 @@ function RightRail({ isOpen, onClose }) {
       )}
       {/* Desktop Sidebar (Right Side) */}
       <aside
-        className={`fixed right-0 top-0 w-16 h-full md:h-[calc(100vh-3.5rem)] bg-[#0a0e18] border-l border-zinc-800/50 flex flex-col items-center justify-start py-4 gap-2 z-50 shadow-lg transition-transform duration-300 ${
+        className={`fixed right-0 top-0 w-16 h-full md:h-[calc(100vh-3.5rem)] bg-[#050713] border-[#1a2233] border-zinc-800/50 flex flex-col items-center justify-start py-4 gap-2 z-50 shadow-lg transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         } md:static md:w-24 md:flex-col md:translate-x-0 md:border-l md:border-t-0 hidden md:flex`}
       >

@@ -90,9 +90,9 @@ function TopBar({
   };
   return (
     <header
-      className="h-14 bg-[#0a0e18] border-b border-zinc-800/50 flex items-center justify-between px-4 shadow-md z-50 relative"
-      ref={dropdownRef}
-    >
+  className="h-14 bg-[#1c202e] border-b border-zinc-800/50 flex items-center justify-between px-4 shadow-md z-50 relative"
+  ref={dropdownRef}
+>
       {/* === LEFT SIDE === */}
       <div className="flex items-center gap-3">
         <button

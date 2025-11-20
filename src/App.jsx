@@ -1,5 +1,6 @@
 // src/App.jsx
 import React, { useEffect } from "react";
+import { Toaster } from "react-hot-toast";
 import {
   BrowserRouter,
   Routes,
@@ -67,14 +68,13 @@ import ProfilePage from "./Pages/Profile/ProfilePage";
 function AppContent() {
   const location = useLocation();
 
-    const hideNavbarRoutes = [
+  const hideNavbarRoutes = [
     "/profile/Profile",
     "/profile/Trading-Profile",
-    "/profile/Trading-History"
+    "/profile/Trading-History",
   ];
 
   const hideNavbar = hideNavbarRoutes.includes(location.pathname);
-
 
   useEffect(() => {
     // Disable browser scroll restoration
@@ -109,11 +109,12 @@ function AppContent() {
   return (
     <div className="min-h-screen flex flex-col">
       <ScrollToTop />
-    {!hideNavbar &&
- !isDashboardRoute &&
- !isFinanceRoute &&
- <Navbar />}
-
+      {!hideNavbar &&
+        !isDashboardRoute &&
+        !isFinanceRoute &&
+        !isTradingRoute && ( // 👈 ADD THIS
+          <Navbar />
+        )}
 
       <main className="flex-1">
         <Routes>
@@ -184,7 +185,8 @@ function AppContent() {
           <Route path="/deposit/:method" element={<PaymentMethodPage />} />
         </Routes>
       </main>
-      {!isDashboardRoute && !isFinanceRoute && !isProfileRoute && <Footer />}
+ {!isDashboardRoute && !isFinanceRoute && !isProfileRoute && !isTradingRoute && <Footer />}
+
     </div>
   );
 }
@@ -192,6 +194,7 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-center" reverseOrder={false} />
       <AppContent />
     </BrowserRouter>
   );

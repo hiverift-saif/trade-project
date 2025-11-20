@@ -25,7 +25,7 @@
     "framer-motion": "^12.23.24",
     "igniteui-react-charts": "^19.2.2",
     "igniteui-react-core": "^19.2.2",
-    "lightweight-charts": "^5.0.8",
+    "lightweight-charts": "^4.2.3",
     "lodash": "^4.17.21",
     "lodash.throttle": "^4.1.1",
     "lucide-react": "^0.544.0",
