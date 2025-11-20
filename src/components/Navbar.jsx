@@ -10,11 +10,23 @@ export default function Navbar() {
     { name: "Home", path: "/" },
     { name: "Quickstart", path: "/Quickstart" },
     { name: "Free Demo", path: "/freedemo" },
-   { name: "Trading", path: "/trading" },  // ⬅ FIXED ⬅
+    { name: "Trading" },
     { name: "Affiliates", path: "/affiliates" },
     { name: "About Us", path: "/aboutus" },
     { name: "Blog", path: "/blog" },
   ];
+
+  // ⭐ Trading Button Control
+  const handleTradingClick = () => {
+    const token = localStorage.getItem("tp_user_token");
+
+    if (!token) {
+      localStorage.setItem("redirect_to", "/trading");
+      window.location.href = "/login";
+    } else {
+      window.location.href = "/trading";
+    }
+  };
 
   return (
     <header className="w-full bg-black/90 backdrop-blur-md border-b border-gray-800 shadow-lg fixed top-0 z-50">
@@ -32,18 +44,28 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex space-x-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className="text-gray-300 hover:text-white hover:bg-gray-800 px-3 py-2 rounded-lg transition-all duration-200"
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) =>
+              link.name === "Trading" ? (
+                <button
+                  key="Trading"
+                  onClick={handleTradingClick}
+                  className="text-gray-300 hover:text-white hover:bg-gray-800 px-3 py-2 rounded-lg transition-all duration-200"
+                >
+                  Trading
+                </button>
+              ) : (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  className="text-gray-300 hover:text-white hover:bg-gray-800 px-3 py-2 rounded-lg transition-all duration-200"
+                >
+                  {link.name}
+                </Link>
+              )
+            )}
           </nav>
 
-          {/* Buttons */}
+          {/* Auth Buttons */}
           <div className="hidden sm:flex items-center space-x-3">
             <Link
               to="/login"
@@ -62,36 +84,43 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={toggleMenu}
-            className="lg:hidden text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md p-2"
+            className="lg:hidden text-gray-300 p-2 rounded-md"
           >
-            {isOpen ? (
-              <span className="text-2xl font-bold">✕</span>
-            ) : (
-              <span className="text-2xl font-bold">☰</span>
-            )}
+            {isOpen ? "✕" : "☰"}
           </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
       <div
-        className={`lg:hidden transition-all duration-300 ease-in-out ${
-          isOpen
-            ? "max-h-screen opacity-100 visible"
-            : "max-h-0 opacity-0 invisible"
+        className={`lg:hidden transition-all duration-300 ${
+          isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
         } overflow-hidden`}
       >
         <div className="bg-black/95 border-t border-gray-800 px-4 py-4 space-y-2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              to={link.path}
-              onClick={() => setIsOpen(false)}
-              className="block text-gray-300 hover:text-white px-3 py-2 rounded-lg transition-all"
-            >
-              {link.name}
-            </Link>
-          ))}
+          {navLinks.map((link) =>
+            link.name === "Trading" ? (
+              <button
+                key="Trading-mobile"
+                onClick={() => {
+                  setIsOpen(false);
+                  handleTradingClick();
+                }}
+                className="block text-gray-300 hover:text-white px-3 py-2 rounded-lg transition-all"
+              >
+                Trading
+              </button>
+            ) : (
+              <Link
+                key={link.name}
+                to={link.path}
+                onClick={() => setIsOpen(false)}
+                className="block text-gray-300 hover:text-white px-3 py-2 rounded-lg transition-all"
+              >
+                {link.name}
+              </Link>
+            )
+          )}
 
           <div className="flex flex-col space-y-2 pt-2 border-t border-gray-800">
             <Link
@@ -104,7 +133,7 @@ export default function Navbar() {
             <Link
               to="/registration"
               onClick={() => setIsOpen(false)}
-              className="block bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white rounded-md text-sm font-medium h-9 px-4 text-center shadow-lg"
+              className="block bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-md text-sm font-medium h-9 px-4 text-center shadow-lg"
             >
               Registration
             </Link>

@@ -48,7 +48,15 @@ export default function TradesTabs({ opened = [], closed = [] }) {
     return `${m}:${s}`;
   };
 
-  const trades = tab === "Opened" ? openedTrades : closed;
+  // ⭐ FILTER: Only show ACTIVE opened trades based on createdAt + tradeTime
+  const activeOpenedTrades = openedTrades.filter((t) => {
+  const expiry = Number(t.expiresAt);
+  if (!expiry) return true; // fallback
+
+  return expiry > Date.now(); // show only active trades
+});
+
+  const trades = tab === "Opened" ? activeOpenedTrades : closed;
 
   return (
     <div className="p-4 rounded-2xl text-white mt-6 bg-[#050713] border border-[#1a2233] shadow-lg">

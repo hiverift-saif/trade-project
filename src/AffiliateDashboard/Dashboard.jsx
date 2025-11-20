@@ -4,6 +4,7 @@ import MetricsCard from "./MetricsCard";
 import BalanceCard from "./BalanceCard";
 import CommissionsCard from "./CommissionsCard";
 import { UserPlus, Link2, Loader2 } from "lucide-react";
+import apiClient from "../api/apiClient";
 import {
   LineChart,
   Line,
@@ -16,61 +17,61 @@ import {
 import axios from "axios";
 import BASE from "../config";
 
-
 function Dashboard() {
   const [filter, setFilter] = useState("day");
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [affiliateId, setAffiliateId] = useState("")
-    
-  // ✅ Affiliate ID (jis user ka dashboard dikhana hai)
-  // const affiliateId = "690d938528d571981d1469f9";
 
-  const fetchDashboardData = async () => {
-    setLoading(true);
-    const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("affiliate_user")); // ✅ logged-in user
-console.log("user",user._id)
-    setAffiliateId(user._id);
-console.log("affiliateId",affiliateId)
-    try {
-      const res = await axios.get( 
-        `${BASE.BASE_URL}/admin/dashboard/${user._id}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, 
-          },
-        }
-      );
-     console.log("Dashboard Response:", res.data);
-      if (res.data.statusCode === 200) {
-        const list = res.data.result;
-        const converted = {
-          affiliate: {
-            code: list.code,
-            totalCommission: list.totalCommission,
-            totalReferrals: list.totalReferrals,
-            withdrawable: list.withdrawable,
-            referredUsers: list.referredUsers,
-          },
-          // ✅ You can add user info later if needed
-        };
 
-        setDashboardData(converted);
-        setError(null);
-      } else {
-        setError("Failed to load affiliate list.");
+const fetchDashboardData = async () => {
+  setLoading(true);
+
+  const token = localStorage.getItem("affiliate_token");
+  const user = JSON.parse(localStorage.getItem("affiliate_user"));
+
+  if (!user || !user.id) {
+    setError("User not found");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const res = await apiClient.get(
+      `/admin/dashboard/${user.id}`,   
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    } catch (err) {
-      console.error("❌ Dashboard API Error:", err);
-      setError("Unable to load data.");
-    } finally {
-      setLoading(false);
+    );
+
+    if (res.data.statusCode === 200) {
+      const list = res.data.result;
+
+      setDashboardData({
+        affiliate: {
+          code: list.code,
+          totalCommission: list.totalCommission,
+          totalReferrals: list.totalReferrals,
+          withdrawable: list.withdrawable,
+          referredUsers: list.referredUsers,
+        },
+      });
+
+      setError(null);
+    } else {
+      setError("Failed to load affiliate dashboard");
     }
-  };
+  } catch (err) {
+    console.error("Dashboard API Error:", err);
+    setError("Unable to load data");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchDashboardData();
@@ -82,11 +83,8 @@ console.log("affiliateId",affiliateId)
     totalReferrals = 0,
     withdrawable = 0,
     code = "N/A",
-    referredUsers = [],
   } = affiliate;
 
-
-console.log("jadjjodwqjiod",affiliate)
   const chartData = {
     day: [
       { name: "Mon", commission: 20 },
@@ -150,7 +148,6 @@ console.log("jadjjodwqjiod",affiliate)
           </div>
         )}
 
-        {/* ✅ Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 ">
           {metricsData.map((metric) => (
             <MetricsCard
@@ -163,15 +160,12 @@ console.log("jadjjodwqjiod",affiliate)
           ))}
         </div>
 
-        {/* ✅ Summary */}
         <BalanceCard metrics={balanceMetrics} />
 
-        {/* ✅ Commission Card */}
         <div className="mt-4 sm:mt-6">
           <CommissionsCard amount={`$${totalCommission.toFixed(2)}`} />
         </div>
 
-        {/* ✅ Chart */}
         <div className="bg-gray-900/70 p-4 sm:p-6 rounded-2xl border border-gray-800 shadow-lg">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
             <h3 className="text-lg sm:text-xl font-semibold text-white">
@@ -233,26 +227,6 @@ console.log("jadjjodwqjiod",affiliate)
             </span>
           </div>
         </div>
-
-        {/* ✅ Referrals List */}
-        {/* <div className="bg-gray-900/70 p-4 sm:p-6 rounded-2xl border border-gray-800 mt-6">
-          <h3 className="text-lg font-semibold text-white mb-3">Referred Users</h3>
-
-          {referredUsers.length === 0 ? (
-            <p className="text-gray-400 text-sm">No referrals yet.</p>
-          ) : (
-            <ul className="space-y-2">
-              {referredUsers.map((id) => (
-                <li
-                  key={id}
-                  className="p-2 bg-gray-800 rounded-lg text-gray-300 text-sm border border-gray-700"
-                >
-                  {id}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div> */}
       </div>
     </Layout>
   );

@@ -1,12 +1,21 @@
 // src/App.jsx
 import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 // Components
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./Pages/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
+import TradingProtectedRoute from "./components/TradingProtectedRoute";
+import AffiliateProtectedRoute from "./components/AffiliateProtectedRoute";
 
 // Pages
 import Home from "./Pages/Home";
@@ -73,7 +82,17 @@ function AppContent() {
 
   // Hide navbar routes
   const hideNavbar =
-    path.startsWith("/dashboard") ||
+    path.startsWith("/affiliate/dashboard") ||
+    path.startsWith("/affiliate/profile") ||
+    path.startsWith("/affiliate/statistics") ||
+    path.startsWith("/affiliate/links") ||
+    path.startsWith("/affiliate/analytics") ||
+    path.startsWith("/affiliate/payments") ||
+    path.startsWith("/affiliate/promo") ||
+    path.startsWith("/affiliate/support") ||
+    path.startsWith("/affiliate/programs") ||
+    path.startsWith("/affiliate/sub-affiliate") ||
+    path.startsWith("/affiliate/telegram") ||
     path.startsWith("/trading") ||
     path.startsWith("/finance") ||
     path.startsWith("/profile");
@@ -81,7 +100,10 @@ function AppContent() {
   // Hide footer routes
   const hideFooter =
     hideNavbar ||
-    ["/login", "/registration", "/affiliatelogin", "/affiliatesignup"].includes(path);
+    path.startsWith("/affiliate") ||
+    ["/login", "/registration", "/affiliatelogin", "/affiliatesignup"].includes(
+      path
+    );
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -91,7 +113,6 @@ function AppContent() {
 
       <main className="flex-1">
         <Routes>
-
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/quickstart" element={<Quickstart />} />
@@ -110,27 +131,124 @@ function AppContent() {
           <Route path="/affiliatelogin" element={<AffiliateLogin />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
 
+          {/* ⭐ Trading Protected Routes */}
           <Route
-            path="/trading/*"
+            path="/trading"
             element={
-              <ProtectedRoute>
+              <TradingProtectedRoute>
                 <Trading />
-              </ProtectedRoute>
+              </TradingProtectedRoute>
             }
           />
 
-          {/* Affiliate Dashboard (Protected) */}
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/programs" element={<ProtectedRoute><Programs /></ProtectedRoute>} />
-          <Route path="/promo" element={<ProtectedRoute><Promo /></ProtectedRoute>} />
-          <Route path="/statistics" element={<ProtectedRoute><Statistics /></ProtectedRoute>} />
-          <Route path="/sub-affiliate" element={<ProtectedRoute><Subaffiliate /></ProtectedRoute>} />
-          <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
-          <Route path="/telegram" element={<ProtectedRoute><Telegram /></ProtectedRoute>} />
-          <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
-          <Route path="/links" element={<ProtectedRoute><Links /></ProtectedRoute>} />
-          <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+          <Route
+            path="/trading/"
+            element={
+              <TradingProtectedRoute>
+                <Trading />
+              </TradingProtectedRoute>
+            }
+          />
+
+          {/* Affiliate Dashboard Routes */}
+          <Route
+            path="/affiliate/dashboard"
+            element={
+              <AffiliateProtectedRoute>
+                <Dashboard />
+              </AffiliateProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/affiliate/profile"
+            element={
+              <AffiliateProtectedRoute>
+                <Profile />
+              </AffiliateProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/affiliate/statistics"
+            element={
+              <AffiliateProtectedRoute>
+                <Statistics />
+              </AffiliateProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/affiliate/links"
+            element={
+              <AffiliateProtectedRoute>
+                <Links />
+              </AffiliateProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/affiliate/analytics"
+            element={
+              <AffiliateProtectedRoute>
+                <Analytics />
+              </AffiliateProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/affiliate/payments"
+            element={
+              <AffiliateProtectedRoute>
+                <Payments />
+              </AffiliateProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/affiliate/promo"
+            element={
+              <AffiliateProtectedRoute>
+                <Promo />
+              </AffiliateProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/affiliate/support"
+            element={
+              <AffiliateProtectedRoute>
+                <Support />
+              </AffiliateProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/affiliate/programs"
+            element={
+              <AffiliateProtectedRoute>
+                <Programs />
+              </AffiliateProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/affiliate/sub-affiliate"
+            element={
+              <AffiliateProtectedRoute>
+                <Subaffiliate />
+              </AffiliateProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/affiliate/telegram"
+            element={
+              <AffiliateProtectedRoute>
+                <Telegram />
+              </AffiliateProtectedRoute>
+            }
+          />
 
           {/* Finance Section */}
           <Route path="/finance" element={<FinanceLayout />}>
@@ -152,7 +270,6 @@ function AppContent() {
             <Route path="Trading-History" element={<TradingHistoryPage />} />
           </Route>
 
-          {/* Outside Method Page */}
           <Route path="/deposit/:method" element={<PaymentMethodPage />} />
         </Routes>
       </main>

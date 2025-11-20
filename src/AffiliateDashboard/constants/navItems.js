@@ -12,15 +12,16 @@ import {
 } from 'lucide-react';
 
 export const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', link: '/Dashboard', active: false },
-  { icon: User, label: 'Profile', link: '/profile', active: false },
-  { icon: ChartColumn, label: 'Statistics', link: '/statistics', active: false },
-  { icon: Link2, label: 'Links', link: '/links', active: false },
-   { icon: Link2, label: 'Analytics ', link: '/Analytics ', active: false },
-  { icon: CreditCard, label: 'Payments', link: '/payments', active: false },
-  { icon: Image, label: 'Promo Materials', link: '/promo', active: false },
-  { icon: Send, label: 'Telegram Bot', link: '/telegram', active: false },
-  { icon: CircleQuestionMark, label: 'Support', link: '/support', active: false },
-  { icon: FileText, label: 'Affiliate Programs', link: '/programs', active: false },
-  { icon: Users, label: 'Sub Affiliate', link: '/sub-affiliate', active: false },
+  { icon: LayoutDashboard, label: 'Dashboard', link: '/affiliate/dashboard', active: false },
+  { icon: User, label: 'Profile', link: '/affiliate/profile', active: false },
+  { icon: ChartColumn, label: 'Statistics', link: '/affiliate/statistics', active: false },
+  { icon: Link2, label: 'Links', link: '/affiliate/links', active: false },
+  { icon: Link2, label: 'Analytics', link: '/affiliate/analytics', active: false },
+  { icon: CreditCard, label: 'Payments', link: '/affiliate/payments', active: false },
+  { icon: Image, label: 'Promo Materials', link: '/affiliate/promo', active: false },
+  { icon: Send, label: 'Telegram Bot', link: '/affiliate/telegram', active: false },
+  { icon: CircleQuestionMark, label: 'Support', link: '/affiliate/support', active: false },
+  { icon: FileText, label: 'Affiliate Programs', link: '/affiliate/programs', active: false },
+  { icon: Users, label: 'Sub Affiliate', link: '/affiliate/sub-affiliate', active: false },
 ];
+
