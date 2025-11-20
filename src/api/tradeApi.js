@@ -5,27 +5,21 @@ export const buyTrade = (data) => {
   return apiClient.post("/trades/buy", data);
 };
 
-// SELL Trade (same endpoint, just type = sell)
+// SELL Trade
 export const sellTrade = (data) => {
-  return apiClient.post("/trades/buy", data);
+  return apiClient.post("/trades/sell", data);
 };
 
 // Get All Trades
-export const getTrades = () => {
-  return apiClient.get("/trades");
-};
+export const getTrades = () => apiClient.get("/trades");
 
-// Get Open Trades
-export const getOpenTrades = () => {
-  return apiClient.get("/trades/open");
-};
+// ⭐ Correct – Get Open Trades
+export const getOpenTrades = () =>
+  apiClient.get("/trades/filter?status=open");
 
 // Get Closed Trades
-export const getClosedTrades = () => {
-  return apiClient.get("/trades/closed");
-};
+export const getClosedTrades = () =>
+  apiClient.get("/trades/filter?status=closed");
 
-// Trade By ID
-export const getTradeById = (id) => {
-  return apiClient.get(`/trades/${id}`);
-};
+// Get Trade By ID
+export const getTradeById = (id) => apiClient.get(`/trades/${id}`);

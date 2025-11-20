@@ -165,6 +165,7 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-center" reverseOrder={false} />
       <AppContent />
     </BrowserRouter>
   );

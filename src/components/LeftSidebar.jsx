@@ -220,7 +220,7 @@ function LeftSidebar({
     if (menu === "Chat") {
       return (
         <div
-          className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 overflow-hidden z-60 ${
+          className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0b1520] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 overflow-hidden z-60 ${
             isOpen && activeMenu === menu
               ? "translate-x-0"
               : "-translate-x-full"
@@ -299,7 +299,7 @@ function LeftSidebar({
     if (menu === "Help") {
       return (
         <div
-          className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 overflow-y-auto z-60 ${
+          className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0b1520]border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 overflow-y-auto z-60 ${
             isOpen && activeMenu === menu
               ? "translate-x-0"
               : "-translate-x-full"
@@ -470,7 +470,7 @@ function LeftSidebar({
 
     return (
       <div
-        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0a0e18] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 overflow-y-auto z-60 ${
+        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#0b1520] border-r border-zinc-800/50 p-0 shadow-lg transition-transform duration-300 overflow-y-auto z-60 ${
           isOpen && activeMenu === menu ? "translate-x-0" : "-translate-x-full"
         } md:static md:w-80 md:flex md:flex-col md:${
           activeMenu === menu ? "block" : "hidden"
@@ -527,7 +527,7 @@ function LeftSidebar({
       <aside
         className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] ${
           isOpen ? "w-64" : "w-20"
-        } bg-[#0a0e18] border-r border-zinc-800/50 flex flex-col items-center py-4 gap-2 z-60 shadow-lg transition-all duration-300 ${
+        } bg-[#050713] border-r border-zinc-800/50 flex flex-col items-center py-4 gap-2 z-60 shadow-lg transition-all duration-300 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } md:static md:w-20 md:translate-x-0`}
       >

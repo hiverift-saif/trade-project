@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { getOpenTrades, getClosedTrades } from "../api/tradeApi";
 import { Routes, Route } from "react-router-dom";
 import TopBar from "../components/TopBar";
 import LeftSidebar from "../components/LeftSidebar";
 import RightRail from "../components/RightRail";
 import Toolbar from "../components/Toolbar";
-import PriceChart from "../components/PriceChart";
+
 import TradePanel from "../components/TradePanel";
 import TradesTabs from "../components/TradesTabs";
 import SignalsWidget from "../components/SignalsWidget";
@@ -17,14 +18,13 @@ import ForexMT4RealAccount from "../assets/Trading/ForexMT4RealAccount";
 import ForexMT4DemoAccount from "../assets/Trading/ForexMT4DemoAccount";
 import ForexMT5RealAccount from "../assets/Trading/ForexMT5RealAccount";
 import ForexMT5DemoAccount from "../assets/Trading/ForexMT5DemoAccount";
-import { X } from "lucide-react"; // For close icon
-// import LiveChart from "../components/LiveChart";
+
 import PocketOptionChart from "../components/LiveChart";
-import ChartToolbar from "../components/ChartToolbar";
 
 export default function Trading() {
-  const [category, setCategory] = useState(null);
-  const [selectedAsset, setSelectedAsset] = useState("BTCUSDT");
+  const [openTrades, setOpenTrades] = useState([]);
+  const [previewExpiry, setPreviewExpiry] = useState(null);
+  const [expiryPreview, setExpiryPreview] = useState(null);
   const [amount, setAmount] = useState(10);
   const [seconds, setSeconds] = useState(30);
   const [payout, setPayout] = useState(80);
@@ -41,25 +41,29 @@ export default function Trading() {
   const [showSignals, setShowSignals] = useState(false);
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [balance, setBalance] = useState(50000);
-  const [showTradeMobile, setShowTradeMobile] = useState(true);
+
   const [showLeftSidebar, setShowLeftSidebar] = useState(false);
   const [showRightRail, setShowRightRail] = useState(true);
   const [activeMenu, setActiveMenu] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const updateExpiryPreview = (seconds) => {
+    const expiry = Date.now() + seconds * 1000;
+    setPreviewExpiry(expiry);
+  };
 
   // ✅ BUY / SELL trade handler
-  // Accept either a simple call (backwards compatible) or an `order` object returned from the API
+
   const handleTradeAction = (arg) => {
-    // If an order object is passed from TradePanel (server response), use it
     const isOrder =
       arg && typeof arg === "object" && (arg._id || arg.id || arg.symbol);
     let order;
     if (isOrder) {
       order = {
         id: arg._id || arg.id || Date.now(),
-        asset: { symbol: arg.symbol || selectedAsset },
+        asset: activeAsset,
+
         side: arg.side || "BUY",
-        // prefer server-provided invested amount, fall back to computed/selected amount
+
         amount:
           arg.amount != null
             ? arg.amount
@@ -81,11 +85,10 @@ export default function Trading() {
         raw: arg,
       };
     } else {
-      // legacy: called as handleTradeAction("BUY")
       const side = arg;
       order = {
         id: Date.now(),
-        asset: { symbol: selectedAsset },
+        asset: activeAsset,
         side,
         amount,
         seconds,
@@ -96,10 +99,9 @@ export default function Trading() {
       };
     }
 
-    // Add to opened list
     setOpened((prev) => [order, ...prev]);
 
-    // schedule move to closed when expiry reached
+    loadTrades(); // ⭐ OPEN/CLOSED trade fresh fetch
     const timeToExpiry = Math.max(
       0,
       (order.expiresAt || Date.now()) - Date.now()
@@ -120,35 +122,114 @@ export default function Trading() {
     }
   };
 
+  // const getAssets = () => [
+  //   { id: "EURUSD-OTC", symbol: "EUR/USD OTC", precision: 5, payout: 0.92 },
+  //   { id: "BTCUSD", symbol: "BTC/USD", precision: 2, payout: 0.9 },
+  //   { id: "AAPL", symbol: "AAPL", precision: 2, payout: 0.88 },
+  //   { id: "EURKWD", symbol: "EUR/KWD", precision: 5, payout: 0.91 },
+  //   { id: "EURBHD", symbol: "EUR/BHD", precision: 5, payout: 0.91 },
+  //   { id: "EUROMR", symbol: "EUR/OMR", precision: 5, payout: 0.91 },
+  //   { id: "EURJOD", symbol: "EUR/JOD", precision: 5, payout: 0.91 },
+  //   { id: "EURGBP", symbol: "EUR/GBP", precision: 5, payout: 0.9 },
+  // ];
+
+  // useEffect(() => {
+  //   const _assets = getAssets();
+  //   setAssets(_assets);
+  //   setActiveAsset(_assets[0]);
+  // }, []);
+
   useEffect(() => {
-    if (showSignals || showSocialModal || isModalOpen) {
-      document.body.style.overflow = "hidden";
-      document.documentElement.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-      document.documentElement.style.overflow = "auto";
-    }
-    return () => {
-      document.body.style.overflow = "auto";
-      document.documentElement.style.overflow = "auto";
+    loadTrades();
+  }, []);
+
+const loadTrades = async () => {
+  try {
+    const openRes = await getOpenTrades();   // 🔵 OPEN TRADES API
+    const closedRes = await getClosedTrades(); // 🔴 CLOSED TRADES API
+
+    const open = openRes?.data?.result?.data || [];
+    const closed = closedRes?.data?.result?.data || [];
+
+    // ⭐ OPEN TRADES को seconds के साथ map करना
+    const mapped = open.map((t) => {
+      const expiry = new Date(t.expiryTime).getTime();
+      const now = Date.now();
+      const sec = Math.max(0, Math.floor((expiry - now) / 1000));
+
+      return {
+        ...t,
+        expiresAt: expiry,   // UI के लिए expiry timestamp
+        seconds: sec,        // remaining seconds
+      };
+    });
+
+    // 🟢 OPEN TRADES UI अपडेट
+    setOpened(mapped);
+
+    // 🔴 CLOSED trades UI अपडेट
+    setClosed(closed);
+
+
+    // ⭐⭐⭐ AUTO-CLOSE TIMER (हर open trade के लिए) ⭐⭐⭐
+    mapped.forEach((trade) => {
+      if (!trade.expiresAt) return;
+
+      const remaining = trade.expiresAt - Date.now();
+
+      if (remaining > 0) {
+        setTimeout(() => {
+          // 🔵 OPEN list से हटाओ
+          setOpened((prev) => prev.filter((t) => t._id !== trade._id));
+
+          // 🔴 CLOSED list में डालो
+          setClosed((prev) => [
+            {
+              ...trade,
+              closePrice: livePrice, // current live price
+              profit:
+                Math.random() > 0.5
+                  ? trade.price * 0.8
+                  : -trade.price * 0.8,
+              closedAt: new Date().toISOString(),
+            },
+            ...prev,
+          ]);
+        }, remaining);
+      }
+    });
+
+  } catch (err) {
+    console.error("Trades load error:", err);
+  }
+};
+
+
+  useEffect(() => {
+    const loadAssets = async () => {
+      try {
+        const res = await fetch("https://api.binance.com/api/v3/exchangeInfo");
+        const json = await res.json();
+
+        const usdtPairs = json.symbols
+          .filter((s) => s.quoteAsset === "USDT" && s.status === "TRADING")
+          .slice(0, 40); // 40 best assets
+
+        const mapped = usdtPairs.map((s) => ({
+          id: s.symbol, // BTCUSDT
+          symbol: `${s.baseAsset}/USDT`,
+          precision: s.quantityPrecision,
+          payout: 0.9, // default 90%, you can randomize
+        }));
+
+        setAssets(mapped);
+        setActiveAsset(mapped[0]); // set first Binance asset as active
+      } catch (e) {
+        console.error("Failed to load Binance assets", e);
+      }
     };
-  }, [showSignals, showSocialModal, isModalOpen]);
 
-  const getAssets = () => [
-    { id: "EURUSD-OTC", symbol: "EUR/USD OTC", precision: 5, payout: 0.92 },
-    { id: "BTCUSD", symbol: "BTC/USD", precision: 2, payout: 0.9 },
-    { id: "AAPL", symbol: "AAPL", precision: 2, payout: 0.88 },
-    { id: "EURKWD", symbol: "EUR/KWD", precision: 5, payout: 0.91 },
-    { id: "EURBHD", symbol: "EUR/BHD", precision: 5, payout: 0.91 },
-    { id: "EUROMR", symbol: "EUR/OMR", precision: 5, payout: 0.91 },
-    { id: "EURJOD", symbol: "EUR/JOD", precision: 5, payout: 0.91 },
-    { id: "EURGBP", symbol: "EUR/GBP", precision: 5, payout: 0.9 },
-  ];
-
-  useEffect(() => {
-    const _assets = getAssets();
-    setAssets(_assets);
-    setActiveAsset(_assets[0]);
+    loadAssets();
   }, []);
 
   useEffect(() => {
@@ -194,64 +275,60 @@ export default function Trading() {
     return () => clearInterval(id);
   }, [seriesData.length]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setOpened((prevOpened) => {
-        return prevOpened
-          .map((t) =>
-            t.remaining > 0 ? { ...t, remaining: t.remaining - 1 } : t
-          )
-          .filter((t) => {
-            if (t.remaining === 0) {
-              const closedTrade = {
-                ...t,
-                closePrice: livePrice,
-                profit:
-                  Math.random() > 0.5
-                    ? t.amount * (t.payout / 100)
-                    : -t.amount * (t.payout / 100),
-              };
-              setClosed((prevClosed) => [closedTrade, ...prevClosed]);
-              return false; // remove from opened
-            }
-            return true;
-          });
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [livePrice]);
-
   const onTopUp = () => setBalance((b) => b + 1000);
 
-  const place = (side) => {
-    if (!activeAsset || amount <= 0) return;
+  const place = async (side) => {
+    if (!activeAsset) return;
 
-    // ✅ Prevent placing trade if insufficient funds
-    if (balance < amount) {
-      alert("Insufficient balance!");
-      return;
-    }
+    const now = new Date();
+    const expiry = new Date(now.getTime() + seconds * 1000);
 
-    // ✅ Deduct amount immediately when placing a trade
-    setBalance((prevBalance) => Math.round((prevBalance - amount) * 100) / 100);
-
-    const now = Date.now();
-    const trade = {
-      id: Math.random().toString(36).slice(2),
-      side,
-      asset: activeAsset,
-      amount: Math.round(amount * 100) / 100,
-      payout: activeAsset.payout,
-      openPrice: latestPrice ?? seriesData[seriesData.length - 1]?.close,
-      openTime: now,
-      expiresAt: now + seconds * 1000,
-      remaining: seconds,
-      closed: false,
+    const payload = {
+      userId: "69119a266c6337fc08afa94a",
+      type: side.toLowerCase(),
+      symbol: activeAsset.apiSymbol || activeAsset.symbol,
+      quantity: 1,
+      price: latestPrice,
+      entryPrice: latestPrice,
+      expiryTime: expiry.toISOString(),
+      status: "open",
+      profitLoss: 0,
+      stopLoss: null,
+      takeProfit: null,
+      txHash: null,
+      exitPrice: null,
+      closeReason: null,
+      isPublic: true,
     };
 
-    // ✅ Add the trade to "opened" list
-    setOpened((o) => [trade, ...o]);
+    try {
+      const res = await fetch("https://trade-pro.xyz/api/v1/trades/buy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      console.log("TRADE API RESPONSE", data);
+
+      // 👉 ADD opened trade to UI (optional)
+      setOpened((o) => [
+        {
+          id: data._id || Date.now(),
+          side,
+          asset: activeAsset,
+          amount,
+          payout: activeAsset.payout,
+          openPrice: latestPrice,
+          expiresAt: expiry.getTime(),
+          remaining: seconds,
+          status: "open",
+        },
+        ...o,
+      ]);
+    } catch (err) {
+      console.error("Trade API Error:", err);
+    }
   };
 
   if (!activeAsset)
@@ -262,7 +339,7 @@ export default function Trading() {
     );
 
   return (
-    <div className="min-h-screen bg-[#070b14] text-white flex flex-col font-sans antialiased relative">
+    <div className="min-h-screen bg-[#0b1520] text-white flex flex-col font-sans antialiased relative">
       <TopBar
         balance={balance}
         onTopUp={onTopUp}
@@ -294,14 +371,6 @@ export default function Trading() {
               path="quick-demo"
               element={
                 <div className="flex flex-col min-h-screen">
-                  <Toolbar
-                    assets={assets}
-                    activeAsset={activeAsset}
-                    setActiveAsset={setActiveAsset}
-                    timeframe={timeframe}
-                    setTimeframe={setTimeframe}
-                    className="sticky top-0 z-20 bg-[#070b14]"
-                  />
                   <QuickTradingDemoAccount
                     assets={assets}
                     activeAsset={activeAsset}
@@ -373,14 +442,6 @@ export default function Trading() {
               path="forex-mt4-real"
               element={
                 <div className="flex flex-col min-h-screen">
-                  <Toolbar
-                    assets={assets}
-                    activeAsset={activeAsset}
-                    setActiveAsset={setActiveAsset}
-                    timeframe={timeframe}
-                    setTimeframe={setTimeframe}
-                    className="sticky top-0 z-20 bg-[#070b14]"
-                  />
                   <ForexMT4RealAccount
                     assets={assets}
                     activeAsset={activeAsset}
@@ -452,14 +513,6 @@ export default function Trading() {
               path="forex-mt5-demo"
               element={
                 <div className="flex flex-col min-h-screen">
-                  <Toolbar
-                    assets={assets}
-                    activeAsset={activeAsset}
-                    setActiveAsset={setActiveAsset}
-                    timeframe={timeframe}
-                    setTimeframe={setTimeframe}
-                    className="sticky top-0 z-20 bg-[#070b14]"
-                  />
                   <ForexMT5DemoAccount
                     assets={assets}
                     activeAsset={activeAsset}
@@ -481,71 +534,78 @@ export default function Trading() {
               path="/"
               element={
                 <div className="flex flex-col min-h-screen">
-                  <Toolbar
-                    assets={assets}
-                    activeAsset={activeAsset}
-                    setActiveAsset={setActiveAsset}
-                    timeframe={timeframe}
-                    setTimeframe={setTimeframe}
-                    className="sticky top-0 z-20 bg-[#070b14]"
-                  />
-                  <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_20rem] min-h-0 w-full h-full relative z-10">
-                    <div className="flex flex-col flex-1 min-h-[50vh] sm:min-h-[60vh] lg:h-full w-full min-w-0 overflow-visible relative">
-                      <div
-                        className="flex-1 relative bg-[#0b0f1a] shadow-inner w-full overflow-hidden"
-                        style={{ minHeight: "500px" }}
-                      >
-                        {/* 🔹 Floating toolbar on top of chart */}
-                        <div className="absolute top-2 left-4 z-30">
-                          <ChartToolbar
-                            category={category}
-                            onCategoryChange={setCategory}
-                            selectedAsset={selectedAsset}
-                            onAssetChange={setSelectedAsset}
-                            chartType={chartType}
-                            onChartTypeChange={setChartType}
-                          />
-                        </div>
+                  <div className="flex w-full h-full overflow-hidden">
+                    {/* 🔵 LEFT SIDE — FULL CHART AREA */}
+                    <div className="flex-1 bg-[#050713] relative overflow-hidden">
+                      {/* Chart */}
+                      <PocketOptionChart
+                        onPriceUpdate={(price) => {
+                          console.log("LIVE PRICE:", price); // debug
+                          setLivePrice(price);
+                        }}
+                        activeAsset={activeAsset}
+                        setActiveAsset={setActiveAsset}
+                        symbol={activeAsset?.id || "BTCUSDT"}
+                        payout={activeAsset?.payout}
+                        chartType={chartType}
+                        expiryPreview={expiryPreview}
+                        onAssetsLoaded={setAssets}
+                        // onPriceUpdate={(p) => setLivePrice(p)}
+                        // activeAsset={activeAsset}
+                        // setActiveAsset={setActiveAsset}
+                        // symbol={activeAsset?.id || "BTCUSDT"}
+                        // payout={activeAsset?.payout}
 
-                        {/* 🔹 Chart area below */}
-                        <PocketOptionChart
-                          symbol={selectedAsset}
-                          onPriceUpdate={(price) => setLivePrice(price)}
+                        // chartType={chartType}
+                        onChartTypeChange={setChartType}
+                        // expiryPreview={expiryPreview}
+                        // onAssetsLoaded={setAssets}
+                      />
+                    </div>
+
+                    {/* 🔵 RIGHT SIDE — TRADE PANEL + POSITIONS */}
+                    <div className="w-[18rem] bg-[#050713] border-l border-zinc-800 flex flex-col h-full">
+                      {/* Trade Panel — FIXED LIKE EQUILIX */}
+                      <div className="border-b border-zinc-800">
+                        <TradePanel
+                          refreshTrades={loadTrades}
+                          onBuy={(order) => handleTradeAction(order)}
+                          onSell={(order) => handleTradeAction(order)}
+                          place={place}
+                          onExpiryPreview={(ts) => {
+                            // Pass to LiveChart / Candle expiry marker
+                            setExpiryPreview(ts);
+                          }}
+                          selectedAsset={activeAsset}
                           amount={amount}
+                          setAmount={setAmount}
                           seconds={seconds}
-                          opened={opened}
-                          closed={closed}
+                          setSeconds={setSeconds}
+                          payout={payout}
+                          livePrice={livePrice}
                           balance={balance}
                           setBalance={setBalance}
-                          chartType={chartType}
-                          onChartTypeChange={setChartType}
+                          asset={activeAsset}
+                          isOpen={true} // always open — Equilix style
+                          updateExpiryPreview={updateExpiryPreview} // ⭐ new prop
+                          // ⭐⭐ ADD THIS HERE ⭐⭐
+                          onAddMarker={(data) => {
+                            if (window.__chartAddMarker) {
+                              window.__chartAddMarker(
+                                data.price,
+                                data.time,
+                                data.side,
+                                data.amount,
+                                data.seconds // ⭐ ADD
+                              );
+                            }
+                          }}
+                          className="max-h-[50%] overflow-y-auto"
                         />
                       </div>
-                    </div>
-                    <div className="flex flex-col md:h-screen h-[400px] bg-[#0b0f1a] md:border-l md:border-zinc-800/50 w-full md:w-[20rem]">
-                      <TradePanel
-                        selectedAsset={selectedAsset}
-                        amount={amount}
-                        setAmount={setAmount}
-                        seconds={seconds}
-                        setSeconds={setSeconds}
-                        payout={payout}
-                        livePrice={livePrice}
-                        onBuy={(order) => handleTradeAction(order)}
-                        onSell={(order) => handleTradeAction(order)}
-                        balance={balance}
-                        setBalance={setBalance}
-                        asset={activeAsset}
-                        isOpen={showTradeMobile}
-                        onClose={() => setShowTradeMobile(false)}
-                        className="md:sticky md:top-0 z-30 md:max-h-[calc(100vh-3.5rem)] md:overflow-y-auto"
-                      />
-                      {/* <TradePanel
-                        isOpen={showTradeMobile}
-                        onClose={() => setShowTradeMobile(false)}
-                      /> */}
 
-                      <div className="flex-1 overflow-y-auto px-4 md:block">
+                      {/* Opened + Closed Trades — Scrollable Bottom */}
+                      <div className="flex-1 overflow-y-auto p-4">
                         <TradesTabs
                           opened={opened}
                           closed={closed}
