@@ -13,7 +13,7 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./Pages/ScrollToTop";
-import ProtectedRoute from "./components/ProtectedRoute";
+// import ProtectedRoute from "./components/ProtectedRoute";
 import TradingProtectedRoute from "./components/TradingProtectedRoute";
 import AffiliateProtectedRoute from "./components/AffiliateProtectedRoute";
 
@@ -36,14 +36,14 @@ import AffiliateLogin from "./Pages/AffiliateLogin";
 
 // Affiliate Dashboard Pages
 import Links from "./AffiliateDashboard/Links";
-import Payments from "./AffiliateDashboard/Payments";
+import Payments from "./AffiliateDashboard/payments.jsx";
 import Telegram from "./AffiliateDashboard/Telegram";
 import Support from "./AffiliateDashboard/Support";
 import Subaffiliate from "./AffiliateDashboard/Subaffiliate";
 import Statistics from "./AffiliateDashboard/Statistics";
 import Promo from "./AffiliateDashboard/Promo";
 import Programs from "./AffiliateDashboard/Programs";
-import Profile from "./AffiliateDashboard/Profile";
+import Profile from "./AffiliateDashboard/profile.jsx";
 import Dashboard from "./AffiliateDashboard/Dashboard";
 import Analytics from "./AffiliateDashboard/Analytics";
 
