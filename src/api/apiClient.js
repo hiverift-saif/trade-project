@@ -2,9 +2,11 @@ import axios from "axios";
 
 const apiClient = axios.create({
   // baseURL: "http://192.168.0.112:3000/api/v1",
-  //  baseURL: "http://68.178.170.69:3000/api/v1",
-  baseURL: "http://68.178.170.69:3000/api/v1",
+
+  // baseURL: "http://68.178.170.69:3000/api/v1",
     // baseURL: "https://trade-pro.xyz/api/v1",
+        baseURL: "https://trade-pro.xyz/api/v1",
+
   headers: {
     "Content-Type": "application/json",
   },

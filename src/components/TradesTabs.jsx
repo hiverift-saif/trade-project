@@ -55,8 +55,16 @@ export default function TradesTabs({ opened = [], closed = [] }) {
 
   return expiry > Date.now(); // show only active trades
 });
+console.log("Closed trades:", closed);
 
-  const trades = tab === "Opened" ? activeOpenedTrades : closed;
+ const uniqueClosed = [
+  ...new Map(
+    closed.map(t => [t.id || t._id || t.tradeId, t])
+  ).values()
+];
+
+const trades = tab === "Opened" ? activeOpenedTrades : uniqueClosed;
+
 
   return (
     <div className="p-4 rounded-2xl text-white mt-6 bg-[#050713] border border-[#1a2233] shadow-lg">
@@ -96,7 +104,9 @@ export default function TradesTabs({ opened = [], closed = [] }) {
 
             return (
               <li
-                key={t.id || t._id || Math.random()}
+                // key={t.id || t._id || Math.random()}
+                key={t.id || t._id || t.tradeId || index}
+
                 className="
                   bg-[#121e2f] 
                   border border-[#1a2233]

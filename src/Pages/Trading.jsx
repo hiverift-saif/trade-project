@@ -117,7 +117,15 @@ export default function Trading() {
             Math.random() > 0.5 ? order.amount * 0.8 : -order.amount * 0.8,
           closedAt: new Date().toISOString(),
         };
-        setClosed((prev) => [closedTrade, ...prev]);
+        // setClosed((prev) => [closedTrade, ...prev]);
+        setClosed((prev) => {
+  const exists = prev.some(
+    (item) => item.id === closedTrade.id || item._id === closedTrade._id
+  );
+  if (exists) return prev;
+  return [closedTrade, ...prev];
+});
+
       }, timeToExpiry);
     }
   };
@@ -172,32 +180,32 @@ const loadTrades = async () => {
 
 
     // ⭐⭐⭐ AUTO-CLOSE TIMER (हर open trade के लिए) ⭐⭐⭐
-    mapped.forEach((trade) => {
-      if (!trade.expiresAt) return;
+    // mapped.forEach((trade) => {
+    //   if (!trade.expiresAt) return;
 
-      const remaining = trade.expiresAt - Date.now();
+    //   const remaining = trade.expiresAt - Date.now();
 
-      if (remaining > 0) {
-        setTimeout(() => {
-          // 🔵 OPEN list से हटाओ
-          setOpened((prev) => prev.filter((t) => t._id !== trade._id));
+    //   if (remaining > 0) {
+    //     setTimeout(() => {
+    //       // 🔵 OPEN list से हटाओ
+    //       setOpened((prev) => prev.filter((t) => t._id !== trade._id));
 
-          // 🔴 CLOSED list में डालो
-          setClosed((prev) => [
-            {
-              ...trade,
-              closePrice: livePrice, // current live price
-              profit:
-                Math.random() > 0.5
-                  ? trade.price * 0.8
-                  : -trade.price * 0.8,
-              closedAt: new Date().toISOString(),
-            },
-            ...prev,
-          ]);
-        }, remaining);
-      }
-    });
+    //       // 🔴 CLOSED list में डालो
+    //       setClosed((prev) => [
+    //         {
+    //           ...trade,
+    //           closePrice: livePrice, // current live price
+    //           profit:
+    //             Math.random() > 0.5
+    //               ? trade.price * 0.8
+    //               : -trade.price * 0.8,
+    //           closedAt: new Date().toISOString(),
+    //         },
+    //         ...prev,
+    //       ]);
+    //     }, remaining);
+    //   }
+    // });
 
   } catch (err) {
     console.error("Trades load error:", err);
