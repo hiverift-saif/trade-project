@@ -91,7 +91,7 @@ export default function Registration() {
       password: form.password,
     });
     toast.dismiss(toastId);
-    toast.success("Registration Successful! :tada:");
+    toast.success("Registration Successful! ");
     // Save user
     localStorage.setItem(
       "user",

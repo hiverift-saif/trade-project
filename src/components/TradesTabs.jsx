@@ -5,7 +5,6 @@ export default function TradesTabs({ opened = [], closed = [] }) {
   const [tab, setTab] = useState("Opened");
   const [openedTrades, setOpenedTrades] = useState([]);
 
-  // Helpers
   const safeString = (v) => (typeof v === "string" ? v : "");
   const safeNumber = (n) => (isNaN(Number(n)) ? 0 : Number(n));
 
@@ -22,7 +21,7 @@ export default function TradesTabs({ opened = [], closed = [] }) {
     setOpenedTrades(opened.map((t) => ({ ...t })));
   }, [opened]);
 
-  // Timer
+  // Timer for opened trades
   useEffect(() => {
     if (tab !== "Opened" || openedTrades.length === 0) return;
 
@@ -48,23 +47,21 @@ export default function TradesTabs({ opened = [], closed = [] }) {
     return `${m}:${s}`;
   };
 
-  // ⭐ FILTER: Only show ACTIVE opened trades based on createdAt + tradeTime
+  // Show only active trades
   const activeOpenedTrades = openedTrades.filter((t) => {
-  const expiry = Number(t.expiresAt);
-  if (!expiry) return true; // fallback
+    const expiry = Number(t.expiresAt);
+    if (!expiry) return true;
+    return expiry > Date.now();
+  });
 
-  return expiry > Date.now(); // show only active trades
-});
-console.log("Closed trades:", closed);
+  // Unique closed trades
+  const uniqueClosed = [
+    ...new Map(
+      closed.map((t) => [t.id || t._id || t.tradeId, t])
+    ).values(),
+  ];
 
- const uniqueClosed = [
-  ...new Map(
-    closed.map(t => [t.id || t._id || t.tradeId, t])
-  ).values()
-];
-
-const trades = tab === "Opened" ? activeOpenedTrades : uniqueClosed;
-
+  const trades = tab === "Opened" ? activeOpenedTrades : uniqueClosed;
 
   return (
     <div className="p-4 rounded-2xl text-white mt-6 bg-[#050713] border border-[#1a2233] shadow-lg">
@@ -86,27 +83,35 @@ const trades = tab === "Opened" ? activeOpenedTrades : uniqueClosed;
         ))}
       </div>
 
-      {/* EMPTY STATE */}
+      {/* Empty State */}
       {trades.length === 0 ? (
         <div className="text-[#9ca3af] text-sm text-center py-8">
           No {tab.toLowerCase()} trades yet.
         </div>
       ) : (
         <ul className="space-y-3">
-          {trades.map((t) => {
+          {trades.map((t, index) => {
             const side = safeString(t.side).toUpperCase();
             const isBuy = side === "BUY";
             const symbol = getSymbol(t);
-            const amount = safeNumber(t.price);
+
+            // FIX: correct amount for both API + local trades
+            const amount = safeNumber(t.amount || t.price);
 
             const payout = safeNumber(t.payout);
             const remaining = safeNumber(t.remaining);
 
+            // ⭐ Calculate Duration For Closed Trades
+            const durationMs =
+              t.expiresAt && t.createdAt
+                ? t.expiresAt - new Date(t.createdAt).getTime()
+                : 0;
+
+            const closeSeconds = Math.max(0, Math.floor(durationMs / 1000));
+
             return (
               <li
-                // key={t.id || t._id || Math.random()}
                 key={t.id || t._id || t.tradeId || index}
-
                 className="
                   bg-[#121e2f] 
                   border border-[#1a2233]
@@ -118,13 +123,10 @@ const trades = tab === "Opened" ? activeOpenedTrades : uniqueClosed;
                 "
               >
                 <div className="flex justify-between items-center">
-                  {/* LEFT SIDE */}
+                  {/* Left Side */}
                   <div>
                     <div className="flex items-center gap-2">
-                      <Star
-                        size={14}
-                        className="text-[#FACC15] fill-[#FACC15]"
-                      />
+                      <Star size={14} className="text-[#FACC15] fill-[#FACC15]" />
 
                       <span className="font-semibold text-sm tracking-wide">
                         {symbol}
@@ -152,7 +154,7 @@ const trades = tab === "Opened" ? activeOpenedTrades : uniqueClosed;
                     </div>
                   </div>
 
-                  {/* RIGHT SIDE */}
+                  {/* Right Side */}
                   <div className="text-right">
                     {tab === "Opened" ? (
                       <>
@@ -167,7 +169,11 @@ const trades = tab === "Opened" ? activeOpenedTrades : uniqueClosed;
                     ) : (
                       <>
                         <div className="text-[#9ca3af] text-xs">
-                          Close: {t.closePrice ? t.closePrice.toFixed(2) : "--"}
+                          At: {t.closedAt ? new Date(t.closedAt).toLocaleTimeString() : "--"}
+                        </div>
+
+                        <div className="text-[#9ca3af] text-xs">
+                          Duration: {formatTime(closeSeconds)}
                         </div>
 
                         <div
@@ -192,3 +198,4 @@ const trades = tab === "Opened" ? activeOpenedTrades : uniqueClosed;
     </div>
   );
 }
+

@@ -109,23 +109,28 @@ export default function Trading() {
     if (timeToExpiry > 0) {
       setTimeout(() => {
         setOpened((prev) => prev.filter((t) => t.id !== order.id));
-
         const closedTrade = {
-          ...order,
-          closePrice: livePrice,
+          id: order.id,
+          side: order.side,
+          symbol: order.asset?.symbol || order.asset?.id || order.symbol,
+          amount: order.amount, // ⭐ SAME AMOUNT
+          openPrice: order.openPrice,
+          closePrice: livePrice, // ⭐ CORRECT CLOSE PRICE
           profit:
             Math.random() > 0.5 ? order.amount * 0.8 : -order.amount * 0.8,
-          closedAt: new Date().toISOString(),
+          expiresAt: order.expiresAt, // ⭐ USED FOR SHOWING CLOSE TIME
+          closedAt: Date.now(), // ⭐ REAL CLOSE TIMESTAMP
+          payout: order.payout,
         };
+
         // setClosed((prev) => [closedTrade, ...prev]);
         setClosed((prev) => {
-  const exists = prev.some(
-    (item) => item.id === closedTrade.id || item._id === closedTrade._id
-  );
-  if (exists) return prev;
-  return [closedTrade, ...prev];
-});
-
+          const exists = prev.some(
+            (item) => item.id === closedTrade.id || item._id === closedTrade.id
+          );
+          if (exists) return prev;
+          return [closedTrade, ...prev];
+        });
       }, timeToExpiry);
     }
   };
@@ -151,67 +156,64 @@ export default function Trading() {
     loadTrades();
   }, []);
 
-const loadTrades = async () => {
-  try {
-    const openRes = await getOpenTrades();   // 🔵 OPEN TRADES API
-    const closedRes = await getClosedTrades(); // 🔴 CLOSED TRADES API
+  const loadTrades = async () => {
+    try {
+      const openRes = await getOpenTrades(); // 🔵 OPEN TRADES API
+      const closedRes = await getClosedTrades(); // 🔴 CLOSED TRADES API
 
-    const open = openRes?.data?.result?.data || [];
-    const closed = closedRes?.data?.result?.data || [];
+      const open = openRes?.data?.result?.data || [];
+      const closed = closedRes?.data?.result?.data || [];
 
-    // ⭐ OPEN TRADES को seconds के साथ map करना
-    const mapped = open.map((t) => {
-      const expiry = new Date(t.expiryTime).getTime();
-      const now = Date.now();
-      const sec = Math.max(0, Math.floor((expiry - now) / 1000));
+      // ⭐ OPEN TRADES को seconds के साथ map करना
+      const mapped = open.map((t) => {
+        const expiry = new Date(t.expiryTime).getTime();
+        const now = Date.now();
+        const sec = Math.max(0, Math.floor((expiry - now) / 1000));
 
-      return {
-        ...t,
-        expiresAt: expiry,   // UI के लिए expiry timestamp
-        seconds: sec,        // remaining seconds
-      };
-    });
+        return {
+          ...t,
+          expiresAt: expiry, // UI के लिए expiry timestamp
+          seconds: sec, // remaining seconds
+        };
+      });
 
-    // 🟢 OPEN TRADES UI अपडेट
-    setOpened(mapped);
+      // 🟢 OPEN TRADES UI अपडेट
+      setOpened(mapped);
 
-    // 🔴 CLOSED trades UI अपडेट
-    setClosed(closed);
+      // 🔴 CLOSED trades UI अपडेट
+      setClosed(closed);
 
+      // ⭐⭐⭐ AUTO-CLOSE TIMER (हर open trade के लिए) ⭐⭐⭐
+      // mapped.forEach((trade) => {
+      //   if (!trade.expiresAt) return;
 
-    // ⭐⭐⭐ AUTO-CLOSE TIMER (हर open trade के लिए) ⭐⭐⭐
-    // mapped.forEach((trade) => {
-    //   if (!trade.expiresAt) return;
+      //   const remaining = trade.expiresAt - Date.now();
 
-    //   const remaining = trade.expiresAt - Date.now();
+      //   if (remaining > 0) {
+      //     setTimeout(() => {
+      //       // 🔵 OPEN list से हटाओ
+      //       setOpened((prev) => prev.filter((t) => t._id !== trade._id));
 
-    //   if (remaining > 0) {
-    //     setTimeout(() => {
-    //       // 🔵 OPEN list से हटाओ
-    //       setOpened((prev) => prev.filter((t) => t._id !== trade._id));
-
-    //       // 🔴 CLOSED list में डालो
-    //       setClosed((prev) => [
-    //         {
-    //           ...trade,
-    //           closePrice: livePrice, // current live price
-    //           profit:
-    //             Math.random() > 0.5
-    //               ? trade.price * 0.8
-    //               : -trade.price * 0.8,
-    //           closedAt: new Date().toISOString(),
-    //         },
-    //         ...prev,
-    //       ]);
-    //     }, remaining);
-    //   }
-    // });
-
-  } catch (err) {
-    console.error("Trades load error:", err);
-  }
-};
-
+      //       // 🔴 CLOSED list में डालो
+      //       setClosed((prev) => [
+      //         {
+      //           ...trade,
+      //           closePrice: livePrice, // current live price
+      //           profit:
+      //             Math.random() > 0.5
+      //               ? trade.price * 0.8
+      //               : -trade.price * 0.8,
+      //           closedAt: new Date().toISOString(),
+      //         },
+      //         ...prev,
+      //       ]);
+      //     }, remaining);
+      //   }
+      // });
+    } catch (err) {
+      console.error("Trades load error:", err);
+    }
+  };
 
   useEffect(() => {
     const loadAssets = async () => {

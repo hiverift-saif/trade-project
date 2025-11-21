@@ -21,7 +21,6 @@ export default function AffiliateSignup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Handle form input updates
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -30,30 +29,15 @@ export default function AffiliateSignup() {
     });
   };
 
-  // Handle signup submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
     if (formData.password !== formData.confirmPassword) {
-      return Swal.fire({
-        icon: "error",
-        title: "Passwords do not match!",
-      });
-    }
-
-    if (!formData.email.includes("@")) {
-      return Swal.fire({
-        icon: "error",
-        title: "Invalid email address!",
-      });
+      return Swal.fire({ icon: "error", title: "Passwords do not match!" });
     }
 
     if (!formData.terms) {
-      return Swal.fire({
-        icon: "warning",
-        title: "Please accept Terms & Conditions!",
-      });
+      return Swal.fire({ icon: "warning", title: "Please accept Terms!" });
     }
 
     const payload = {
@@ -61,6 +45,7 @@ export default function AffiliateSignup() {
       email: formData.email,
       phone: formData.mobile,
       password: formData.password,
+      role: "affiliate", // 🔥 ADDED ROLE
     };
 
     try {
@@ -70,8 +55,6 @@ export default function AffiliateSignup() {
         `${BASE.AFFILIATE_URL}/auth/register`,
         payload
       );
-
-      console.log("Signup Response:", res);
 
       if (res.status === 201 || res.data?.statusCode === 201) {
         Swal.fire({
@@ -90,7 +73,6 @@ export default function AffiliateSignup() {
         });
       }
     } catch (error) {
-      console.error("Signup Error:", error);
       Swal.fire({
         icon: "error",
         title: "Server Error!",
@@ -104,16 +86,13 @@ export default function AffiliateSignup() {
   return (
     <div className="h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-4 py-20 relative overflow-hidden">
 
-      {/* Background Blur Circles */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-green-500/10 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Signup Card */}
       <div className="flex flex-col gap-6 rounded-xl border w-full max-w-md bg-gray-900/60 border-gray-800 backdrop-blur-xl relative z-10">
 
-        {/* Header */}
         <div className="px-6 pt-6 text-center space-y-2">
           <div className="flex justify-center items-center">
             <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-green-500 rounded-xl flex items-center justify-center mr-3">
@@ -124,7 +103,6 @@ export default function AffiliateSignup() {
           <p className="text-gray-400">Create your affiliate account</p>
         </div>
 
-        {/* Form */}
         <div className="px-6 pb-6">
           <form className="space-y-4" onSubmit={handleSubmit}>
 
@@ -253,3 +231,4 @@ export default function AffiliateSignup() {
     </div>
   );
 }
+

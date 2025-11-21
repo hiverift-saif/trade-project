@@ -22,78 +22,74 @@ export default function AffiliateLogin() {
   };
 
   // Handle Login Form Submit
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const res = await fetch(`${BASE.AFFILIATE_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const payload = {
+        ...formData,
+        role: "affiliate", // 🔥 ADDED ROLE
+      };
 
-    const data = await res.json();
-    console.log("Login Response:", data);
+      const res = await fetch(`${BASE.AFFILIATE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    setLoading(false);
+      const data = await res.json();
+      setLoading(false);
 
-    if (res.status === 200 || res.status === 201) {
+      if (res.status === 200 || res.status === 201) {
+        const token = data.data?.access_token;
+        const user = data.data?.user;
 
-      const token = data.data?.access_token;   
-      const user = data.data?.user;
+        if (!token) {
+          return Swal.fire({
+            icon: "error",
+            title: "Token missing in backend response!",
+          });
+        }
 
-      if (!token) {
-        return Swal.fire({
+        localStorage.setItem("affiliate_token", token);
+        localStorage.setItem("affiliate_user", JSON.stringify(user));
+
+        Swal.fire({
+          icon: "success",
+          title: "Login Successful!",
+          timer: 2000,
+          showConfirmButton: false,
+        }).then(() => navigate("/affiliate/dashboard"));
+      } else {
+        Swal.fire({
           icon: "error",
-          title: "Token missing from backend response!",
+          title: "Login Failed!",
+          text: data.message || "Invalid email or password",
         });
       }
+    } catch (error) {
+      console.error("Login error:", error);
+      setLoading(false);
 
-      localStorage.setItem("affiliate_token", token);
-      localStorage.setItem("affiliate_user", JSON.stringify(user));
-
-      Swal.fire({
-        icon: "success",
-        title: "Login Successful!",
-        timer: 2000,
-        showConfirmButton: false,
-      }).then(() => navigate("/affiliate/dashboard"));
-
-    } else {
       Swal.fire({
         icon: "error",
-        title: "Login Failed!",
-        text: data.message || "Invalid email or password",
+        title: "Server Error",
+        text: "API not responding.",
       });
     }
-  } catch (error) {
-    console.error("Login error:", error);
-    setLoading(false);
-
-    Swal.fire({
-      icon: "error",
-      title: "Server Error",
-      text: "API not responding or network issue.",
-    });
-  }
-};
-
-
+  };
 
   return (
     <div className="h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-4 relative overflow-hidden">
-      
-      {/* Background Glow */}
+
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-green-500/10 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Login Card */}
       <div className="text-card-foreground flex flex-col gap-6 rounded-xl border w-full max-w-md bg-gray-900/60 border-gray-800 backdrop-blur-xl relative z-10">
         
-        {/* Header */}
         <div className="grid items-start gap-1.5 px-6 pt-6 space-y-4">
           <div className="flex justify-center">
             <div className="flex items-center">
@@ -106,15 +102,12 @@ const handleSubmit = async (e) => {
 
           <div className="text-center space-y-2">
             <h4 className="text-2xl text-white">Affiliate Login</h4>
-            <p className="text-gray-400">Welcome back! Log in to your affiliate account</p>
+            <p className="text-gray-400">Welcome back!</p>
           </div>
         </div>
 
-        {/* Login Form */}
         <div className="px-6 pb-6">
           <form className="space-y-4" onSubmit={handleSubmit}>
-            
-            {/* Email */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">Email Address</label>
               <input
@@ -128,7 +121,6 @@ const handleSubmit = async (e) => {
               />
             </div>
 
-            {/* Password */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">Password</label>
               <div className="relative">
@@ -142,7 +134,6 @@ const handleSubmit = async (e) => {
                   className="bg-gray-800/50 w-full border border-gray-700 text-white rounded-md px-3 py-2 pr-10 outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                 />
 
-                {/* Eye Toggle */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -153,7 +144,6 @@ const handleSubmit = async (e) => {
               </div>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
@@ -162,7 +152,6 @@ const handleSubmit = async (e) => {
               {loading ? "Logging in..." : "Login Affiliate"}
             </button>
 
-            {/* Signup Link */}
             <div className="text-center pt-4 border-t border-gray-800">
               <p className="text-gray-400">
                 Don’t have an affiliate account?{" "}
@@ -180,3 +169,4 @@ const handleSubmit = async (e) => {
     </div>
   );
 }
+
