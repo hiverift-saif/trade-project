@@ -31,7 +31,7 @@ const openLevelsPanel = () => setShowLevelsPanel(true);
 
   const fetchBalance = async () => {
     setFetching(true);
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("affiliate_token");
 
     if (!token) {
       navigate("/affiliateLogin");
@@ -48,7 +48,7 @@ const openLevelsPanel = () => setShowLevelsPanel(true);
       });
 
       if (response.status === 401) {
-        localStorage.removeItem("token");
+        localStorage.removeItem("affiliate_token");
         navigate("/affiliateLogin");
         return;
       }
@@ -76,7 +76,7 @@ const openLevelsPanel = () => setShowLevelsPanel(true);
   };
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("affiliate_user");
+    const storedUser = localStorage.getItem("affiliate_token");
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
