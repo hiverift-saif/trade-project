@@ -2,7 +2,7 @@ import React from 'react';
 import { MoveRight, Play } from 'lucide-react';
 import partners from "../assets/partners.png"; // Ensure this path is correct
 
-const PartnerSection = () => {
+const PartnerSec = () => {
   // Partner Logos Data (Using the original links provided)
   const partnersList = [
     { name: "Brand 1", logo: "https://tradebro-react-next-js-template.vercel.app/_next/image?url=%2Fassets%2Fimages%2Fbrand%2Fbrand-1-1.png&w=384&q=75" },
@@ -106,4 +106,4 @@ const PartnerSection = () => {
   );
 };
 
-export default PartnerSection;
+export default PartnerSec;

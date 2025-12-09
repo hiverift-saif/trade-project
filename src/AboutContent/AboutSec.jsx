@@ -4,7 +4,7 @@ import aboutV2Shape22 from "../assets/about.png";
 import aboutv2 from "../assets/aboutv2.png";
 import aboutv3 from "../assets/aboutv3.png";
 
-const AboutSection = () => {
+const AboutSec = () => {
   return (
     <section className="py-16 lg:py-24 bg-white overflow-hidden">
       <div className="container mx-auto px-4 md:px-8">
@@ -126,4 +126,4 @@ const AboutSection = () => {
   );
 };
 
-export default AboutSection;
+export default AboutSec;

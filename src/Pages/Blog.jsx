@@ -1,6 +1,6 @@
 import React from 'react'
 import { ChevronRight } from "lucide-react";
-import BlogCard from '../AboutContent/BlogCard';
+import BlogCardSection from '../AboutContent/BlogCardSection';
 
 const Blog = () => {
   return (
@@ -61,7 +61,7 @@ const Blog = () => {
 
 
       </section>
-    <BlogCard/>
+    <BlogCardSection/>
     </div>
   )
 }
