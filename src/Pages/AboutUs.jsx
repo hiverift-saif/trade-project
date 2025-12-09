@@ -3,7 +3,7 @@ import { ChevronRight } from "lucide-react";
 // import AboutSection from "../AboutContent/AboutSection";
 import AboutSection from "../AboutContent/AboutSec";
 import MissionStatement from "../AboutContent/MissionStatementSection";
-import TestimonialSection from "../AboutContent/TestimonialSec";
+import TestimonialSection from "../AboutContent/TestimonialSection";
 import FactCounter from "../AboutContent/FactCounterOne";
 import PartnerSection from "../AboutContent/PartnerSec";
 import AwardsSection  from "../AboutContent/AwardsSec";
