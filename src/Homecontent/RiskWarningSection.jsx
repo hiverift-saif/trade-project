@@ -1,81 +1,132 @@
 import React from "react";
-import { TriangleAlert, Shield, Info, ExternalLink } from "lucide-react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Autoplay } from "swiper/modules";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import "swiper/css";
+import "swiper/css/navigation";
+
+const steps = [
+  {
+    step: "STEP 01",
+    title: "Open Your Account",
+    text: "Always holds these matters to this principle of selection or else cases he endures pains.",
+  },
+  {
+    step: "STEP 02",
+    title: "Fund Your Account",
+    text: "Beguiled and demoralized the charms of pleasure of the moment, so blinded by desire that they foresee.",
+  },
+  {
+    step: "STEP 03",
+    title: "Choose Your Asset",
+    text: "Business it will frequently occur that pleasures have to be repudiated and annoyances accepted.",
+  },
+  {
+    step: "STEP 04",
+    title: "Start Trading",
+    text: "Perform trades immediately with speed and highly optimized execution.",
+  },
+  {
+    step: "STEP 05",
+    title: "Track Performance",
+    text: "Analyze results using charts, indicators, and financial analytics.",
+  },
+];
 
 export default function RiskWarningSection() {
   return (
-    <section className="py-16 bg-gradient-to-r from-[#3e2723]/90 via-[#2c1810]/90 to-[#1b0d0b]/90 border-y border-[#4e342e]/40 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-br from-gray-800/100 to-gray-900/100 rounded-2xl p-8 border border-gray-700/50">
-          <div className="flex flex-col lg:flex-row items-start gap-8">
-            {/* Icon */}
-            <div className="flex-shrink-0">
-              <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-xl">
-                <TriangleAlert className="w-8 h-8 text-white" />
-              </div>
+    <section className="bg-[#000420] py-24 relative overflow-hidden font-sans rounded-2xl">
+      <div className="container mx-auto px-4 md:px-8 max-w-7xl">
+        
+        {/* ================= HEADER SECTION ================= */}
+        <div className="flex flex-col lg:flex-row justify-between items-end mb-20 gap-8">
+          
+          {/* Left: Title */}
+          <div className="max-w-2xl">
+            <div className="inline-block mb-4">
+               <span className="bg-[#50fa7b] text-[#051509] px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider">
+                 How It Works
+               </span>
             </div>
-
-            {/* Content */}
-            <div className="flex-1">
-              <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
-                <Shield className="w-6 h-6 mr-3 text-yellow-400" />
-                Risk Warning & Legal Compliance
-              </h3>
-
-              <div className="space-y-6 text-gray-300 leading-relaxed">
-                {/* Risk Disclosure */}
-                <div className="bg-yellow-500/20 rounded-xl p-6 border border-yellow-500/20">
-                  <h4 className="font-semibold text-yellow-400 mb-3 flex items-center">
-                    <TriangleAlert className="w-5 h-5 mr-2" />
-                    Risk Disclosure
-                  </h4>
-                  <p className="text-sm">
-                    Trading financial instruments involves substantial risk of loss and may not be suitable for all investors. The high degree of leverage can work against you as well as for you. Before deciding to trade, you should carefully consider your investment objectives, level of experience, and risk appetite. There is a possibility that you could sustain a loss of some or all of your initial investment.{" "}
-                    <strong className="text-yellow-300">You should not invest money that you cannot afford to lose.</strong>
-                  </p>
-                </div>
-
-                {/* Legal Notice */}
-                <div className="bg-blue-500/20 rounded-xl p-6 border border-blue-500/20">
-                  <h4 className="font-semibold text-blue-400 mb-3 flex items-center">
-                    <Info className="w-5 h-5 mr-2" />
-                    Legal Notice
-                  </h4>
-                  <p className="text-sm">
-                    Trade Pro is a registered trading platform operating under strict regulatory compliance. Our services are not available to residents of certain jurisdictions including but not limited to the European Economic Area (EEA), United States of America (USA), Israel, United Kingdom (UK), and other restricted territories as per our Terms & Conditions.
-                  </p>
-                </div>
-
-                {/* Important Notice */}
-                <div className="bg-purple-500/20 rounded-xl p-6 border border-purple-500/20">
-                  <h4 className="font-semibold text-purple-400 mb-3 flex items-center">
-                    <Shield className="w-5 h-5 mr-2" />
-                    Important Notice
-                  </h4>
-                  <p className="text-sm">
-                    <strong className="text-purple-300">Past performance is not indicative of future results.</strong> All trading involves risk, and profits are not guaranteed. Please ensure you understand the risks involved and seek independent financial advice if necessary. Only invest capital you can afford to lose.
-                  </p>
-                </div>
-              </div>
-
-              {/* Buttons */}
-              <div className="flex flex-wrap gap-4 mt-8 pt-6 border-t border-gray-700/50">
-                {[
-                  "Terms & Conditions",
-                  "Privacy Policy",
-                  "Regulatory Information",
-                  "Risk Management",
-                ].map((label, idx) => (
-                  <button
-                    key={idx}
-                    className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] border bg-background dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white"
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <h2 className="text-4xl md:text-5xl font-bold font-heading text-white leading-tight">
+              Step-By-Step Trading Guide
+            </h2>
           </div>
+
+          {/* Right: Description */}
+          <div className="max-w-sm text-gray-400 text-base leading-relaxed pb-2">
+            Pleasure and praising pain was born and will give complete system.
+          </div>
+        </div>
+
+        {/* ================= SLIDER SECTION ================= */}
+        <div className="relative">
+          
+          {/* Faint Background Line (Connecting the dots) */}
+          <div className="absolute top-[55px] left-0 w-full h-[1px] bg-white/5 z-0 hidden md:block"></div>
+
+          <Swiper
+            modules={[Navigation, Autoplay]}
+            navigation={{
+              prevEl: ".hiw-prev",
+              nextEl: ".hiw-next",
+            }}
+            loop={true}
+            autoplay={{ delay: 3000, disableOnInteraction: false }}
+            spaceBetween={30}
+            slidesPerView={1}
+            breakpoints={{
+              640: { slidesPerView: 1 },
+              768: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+            }}
+            className="pb-12"
+          >
+            {steps.map((item, index) => (
+              <SwiperSlide key={index}>
+                <div className="relative pt-14 group cursor-pointer">
+                  
+                  {/* --- TIMELINE ELEMENTS --- */}
+                  
+                  {/* 1. Step Pill (Floating Top) */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20">
+                    <span className="bg-[#0b1221] border border-white/10 text-[#50fa7b] text-xs font-bold px-4 py-1.5 rounded uppercase tracking-wider group-hover:bg-[#50fa7b] group-hover:text-black transition-colors duration-300">
+                      {item.step}
+                    </span>
+                  </div>
+
+                  {/* 2. The Dot (On the line) */}
+                  <div className="absolute top-[55px] left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-[#000420] border-2 border-gray-600 rounded-full z-10 group-hover:border-[#50fa7b] group-hover:bg-[#50fa7b] transition-all duration-300 shadow-[0_0_0_4px_#000420]"></div>
+
+                  {/* 3. The Vertical Connector (Visual tweak) */}
+                  <div className="absolute top-[55px] left-1/2 -translate-x-1/2 w-[1px] h-8 bg-gradient-to-b from-gray-700 to-transparent opacity-50"></div>
+
+
+                  {/* --- CARD CONTENT --- */}
+                  <div className="mt-8 bg-[#0b1221] border border-white/5 p-8 rounded-2xl hover:border-[#50fa7b]/30 transition-all duration-300 h-full group-hover:-translate-y-2">
+                    <h3 className="text-xl font-bold font-heading text-white mb-3 group-hover:text-[#50fa7b] transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm leading-relaxed">
+                      {item.text}
+                    </p>
+                  </div>
+
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+
+          {/* ================= NAVIGATION BUTTONS ================= */}
+          <div className="flex justify-center gap-4 mt-8">
+            <button className="hiw-prev w-12 h-12 rounded-full border font-bold border-white/10 bg-[#0b1221] text-white flex items-center justify-center hover:bg-[#50fa7b] hover:text-black hover:border-[#50fa7b] transition-all duration-300 group">
+              <ArrowLeft size={20} />
+            </button>
+            <button className="hiw-next w-12 h-12 rounded-full border font-bold border-white/10 bg-[#0b1221] text-white flex items-center justify-center hover:bg-[#50fa7b] hover:text-black hover:border-[#50fa7b] transition-all duration-300 group">
+              <ArrowRight size={20} />
+            </button>
+          </div>
+
         </div>
       </div>
     </section>

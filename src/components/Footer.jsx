@@ -21,7 +21,8 @@ export default function Footer() {
     { name: "Trading Signals", path: "/trading/signals", color: "hover:text-pink-400" },
   ];
   return (
-    <footer className="bg-gradient-to-b from-black to-gray-900 text-white relative overflow-hidden">
+     <div className=" ">
+    <footer className="bg-[#000420]  text-white relative overflow-hidden rounded-2xl">
       {/* Background SVG overlay */}
       <div className="absolute inset-0 opacity-5">
         <div
@@ -171,5 +172,6 @@ export default function Footer() {
       </div>
       
     </footer>
+</div>
   );
 }

@@ -1,11 +1,10 @@
-// src/Pages/finance/HistoryPage.jsx
 import React, { useState, useEffect } from "react";
 
 export default function HistoryPage() {
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
-    // ✅ Mock API Data (later you can replace with your backend API)
+    // Mock Data
     const mockData = [
       {
         id: "91843401",
@@ -40,21 +39,22 @@ export default function HistoryPage() {
   }, []);
 
   return (
-    <div className="bg-[#0b1320] min-h-screen text-white p-6">
+    <div className="w-full h-full bg-[#0b1320] text-white p-6 overflow-x-hidden">
+
       {/* Header */}
       <h1 className="text-2xl font-semibold mb-6">Transaction History</h1>
 
       {/* Info */}
       <div className="bg-[#101a2b] border border-gray-700 p-5 rounded-xl mb-6">
         <p className="text-gray-400 text-sm">
-          Below is the list of all your deposits and withdrawals.  
-          You can check their current status and transaction details.
+          Below is the list of all your deposits and withdrawals. You can check
+          their current status and transaction details.
         </p>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-[#101a2b] border border-gray-700 rounded-xl">
-        <table className="w-full text-sm text-gray-300">
+      <div className="overflow-x-auto bg-[#101a2b] border border-gray-700 rounded-xl w-full">
+        <table className="w-full text-sm text-gray-300 border-collapse">
           <thead className="bg-[#131c2f] text-gray-400 text-xs uppercase">
             <tr>
               <th className="px-4 py-3 text-left">ID</th>

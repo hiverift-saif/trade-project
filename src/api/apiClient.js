@@ -5,7 +5,7 @@ const apiClient = axios.create({
 
   // baseURL: "http://68.178.170.69:3000/api/v1",
     // baseURL: "https://trade-pro.xyz/api/v1",
-        baseURL: "https://trade-pro.xyz/api/v1",
+        baseURL: "https://trade-pro.xyz/tradingPro-api-v1/api/v1",
 
   headers: {
     "Content-Type": "application/json",

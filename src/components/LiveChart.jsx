@@ -1,8 +1,8 @@
-// src/components/EquilixChart.jsx
+
 
 import React, { useEffect, useRef, useState } from "react";
 import { createChart, CrosshairMode } from "lightweight-charts";
-import { BarChart3, CandlestickChart, Pencil } from "lucide-react";
+import { BarChart3, CandlestickChart, Pencil , Maximize2, Minimize2} from "lucide-react";
 
 const TIMEFRAME_MAP = {
   S5: "5s",
@@ -26,7 +26,7 @@ const TIMEFRAME_MAP = {
 
 // Convert interval string into seconds (S, M, H, D)
 const getIntervalSeconds = (intv) => {
-  if (!intv || typeof intv !== "string") return 60; // ⭐ FIX
+  if (!intv || typeof intv !== "string") return 60;
 
   const n = parseInt(intv);
   if (intv.endsWith("s")) return n;
@@ -43,13 +43,14 @@ const BINANCE_KLINES = (symbol, interval = "1m", limit = 500) =>
 const BINANCE_WS_KLINE = (symbol, interval = "1m") =>
   `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${interval}`;
 
+
 const PocketOptionChart = ({
   onPriceUpdate,
-  activeAsset, // ⬅️ ADD THIS
-  setActiveAsset, // ⬅️ ADD THIS
+  activeAsset,
+  setActiveAsset,
   symbol = "BTCUSDT",
   initialInterval = "1m",
-  height = 420,
+  height = window.innerWidth < 768 ? 420 : 890,
   expiryPreview,
   addTradeMarker,
 }) => {
@@ -58,48 +59,76 @@ const PocketOptionChart = ({
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState({
-    name: "Bitcoin - OTC",
-    symbol: "BTC",
-    payout: "+73%",
+    name: "BTC / USDT",
+    displaySymbol: "BTC",
+    symbol: "BTCUSDT",
+    apiSymbol: "BTCUSDT",
+    image: "https://assets.coincap.io/assets/icons/btc@2x.png",
+    payout: "+82%",
   });
+
+  const [chartSymbol, setChartSymbol] = useState("BTCUSDT");
   const dropdownRef = useRef(null);
 
-  // Assets usestate
   const [assets, setAssets] = useState([]);
-  const [chartSymbol, setChartSymbol] = useState(symbol); // "BTCUSDT" by default
+  const [searchTerm, setSearchTerm] = useState("");
 
+  const getIndicatorDataByName = (name, candles) => {
+    switch (name) {
+      case "AO": return calcAO(candles);
+      case "RSI": return calcRSI(candles);
+      case "Bulls Power": return calcBulls(candles);
+      case "Bears Power": return calcBears(candles);
+      default: return null;
+    }
+  };
+
+  // Load Assets
   useEffect(() => {
     const randomPayout = () => {
-      const values = [65, 70, 75, 80, 85, 90, 92, 95];
+      const values = [70, 75, 80, 82, 85, 87, 90, 92];
       return values[Math.floor(Math.random() * values.length)] + "%";
     };
 
     const loadBinanceAssets = async () => {
       try {
-        const res = await fetch("https://api.binance.com/api/v3/exchangeInfo");
+        const res = await fetch("https://api.binance.com/api/v3/ticker/price");
         const json = await res.json();
 
-        console.log("🔥 Binance Asset List...........:", json.symbols);
+        if (Array.isArray(json)) {
+          const usdtSymbols = json.filter((s) => {
+            return s.symbol.endsWith("USDT") && 
+                   !s.symbol.includes("UP") && 
+                   !s.symbol.includes("DOWN") && 
+                   !s.symbol.includes("BULL") && 
+                   !s.symbol.includes("BEAR");
+          });
 
-        // Only USDT pairs
-        const usdtSymbols = json.symbols
-          .filter((s) => s.quoteAsset === "USDT" && s.status === "TRADING")
-          .slice(0, 30);
+          const mapped = usdtSymbols.map((s) => {
+            const baseAsset = s.symbol.replace("USDT", "");
+            const iconUrl = `https://assets.coincap.io/assets/icons/${baseAsset.toLowerCase()}@2x.png`;
 
-        const mapped = usdtSymbols.map((s) => ({
-          name: `${s.baseAsset} / ${s.quoteAsset}`,
-          displaySymbol: s.baseAsset,
-          apiSymbol: s.symbol,
-          symbol: s.baseAsset + "USDT", // ⭐ MUST HAVE
-          id: s.symbol, // ⭐ OPTIONAL but helpful
-          payout: "+" + randomPayout(),
-        }));
+            return {
+              name: `${baseAsset} / USDT`,
+              displaySymbol: baseAsset,
+              apiSymbol: s.symbol,
+              symbol: s.symbol,
+              id: s.symbol,
+              image: iconUrl, 
+              payout: "+" + randomPayout(),
+            };
+          });
 
-        setAssets(mapped);
+          setAssets(mapped);
 
-        if (mapped.length > 0) {
-          setSelectedAsset(mapped[0]);
-          setChartSymbol(mapped[0].apiSymbol);
+          if (mapped.length > 0 && !activeAsset) {
+             const btc = mapped.find(m => m.displaySymbol === "BTC");
+             const defaultAsset = btc || mapped[0];
+
+             setSelectedAsset(defaultAsset);
+             setChartSymbol(defaultAsset.apiSymbol);
+             if(setActiveAsset) setActiveAsset(defaultAsset);
+          }
         }
       } catch (e) {
         console.error("❌ Failed to load Binance assets", e);
@@ -119,10 +148,11 @@ const PocketOptionChart = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
   const handleSelect = (asset) => {
     setSelectedAsset(asset);
-    setChartSymbol(asset.apiSymbol); // ⭐ FIX #1 (IMPORTANT)
-    setActiveAsset(asset); // ⬅️ FIX: update parent Trading.jsx
+    setChartSymbol(asset.apiSymbol);
+    setActiveAsset(asset);
     setIsOpen(false);
   };
 
@@ -144,6 +174,8 @@ const PocketOptionChart = ({
   const smaSeriesRef = useRef(null);
   const wsRef = useRef(null);
   const resizeObserverRef = useRef(null);
+  const mainContainerRef = useRef(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Data references
   const livePriceLineRef = useRef(null);
@@ -155,7 +187,6 @@ const PocketOptionChart = ({
   const [activeIndicators, setActiveIndicators] = useState({});
 
   // States
-  // "all" OR "current"
   const [indicatorTab, setIndicatorTab] = useState("all");
   const [tfInterval, setTfInterval] = useState(initialInterval);
 
@@ -172,7 +203,7 @@ const PocketOptionChart = ({
   const [chartPopup, setChartPopup] = useState(false);
   const [drawingPopup, setDrawingPopup] = useState(false);
 
-  // -------------- EMA ----------------
+  // EMA
   const calculateEMA = (data, period = 20) => {
     if (!data.length) return [];
     const k = 2 / (period + 1);
@@ -186,7 +217,7 @@ const PocketOptionChart = ({
     return out;
   };
 
-  // Awesome Oscillator  formula
+  // Awesome Oscillator formula
   const calcAO = (candles) => {
     const median = candles.map((c) => ({
       time: c.time,
@@ -260,7 +291,7 @@ const PocketOptionChart = ({
     }));
   };
 
-  // -------------- SMA ----------------
+  // SMA
   const calculateSMA = (data, period = 50) => {
     if (!data.length) return [];
     const result = [];
@@ -278,7 +309,7 @@ const PocketOptionChart = ({
     return result;
   };
 
-  // ---------------- INDICATORS UPDATE ----------------
+  // Update Indicators
   const updateIndicators = () => {
     const data = candlesRef.current;
     if (!data.length) return;
@@ -286,7 +317,7 @@ const PocketOptionChart = ({
     if (showEma) {
       if (!emaSeriesRef.current) {
         emaSeriesRef.current = chartRef.current.addLineSeries({
-          lineWidth: 2,
+          lineWidth: 1,
           color: "#10b981",
         });
       }
@@ -314,21 +345,52 @@ const PocketOptionChart = ({
     }
   };
 
-  // ---------------- CUSTOM INDICATOR ADDER ----------------
+  // Add Indicator
   const addIndicator = (name, data) => {
     if (!chartRef.current) return;
+    
+    if (activeIndicators[name]) return;
 
-    const series = chartRef.current.addLineSeries({
-      lineWidth: 2,
-      color: "#" + Math.floor(Math.random() * 16777215).toString(16), // random color
-    });
+const isOscillator = ["RSI", "AO", "MACD", "Bulls Power", "Bears Power", "ATR", "CCI", "Stoch"].some(type => name.includes(type));
+    let series;
+
+    if (isOscillator) {
+      series = chartRef.current.addLineSeries({
+        lineWidth: 2,
+        color: "#" + Math.floor(Math.random() * 16777215).toString(16),
+        priceScaleId: name,
+        scaleMargins: { top: 0.8, bottom: 0 },
+      });
+    } else {
+      series = chartRef.current.addLineSeries({
+        lineWidth: 2,
+        color: "#" + Math.floor(Math.random() * 16777215).toString(16),
+        priceScaleId: 'right',
+      });
+    }
 
     series.setData(data);
 
-    setActiveIndicators((prev) => ({
-      ...prev,
-      [name]: series,
-    }));
+    const newIndicators = { ...activeIndicators, [name]: series };
+    setActiveIndicators(newIndicators);
+
+    localStorage.setItem("savedIndicators", JSON.stringify(Object.keys(newIndicators)));
+  };
+
+  // Remove Indicator
+  const removeIndicator = (name) => {
+    if (activeIndicators[name]) {
+      try {
+        chartRef.current.removeSeries(activeIndicators[name]);
+      } catch (e) { console.log("Remove error:", e); }
+    }
+
+    const newIndicators = { ...activeIndicators };
+    delete newIndicators[name];
+    
+    setActiveIndicators(newIndicators);
+    
+    localStorage.setItem("savedIndicators", JSON.stringify(Object.keys(newIndicators)));
   };
 
   const calcEMA = (data, period = 13) => {
@@ -363,21 +425,72 @@ const PocketOptionChart = ({
     }));
   };
 
-  const removeIndicator = (name) => {
-    if (activeIndicators[name]) {
-      try {
-        chartRef.current.removeSeries(activeIndicators[name]); // chart se remove
-      } catch (e) {
-        console.log("Remove error:", e);
-      }
-    }
+  // FULLSCREEN LOGIC - Close all popups before entering fullscreen
+  const toggleFullscreen = async () => {
+    if (!mainContainerRef.current) return;
 
-    setActiveIndicators((prev) => {
-      const updated = { ...prev };
-      delete updated[name];
-      return updated;
-    });
+    try {
+      if (!isFullscreen) {
+        // Close all popups first
+        setIndicatorsOpen(false);
+        setChartPopup(false);
+        setDrawingPopup(false);
+        setIsOpen(false);
+
+        // Wait a bit for popups to close
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Enter Fullscreen
+        if (mainContainerRef.current.requestFullscreen) {
+          await mainContainerRef.current.requestFullscreen();
+        } else if (mainContainerRef.current.webkitRequestFullscreen) {
+          await mainContainerRef.current.webkitRequestFullscreen();
+        } else if (mainContainerRef.current.mozRequestFullScreen) {
+          await mainContainerRef.current.mozRequestFullScreen();
+        } else if (mainContainerRef.current.msRequestFullscreen) {
+          await mainContainerRef.current.msRequestFullscreen();
+        }
+      } else {
+        // Exit Fullscreen
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          await document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          await document.msExitFullscreen();
+        }
+      }
+    } catch (err) {
+      console.error("Fullscreen error:", err);
+    }
   };
+
+  // Listen for ESC key or fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      );
+      setIsFullscreen(isCurrentlyFullscreen);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
+    };
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -385,7 +498,6 @@ const PocketOptionChart = ({
 
       const before = markersRef.current.length;
 
-      // REMOVE expired markers
       markersRef.current = markersRef.current.filter((m) => m.expiry > now);
 
       if (markersRef.current.length !== before) {
@@ -414,13 +526,13 @@ const PocketOptionChart = ({
     };
   }, [indicatorsOpen]);
 
-  // ---------------- CHART INIT ----------------
+  // CHART INIT
   useEffect(() => {
     if (!containerRef.current) return;
 
     const chart = createChart(containerRef.current, {
       width: containerRef.current.clientWidth,
-      height,
+      height: containerRef.current.clientHeight,
       layout: {
         background: { color: "#050713" },
         textColor: "#d1d5db",
@@ -429,18 +541,34 @@ const PocketOptionChart = ({
         vertLines: { color: "#111827" },
         horzLines: { color: "#111827" },
       },
-      crosshair: { mode: CrosshairMode.Normal },
-      rightPriceScale: { borderColor: "#1f2937" },
+      crosshair: {
+        mode: CrosshairMode.Normal,
+        vertLine: { labelBackgroundColor: '#1f2937' },
+        horzLine: { labelBackgroundColor: '#1f2937' },
+      },
+      rightPriceScale: {
+        visible: true,
+        borderColor: "#1f2937",
+        borderVisible: true,
+        scaleMargins: {
+          top: 0.1,
+          bottom: 0.1,
+        },
+      },
       timeScale: {
         borderColor: "#1f2937",
         timeVisible: true,
         secondsVisible: true,
+        rightOffset: 2,
+        shiftVisibleRangeOnNewBar: true,
       },
     });
 
     chart.priceScale("right").applyOptions({
       borderColor: "#1f2937",
-      entireTextOnly: true,
+      visible: true,
+      entireTextOnly: false,
+      autoScale: true,
     });
 
     const candleSeries = chart.addCandlestickSeries({
@@ -451,150 +579,51 @@ const PocketOptionChart = ({
       wickDownColor: "#ef4444",
       lastValueVisible: true,
       priceLineVisible: true,
+      priceFormat: {
+        type: 'price',
+        precision: 2,
+        minMove: 0.01,
+      },
     });
 
-    // Save refs
     chartRef.current = chart;
     candleSeriesRef.current = candleSeries;
 
-    // ⭐ ADD LIVE PRICE LINE INIT HERE
-    livePriceLineRef.current = candleSeriesRef.current.createPriceLine({
-      price: 0,
-      color: "#3b82f6",
-      lineWidth: 2,
-      axisLabelVisible: true,
-      title: "",
+    areaSeriesRef.current = chart.addAreaSeries({ 
+      lineColor: "#10b981", 
+      topColor: "rgba(16, 185, 129, 0.2)", 
+      bottomColor: "rgba(16, 185, 129, 0)", 
+      visible: false 
     });
+    lineSeriesRef.current = chart.addLineSeries({ color: "#3b82f6", visible: false });
+    barSeriesRef.current = chart.addBarSeries({ color: "#ef4444", visible: false });
 
-    // === TRADE MARKER (GLOBAL ACCESS) ===
-    chartRef.current = chart;
-    candleSeriesRef.current = candleSeries;
-
-    window.__chartAddMarker = (price, time, side, amount, seconds) => {
-      if (!chartRef.current || !candleSeriesRef.current) return;
-
-      const lastCandle = candlesRef.current[candlesRef.current.length - 1];
-      // const ts = lastCandle.time; // ⭐ FIXED time
-      let ts = Math.floor(time / 1000); // ✔ Real entry time
-      if (ts <= lastMarkerTimeRef.current) {
-        ts = lastMarkerTimeRef.current + 1;
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (entries.length === 0 || !entries[0].contentRect) return;
+      
+      const { width, height } = entries[0].contentRect;
+      
+      if (width > 0 && height > 0) {
+        chart.applyOptions({ width, height });
       }
-
-      lastMarkerTimeRef.current = ts;
-      //  const expiryTs = ts + seconds;       // ✔ exact expiry
-
-      const expiryTs = ts + seconds; // ⭐ EXPIRY TIME ADD
-
-      const marker = {
-        time: ts,
-        amount: amount,
-        position: side === "buy" ? "belowBar" : "aboveBar",
-        color: side === "buy" ? "#22c55e" : "#ef4444",
-        shape: side === "buy" ? "arrowUp" : "arrowDown",
-        // text: `${amount}$ | ${side.toUpperCase()} | ${seconds}s`,
-        text: `${amount}$ | ${seconds}s`, // ✔ correct time shown
-        expiry: expiryTs, // ⭐ NEW
-        secondsLeft: seconds,
-      };
-
-      markersRef.current.push(marker);
-      markersRef.current.sort((a, b) => a.time - b.time);
-
-      candleSeriesRef.current.setMarkers(markersRef.current);
-
-      candleSeriesRef.current.createPriceLine({
-        price,
-        color: side === "buy" ? "#22c55e" : "#ef4444",
-        lineWidth: 2,
-        title: `${side.toUpperCase()} $${amount} (${seconds}s)`,
-      });
-    };
-
-    // === TRADE MARKER DRAWER ===
-    const addTradeMarker = (price, time, side, amount) => {
-      if (!chartRef.current || !candleSeriesRef.current) return;
-
-      candleSeriesRef.current.createPriceLine({
-        price,
-        color: side === "buy" ? "#22c55e" : "#ef4444",
-        lineWidth: 2,
-        lineStyle: 2,
-        axisLabelVisible: true,
-        title: `${side.toUpperCase()} $${amount}`,
-      });
-
-      candleSeriesRef.current.setMarkers([
-        {
-          time: Math.floor(time / 1000),
-          position: side === "buy" ? "belowBar" : "aboveBar",
-          color: side === "buy" ? "#22c55e" : "#ef4444",
-          shape: side === "buy" ? "arrowUp" : "arrowDown",
-          text: `$${amount}`,
-        },
-      ]);
-    };
-
-    const areaSeries = chart.addAreaSeries({
-      topColor: "rgba(59,130,246,0.4)",
-      bottomColor: "rgba(15,23,42,0)",
-      lineColor: "#3b82f6",
-      lineWidth: 2,
     });
 
-    const lineSeries = chart.addLineSeries({
-      color: "#3b82f6",
-      lineWidth: 2,
-    });
-
-    const barSeries = chart.addHistogramSeries({
-      color: "#475569",
-      base: 0,
-    });
-
-    // Hide alt series initially
-    areaSeries.priceScale().applyOptions({ visible: false });
-    lineSeries.priceScale().applyOptions({ visible: false });
-    barSeries.priceScale().applyOptions({ visible: false });
-
-    // Save refs
-    chartRef.current = chart;
-    candleSeriesRef.current = candleSeries;
-    areaSeriesRef.current = areaSeries;
-    lineSeriesRef.current = lineSeries;
-    barSeriesRef.current = barSeries;
-
-    // Resize observer
-    resizeObserverRef.current = new ResizeObserver(() => {
-      chart.applyOptions({
-        width: containerRef.current.clientWidth,
-      });
-    });
-    resizeObserverRef.current.observe(containerRef.current);
+    resizeObserver.observe(containerRef.current);
 
     return () => {
-      resizeObserverRef.current.disconnect();
-      chartRef.current?.remove();
+      resizeObserver.disconnect();
+      chart.remove();
+      chartRef.current = null;
     };
-  }, [height]);
 
-  // ---------------- LOAD CANDLES + WS LIVE ----------------
+  }, []);
+
+  // LOAD CANDLES + WS LIVE
   useEffect(() => {
     let cancelled = false;
 
-    // ⭐ Add this check here
-    const VALID_BINANCE_TF = [
-      "1m",
-      "2m",
-      "3m",
-      "5m",
-      "15m",
-      "30m",
-      "1h",
-      "4h",
-      "1d",
-    ];
+    const VALID_BINANCE_TF = ["1m", "2m", "3m", "5m", "15m", "30m", "1h", "4h", "1d"];
 
-    // ❗ Binance 5s/10s/15s/30s support nahi karta
     if (!VALID_BINANCE_TF.includes(tfInterval)) {
       console.warn("Unsupported TF:", tfInterval);
       return;
@@ -607,7 +636,7 @@ const PocketOptionChart = ({
         wsRef.current.close();
         wsRef.current = null;
       }
-
+      
       const res = await fetch(BINANCE_KLINES(chartSymbol, tfInterval, 500));
       const raw = await res.json();
       if (!Array.isArray(raw) || cancelled) return;
@@ -623,15 +652,11 @@ const PocketOptionChart = ({
       candlesRef.current = candles;
 
       candleSeriesRef.current.setData(candles);
-      areaSeriesRef.current.setData(
-        candles.map((c) => ({ time: c.time, value: c.close }))
-      );
-      lineSeriesRef.current.setData(
-        candles.map((c) => ({ time: c.time, value: c.close }))
-      );
-      barSeriesRef.current.setData(
-        candles.map((c) => ({ time: c.time, value: c.close }))
-      );
+      barSeriesRef.current.setData(candles);
+      
+      const simpleData = candles.map((c) => ({ time: c.time, value: c.close }));
+      areaSeriesRef.current.setData(simpleData);
+      lineSeriesRef.current.setData(simpleData);
 
       setLastCandleData(candles[candles.length - 1]);
       updateIndicators();
@@ -644,7 +669,6 @@ const PocketOptionChart = ({
         if (d.e !== "kline") return;
 
         const k = d.k;
-
         const live = {
           time: Math.floor(k.t / 1000),
           open: +k.o,
@@ -654,19 +678,22 @@ const PocketOptionChart = ({
         };
 
         candleSeriesRef.current.update(live);
+        barSeriesRef.current.update(live);
+        
+        const lineUpdate = { time: live.time, value: live.close };
+        areaSeriesRef.current.update(lineUpdate);
+        lineSeriesRef.current.update(lineUpdate);
 
         const lastIndex = candlesRef.current.length - 1;
         candlesRef.current[lastIndex] = live;
 
-        // ⭐ SEND REAL LIVE PRICE TO TRADEPANEL
         if (typeof onPriceUpdate === "function") {
-          onPriceUpdate(live.close); // ✅ FIXED
+          onPriceUpdate(live.close);
         }
 
         setLastCandleData(live);
       };
 
-      // Live trade price WS (real-time chart update)
       const wsTrade = new WebSocket(
         `wss://stream.binance.com:9443/ws/${chartSymbol.toLowerCase()}@trade`
       );
@@ -674,7 +701,7 @@ const PocketOptionChart = ({
         const t = JSON.parse(msg.data);
         const livePrice = +t.p;
         onPriceUpdate?.(livePrice);
-        // update last candle
+
         const last = candlesRef.current[candlesRef.current.length - 1];
         if (!last) return;
 
@@ -687,15 +714,19 @@ const PocketOptionChart = ({
         };
 
         candleSeriesRef.current.update(updated);
+        barSeriesRef.current.update(updated);
+
+        const lineUpdate = { time: updated.time, value: updated.close };
+        areaSeriesRef.current.update(lineUpdate);
+        lineSeriesRef.current.update(lineUpdate);
+
         candlesRef.current[candlesRef.current.length - 1] = updated;
 
-        // ⭐⭐⭐ SEND LIVE PRICE TO TRADEPANEL
         if (typeof onPriceUpdate === "function") {
           onPriceUpdate(livePrice);
         }
       };
 
-      // Save trade websocket reference
       wsRef.currentTrade = wsTrade;
     };
 
@@ -708,7 +739,7 @@ const PocketOptionChart = ({
     };
   }, [chartSymbol, tfInterval, showEma, showSma]);
 
-  // ---------------- CHART TYPE SWITCHER ----------------
+  // CHART TYPE SWITCHER
   useEffect(() => {
     if (!chartRef.current) return;
 
@@ -718,7 +749,7 @@ const PocketOptionChart = ({
     barSeriesRef.current.applyOptions({ visible: chartType === "bar" });
   }, [chartType]);
 
-  // ---------------- DRAWING TOOLS HANDLER ----------------
+  // DRAWING TOOLS HANDLER
   const toggleDrawingMode = (m) => {
     const newMode = drawingModeRef.current === m ? "none" : m;
     drawingModeRef.current = newMode;
@@ -726,68 +757,13 @@ const PocketOptionChart = ({
     if (newMode !== "trend") trendStartRef.current = null;
   };
 
-  useEffect(() => {
-    const intervalClock = setInterval(() => {
-      if (autoScroll) {
-        chartRef.current.timeScale().scrollToRealTime();
-      }
-    }, 1000);
-
-    return () => clearInterval(intervalClock);
-  }, []);
-
   // Drawing section
-
   useEffect(() => {
     if (!chartRef.current) return;
     const chart = chartRef.current;
 
-    function handleClick(param) {
-      if (!param.time) return;
 
-      // ✔ FIXED: Chart's internal time → seconds
-      const t = Math.floor(param.time);
 
-      const price = param.point
-        ? chart.priceScale("right").coordinateToPrice(param.point.y)
-        : lastCandleData?.close || 0;
-
-      const mode = drawingModeRef.current;
-
-      switch (mode) {
-        case "vl":
-          drawVerticalLine(t);
-          break;
-
-        case "hl":
-          drawHorizontalLine(price);
-          break;
-
-        case "trend":
-          handleTrendClick({ ...param, time: t });
-          break;
-
-        case "ray":
-          handleRayClick({ ...param, time: t });
-          break;
-
-        case "rectangle":
-          handleRectangleClick({ ...param, time: t });
-          break;
-
-        case "channel":
-          handleChannelClick({ ...param, time: t });
-          break;
-
-        case "fibonacci":
-          handleFibonacci({ ...param, time: t });
-          break;
-
-        default:
-          break;
-      }
-    }
-    // ⭐ ADD HERE — HOVER LIVE PRICE LINE
     chart.subscribeCrosshairMove((param) => {
       if (!candleSeriesRef.current) return;
 
@@ -828,11 +804,24 @@ const PocketOptionChart = ({
       });
     });
 
-    chart.subscribeClick(handleClick);
-    return () => chart.unsubscribeClick(handleClick);
+chart.subscribeClick((param) => {
+  if (!param.time || !param.point) return;
+
+  const price = candleSeriesRef.current.coordinateToPrice(param.point.y);
+  const t = Math.floor(param.time);
+  const mode = drawingModeRef.current;
+
+  if (mode === "vl") drawVerticalLine(t);
+  if (mode === "hl") drawHorizontalLine(price);
+  if (mode === "trend") handleTrendClick({ ...param, time: t });
+  if (mode === "ray") handleRayClick({ ...param, time: t });
+  if (mode === "rectangle") handleRectangleClick({ ...param, time: t });
+  if (mode === "channel") handleChannelClick({ ...param, time: t });
+  if (mode === "fibonacci") handleFibonacci({ ...param, time: t });
+});
   }, []);
 
-  // ---------------- VERTICAL LINE ----------------
+  // VERTICAL LINE
   const drawVerticalLine = (time) => {
     const scale = chartRef.current.priceScale("right").getVisibleRange() || {
       minValue: candlesRef.current[0].low,
@@ -852,7 +841,7 @@ const PocketOptionChart = ({
     drawingsRef.current.push(series);
   };
 
-  // ---------------- HORIZONTAL LINE ----------------
+  // HORIZONTAL LINE
   const drawHorizontalLine = (price) => {
     const candles = candlesRef.current;
     const t1 = candles[0].time;
@@ -871,7 +860,7 @@ const PocketOptionChart = ({
     drawingsRef.current.push(series);
   };
 
-  // ---------------- TREND LINE (2 Click) ----------------
+  // TREND LINE (2 Click)
   const handleTrendClick = (p) => {
     if (!trendStartRef.current) {
       trendStartRef.current = p;
@@ -902,7 +891,7 @@ const PocketOptionChart = ({
     }
   };
 
-  // ---------------- RAY (2 Click — infinite extension) ----------------
+  // RAY (2 Click — infinite extension)
   const handleRayClick = (p) => {
     if (!trendStartRef.current) {
       trendStartRef.current = p;
@@ -937,7 +926,7 @@ const PocketOptionChart = ({
     }
   };
 
-  // ---------------- RECTANGLE (2 Click) ----------------
+  // RECTANGLE (2 Click)
   const rectangleTemp = useRef(null);
 
   const handleRectangleClick = (p) => {
@@ -971,7 +960,7 @@ const PocketOptionChart = ({
     }
   };
 
-  // ---------------- CHANNEL (Parallel Trendlines) ----------------
+  // CHANNEL (Parallel Trendlines)
   const channelTemp = useRef(null);
 
   const handleChannelClick = (p) => {
@@ -1016,7 +1005,7 @@ const PocketOptionChart = ({
     }
   };
 
-  // ---------------- FIBONACCI RETRACEMENT (2 Click) ----------------
+  // FIBONACCI RETRACEMENT (2 Click)
   const fibTemp = useRef(null);
 
   const FIB_LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
@@ -1055,17 +1044,10 @@ const PocketOptionChart = ({
   };
 
   useEffect(() => {
-    // if (!timerEnabled) {
-    //   setTimeLeft(0);
-    //   return;
-    // }
-
     const sec = getIntervalSeconds(tfInterval);
 
     const now = Math.floor(Date.now() / 1000);
     const remaining = sec - (now % sec);
-
-    // setTimeLeft(remaining);
 
     const t = setInterval(() => {
       setTimeLeft((prev) => {
@@ -1077,12 +1059,10 @@ const PocketOptionChart = ({
     return () => clearInterval(t);
   }, [tfInterval]);
 
-  // === EXPIRY PREVIEW LINE ===
-  //  // === EXPIRY PREVIEW LINE ===
+  // EXPIRY PREVIEW LINE
   useEffect(() => {
     if (!chartRef.current || !candleSeriesRef.current) return;
 
-    // remove old expiry line
     if (expiryLineRef.current) {
       try {
         chartRef.current.removeSeries(expiryLineRef.current);
@@ -1095,6 +1075,7 @@ const PocketOptionChart = ({
     const expirySec = Math.floor(expiryPreview / 1000);
 
     const last = candlesRef.current[candlesRef.current.length - 1];
+
     if (!last) return;
 
     const min = last.low;
@@ -1137,569 +1118,419 @@ const PocketOptionChart = ({
     return () => clearInterval(timer);
   }, []);
 
-  // ---------------- UI ----------------
+  // UI RENDER
   return (
-    <div className="w-full bg-[#050713] border border-[#1f2937] rounded-xl text-gray-100 relative">
-      {/* TOP TOOLBAR */}
+<div
+  ref={mainContainerRef}
+  className="flex flex-col bg-[#050713] w-full border border-[#1f2937] rounded-xl relative"
+  style={{ 
+      height: height ,
+      width: '100%'
+  }}
+>
 
-      <div className="px-3 py-2 border-b border-[#1f2937] bg-[#050713] relative z-50">
-        {/* FIRST ROW — Asset + Three Dots */}
-        <div className="flex items-center gap-4 ">
-          {/* LEFT — ASSET */}
-          <div className="relative" ref={dropdownRef}>
-            {/* Selected Asset Button */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="h-10 px-4 bg-[#0f172a] text-gray-200 text-sm rounded-lg border border-[#1e293b] 
-               hover:border-gray-500 transition-all flex items-center gap-3 min-w-[160px] justify-between"
-            >
-              <span className="font-semibold text-[13px]">
-                {selectedAsset?.displaySymbol || selectedAsset?.symbol || "BTC"}{" "}
-                / USDT
-              </span>
+{/* TOP TOOLBAR */}
+<div className="px-2 sm:px-3 py-2 border-b border-[#1f2937] bg-[#050713] relative z-50 shrink-0">
+  <div className="flex items-center justify-between gap-2 sm:gap-4">
+    
+    {/* LEFT — ASSET SELECTOR */}
+    <div className="relative flex-1 min-w-0 max-w-[240px]" ref={dropdownRef}>
+      <button
+        onClick={() => {
+          setIsOpen(!isOpen);
+          setSearchTerm(""); 
+        }}
+        className="h-9 sm:h-10 w-full px-2 sm:px-3 bg-[#0f172a] text-gray-200 text-xs sm:text-sm rounded-lg border border-[#1e293b] hover:border-gray-500 transition-all flex items-center justify-between gap-2"
+      >
+        <div className="flex items-center gap-2 overflow-hidden">
+          <img 
+            src={selectedAsset?.image || "https://cdn-icons-png.flaticon.com/512/1213/1213079.png"} 
+            alt="" 
+            className="w-4 h-4 sm:w-5 sm:h-5 rounded-full flex-shrink-0"
+            onError={(e) => {
+              e.target.onerror = null; 
+              e.target.src = "https://cdn-icons-png.flaticon.com/512/1213/1213079.png";
+            }}
+          />
+          <span className="font-semibold truncate">
+            {selectedAsset?.name || "BTC / USDT"}
+          </span>
+        </div>
+        <svg className={`w-3 h-3 sm:w-4 sm:h-4 text-gray-400 transition-transform flex-shrink-0 ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
 
-              <svg
-                className={`w-4 h-4 transition-transform ${
-                  isOpen ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-
-            {/* Dropdown Modal */}
-            {isOpen && (
-              <div
-                className="absolute top-full left-0 mt-2 w-[300px] bg-[#0f172a] rounded-xl border 
-               border-[#1f2937] shadow-2xl overflow-hidden z-50"
-              >
-                {/* Header */}
-                <div className="px-4 py-2 border-b border-[#1f2937] flex items-center justify-between">
-                  <span className="text-gray-400 text-[11px] font-medium uppercase">
-                    Asset
-                  </span>
-
-                  {/* Right side Cross button */}
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="text-gray-400 hover:text-white text-sm"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                {/* Assets List */}
-
-                <div className="max-h-[350px] overflow-y-auto">
-                  {assets.map((asset, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleSelect(asset)}
-                      className={`w-full px-4 py-2.5 flex items-center justify-between 
-      hover:bg-[#1e293b]/70 transition-all group ${
-        selectedAsset?.apiSymbol === asset.apiSymbol ? "bg-[#1e293b]/50" : ""
-      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div>
-                          <div className="text-gray-200 text-sm font-medium">
-                            {asset.name}
-                          </div>
-                          <div className="text-gray-500 text-xs">
-                            {asset.displaySymbol || asset.symbol}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-green-400 text-sm font-bold">
-                        {asset.payout}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+      {/* Dropdown Content */}
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-2 w-[85vw] sm:w-[320px] bg-[#0f172a] rounded-xl border border-[#1f2937] shadow-2xl overflow-hidden z-50 flex flex-col">
+          
+          {/* SEARCH BAR */}
+          <div className="p-3 border-b border-[#1f2937]">
+            <input 
+              type="text"
+              placeholder="Search coin..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              autoFocus
+              className="w-full bg-[#1e293b] text-white text-sm px-3 py-2 rounded-lg outline-none border border-transparent focus:border-blue-500 transition-all placeholder-gray-500"
+            />
           </div>
 
-          {/* RIGHT — THREE DOT BUTTON */}
-          <div className="relative">
-            <button
-              onClick={() => {
-                setMenuOpen(!menuOpen);
-                setIndicatorsOpen(false);
-                setChartPopup(false);
-                setDrawingPopup(false);
-              }}
-              className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#1e293b] text-white text-xl"
-            >
-              ⋮
-            </button>
-
-            {/* MAIN MENU */}
-
-            {menuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-12 bg-[#0f172a] border border-[#1e293b] rounded-xl shadow-xl p-1 z-50">
-                {/* Indicators */}
-                <button
-                  onClick={() => {
-                    setIndicatorsOpen(!indicatorsOpen);
-                    setChartPopup(false);
-                    setDrawingPopup(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-[#1e293b] rounded-lg text-left text-sm"
-                >
-                  <BarChart3 className="text-blue-400 w-5 h-5" />
-                </button>
-
-                {/* Chart Type */}
-                <button
-                  onClick={() => {
-                    setChartPopup(!chartPopup);
-                    setIndicatorsOpen(false);
-                    setDrawingPopup(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-[#1e293b] rounded-lg text-left text-sm"
-                >
-                  <CandlestickChart className="text-green-400 w-5 h-5" />
-                </button>
-
-                {/* Drawing Tools */}
-                <button
-                  onClick={() => {
-                    setDrawingPopup(!drawingPopup);
-                    setIndicatorsOpen(false);
-                    setChartPopup(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-[#1e293b] rounded-lg text-left text-sm"
-                >
-                  <Pencil className="text-yellow-300 w-5 h-5" />
-                </button>
-              </div>
+          {/* Asset List */}
+          <div className="max-h-[280px] overflow-y-auto">
+            {assets
+              .filter(asset => 
+                asset.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                asset.displaySymbol.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map((asset, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSelect(asset)}
+                className={`w-full px-4 py-2.5 flex items-center justify-between hover:bg-[#1e293b]/70 transition-all group ${selectedAsset?.apiSymbol === asset.apiSymbol ? "bg-[#1e293b]/50" : ""}`}
+              >
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={asset.image} 
+                    alt={asset.displaySymbol} 
+                    className="w-6 h-6 rounded-full bg-white/5 p-0.5"
+                    onError={(e) => {
+                      e.target.onerror = null; 
+                      e.target.src = "https://cdn-icons-png.flaticon.com/512/1213/1213079.png";
+                    }} 
+                  />
+                  <div className="text-left">
+                    <div className="text-gray-200 text-sm font-medium">{asset.name}</div>
+                    <div className="text-gray-500 text-[10px]">{asset.displaySymbol}</div>
+                  </div>
+                </div>
+                <div className="text-green-400 text-sm font-bold bg-green-400/10 px-2 py-1 rounded">{asset.payout}</div>
+              </button>
+            ))}
+            
+            {assets.filter(asset => asset.name.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+              <div className="p-4 text-center text-gray-500 text-sm">No assets found</div>
             )}
           </div>
         </div>
+      )}
+    </div>
+
+    {/* RIGHT — TOOLS BUTTONS */}
+    <div className="flex items-center gap-1.5 sm:gap-2">
+      
+      {/* 1. Indicators Button */}
+      <button
+        onClick={() => {
+          setIndicatorsOpen(!indicatorsOpen);
+          setChartPopup(false);
+          setDrawingPopup(false);
+        }}
+        className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg border border-[#1e293b] hover:bg-[#1e293b] transition-colors ${indicatorsOpen ? "bg-[#1e293b] text-blue-400" : "bg-[#0f172a] text-gray-400"}`}
+        title="Indicators"
+      >
+        <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
+      </button>
+
+      {/* 2. Chart Type Button */}
+      <button
+        onClick={() => {
+          setChartPopup(!chartPopup);
+          setIndicatorsOpen(false);
+          setDrawingPopup(false);
+        }}
+        className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg border border-[#1e293b] hover:bg-[#1e293b] transition-colors ${chartPopup ? "bg-[#1e293b] text-green-400" : "bg-[#0f172a] text-gray-400"}`}
+        title="Chart Type"
+      >
+        <CandlestickChart className="w-4 h-4 sm:w-5 sm:h-5" />
+      </button>
+
+      {/* 3. Drawing Tools Button */}
+      <button
+        onClick={() => {
+          setDrawingPopup(!drawingPopup);
+          setIndicatorsOpen(false);
+          setChartPopup(false);
+        }}
+        className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg border border-[#1e293b] hover:bg-[#1e293b] transition-colors ${drawingPopup ? "bg-[#1e293b] text-yellow-400" : "bg-[#0f172a] text-gray-400"}`}
+        title="Drawing Tools"
+      >
+        <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
+      </button>
+
+      {/* 4. Fullscreen Button */}
+      <button 
+        onClick={toggleFullscreen} 
+        className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg border border-[#1e293b] hover:bg-[#1e293b] text-gray-400 transition-colors" 
+        title="Fullscreen"
+      >
+        {isFullscreen ? <Minimize2 className="w-4 h-4 sm:w-5 sm:h-5" /> : <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5" />}
+      </button>
+      
+    </div>
+  </div>
+</div>
+
+
+{/* 1. INDICATORS POPUP */}
+{indicatorsOpen && !isFullscreen && (
+  <>
+    <div
+      className="fixed inset-0 z-40 bg-black/50 md:hidden"
+      onClick={(e) => {
+        e.stopPropagation();
+        setIndicatorsOpen(false);
+      }}
+    ></div>
+
+    <div
+      ref={indicatorPopupRef}
+      className="absolute top-12 left-2 right-2 bottom-auto max-h-[80vh] overflow-y-auto z-50 bg-[#1a1d28] border border-[#2d3748] rounded-xl shadow-2xl p-4 
+      md:right-0 md:left-auto md:w-[420px] md:h-auto md:overflow-visible"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        onClick={() => setIndicatorsOpen(false)}
+        className="absolute top-3 right-3 z-50 text-gray-400 hover:text-white bg-[#1a1d28] rounded-full p-1"
+      >
+        ✕
+      </button>
+
+      {/* Tabs */}
+      <div className="flex gap-2 mb-4 sticky top-0 bg-[#1a1d28] z-10 py-1 pr-8">
+        <button
+          onClick={() => setIndicatorTab("current")}
+          className={`flex-1 px-4 py-2 rounded-lg text-sm transition-colors ${
+            indicatorTab === "current"
+              ? "bg-[#2d3748] text-white"
+              : "bg-[#252836] text-gray-400"
+          }`}
+        >
+          Current
+        </button>
+
+        <button
+          onClick={() => setIndicatorTab("all")}
+          className={`flex-1 px-4 py-2 rounded-lg text-sm transition-colors ${
+            indicatorTab === "all"
+              ? "bg-[#2d3748] text-white"
+              : "bg-[#252836] text-gray-400"
+          }`}
+        >
+          All
+        </button>
       </div>
 
-      {/* ---------- INDICATORS POPUP ---------- */}
-
-      {indicatorsOpen && (
-        <div
-          ref={indicatorPopupRef}
-          className="absolute right-60 left-70 top-30 w-[420px] bg-[#1a1d28] border z-50 border-[#2d3748] rounded-xl shadow-2xl p-4"
-        >
-          {/* ---------- TABS ---------- */}
-          <div className="flex gap-2 mb-4">
-            <button
-              onClick={() => setIndicatorTab("current")}
-              className={`px-4 py-2 rounded-lg text-sm ${
-                indicatorTab === "current"
-                  ? "bg-[#2d3748] text-white"
-                  : "bg-[#252836] text-gray-400"
-              }`}
-            >
-              Current
-            </button>
-
-            <button
-              onClick={() => setIndicatorTab("all")}
-              className={`px-4 py-2 rounded-lg text-sm ${
-                indicatorTab === "all"
-                  ? "bg-[#2d3748] text-white"
-                  : "bg-[#252836] text-gray-400"
-              }`}
-            >
-              All
-            </button>
-          </div>
-
-          {/* ---------- CURRENT INDICATORS LIST ---------- */}
-          {indicatorTab === "current" && (
-            <div>
-              {Object.keys(activeIndicators).length === 0 && (
-                <p className="text-gray-400 text-sm">No indicators applied.</p>
-              )}
-
-              {Object.keys(activeIndicators).map((name) => (
-                <div
-                  key={name}
-                  className="flex justify-between items-center bg-[#1f2330] px-3 py-2 rounded-lg mb-2"
-                >
-                  <span className="text-gray-200 text-sm">{name}</span>
-
-                  <button
-                    onClick={() => removeIndicator(name)}
-                    className="text-red-400 text-xs font-bold hover:text-red-200"
-                  >
-                    ✕ Remove
-                  </button>
-                </div>
-              ))}
-            </div>
+      {/* Current Indicators List */}
+      {indicatorTab === "current" && (
+        <div>
+          {Object.keys(activeIndicators).length === 0 && (
+            <p className="text-gray-400 text-sm text-center py-4">
+              No indicators applied.
+            </p>
           )}
 
-          {/* ---------- ALL INDICATORS LIST ---------- */}
-          {indicatorTab === "all" && (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 ">
-              {/* 🔥 AO */}
+          {Object.keys(activeIndicators).map((name) => (
+            <div
+              key={name}
+              className="flex justify-between items-center bg-[#1f2330] px-3 py-3 rounded-lg mb-2"
+            >
+              <span className="text-gray-200 text-sm">{name}</span>
+
               <button
-                onClick={() => {
-                  const data = calcAO(candlesRef.current);
-                  addIndicator("AO", data);
-                  // setIndicatorTab("current");
-                }}
-                className="flex items-center gap-2 px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded"
+                onClick={() => removeIndicator(name)}
+                className="text-red-400 text-xs font-bold hover:text-red-200 px-2 py-1"
               >
-                <span className="text-orange-500">⭐</span>
-                <span>Awesome Oscillator</span>
+                ✕ Remove
               </button>
-
-              {/* 🔥 RSI */}
-              <button
-                onClick={() => {
-                  const data = calcRSI(candlesRef.current);
-                  addIndicator("RSI", data);
-                  // setIndicatorTab("current");
-                }}
-                className="flex items-center gap-2 px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded"
-              >
-                <span className="text-orange-500">⭐</span>
-                <span>RSI</span>
-              </button>
-
-              {/* 🔥 Bulls */}
-              <button
-                onClick={() => {
-                  const data = calcBulls(candlesRef.current);
-                  addIndicator("Bulls Power", data);
-                  // setIndicatorTab("current");
-                }}
-                className="flex items-center gap-2 px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded"
-              >
-                <span className="text-orange-500">⭐</span>
-                <span>Bulls Power</span>
-              </button>
-
-              {/* 🔥 Bears */}
-              <button
-                onClick={() => {
-                  const data = calcBears(candlesRef.current);
-                  addIndicator("Bears Power", data);
-                  // setIndicatorTab("current");
-                }}
-                className="flex items-center gap-2 px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded"
-              >
-                <span className="text-orange-500">⭐</span>
-                <span>Bears Power</span>
-              </button>
-
-              <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>MACD</span>
-              </button>
-
-              <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>Average True Range</span>
-              </button>
-
-              {/* <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>Bollinger Bands</span>
-              </button>
-
-              <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>Momentum</span>
-              </button>
-
-              <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>Moving Average</span>
-              </button>
-
-              <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>Stochastic Oscillator</span>
-              </button>
-
-              <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>Williams %R</span>
-              </button>
-
-              <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>MACross</span>
-              </button>
-
-              <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>ZigZag</span>
-              </button>
-
-              <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>Stochastic Momentum Index</span>
-              </button>
-
-              <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>Moving Average Deviation</span>
-              </button>
-
-              <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>Moving Average Envelope</span>
-              </button>
-
-              <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>Acceleration Bands</span>
-              </button> */}
-
-              {/* <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>Accumulation Distribution</span>
-              </button>
-
-              <button className="flex items-center gap-2 text-left px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded">
-                <span className="text-orange-500">⭐</span>
-                <span>Accumulative Swing Index</span>
-              </button> */}
             </div>
-          )}
+          ))}
         </div>
       )}
 
-      {/* ---------- CHART TYPE POPUP ---------- */}
-      {chartPopup && (
-        <div className="absolute right-60 left-70 top-20  w-80 h-[300px] bg-[#1a1d28] z-50 border border-[#2d3748] rounded-xl shadow-2xl p-4">
-          {/* Chart Type Icons */}
-          <div className="flex gap-2 mb-6">
+      {/* All Indicators List */}
+      {indicatorTab === "all" && (
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            {
+              name: "Awesome Oscillator",
+              func: () => addIndicator("AO", calcAO(candlesRef.current)),
+            },
+            {
+              name: "RSI",
+              func: () =>
+                addIndicator("RSI", calcRSI(candlesRef.current)),
+            },
+            {
+              name: "Bulls Power",
+              func: () =>
+                addIndicator(
+                  "Bulls Power",
+                  calcBulls(candlesRef.current)
+                ),
+            },
+            {
+              name: "Bears Power",
+              func: () =>
+                addIndicator(
+                  "Bears Power",
+                  calcBears(candlesRef.current)
+                ),
+            },
+            { name: "MACD", func: null }, 
+            { name: "ATR", func: null }, 
+          ].map((item, idx) => (
             <button
-              onClick={() => setChartType("candles")}
-              className={`p-3 rounded-lg transition-colors ${
-                chartType === "candles"
-                  ? "bg-[#2d3748] text-white"
-                  : "bg-[#252836] text-gray-400 hover:bg-[#2d3748]"
-              }`}
+              key={idx}
+              onClick={item.func}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-[#252836] rounded-lg bg-[#1f2330] md:bg-transparent transition-colors"
             >
-              📊
+              <span className="text-orange-500">⭐</span>
+              <span className="truncate">{item.name}</span>
             </button>
-            <button
-              onClick={() => setChartType("line")}
-              className={`p-3 rounded-lg transition-colors ${
-                chartType === "line"
-                  ? "bg-[#2d3748] text-white"
-                  : "bg-[#252836] text-gray-400 hover:bg-[#2d3748]"
-              }`}
-            >
-              📈
-            </button>
-            <button
-              onClick={() => setChartType("bar")}
-              className={`p-3 rounded-lg transition-colors ${
-                chartType === "bar"
-                  ? "bg-[#2d3748] text-white"
-                  : "bg-[#252836] text-gray-400 hover:bg-[#2d3748]"
-              }`}
-            >
-              📉
-            </button>
-            <button
-              onClick={() => setChartType("area")}
-              className={`p-3 rounded-lg transition-colors ${
-                chartType === "area"
-                  ? "bg-[#2d3748] text-white"
-                  : "bg-[#252836] text-gray-400 hover:bg-[#2d3748]"
-              }`}
-            >
-              🔗
-            </button>
-          </div>
-
-          {/* Time Frames */}
-          <div className="mb-6">
-            <h3 className="text-gray-400 text-sm font-medium mb-3">
-              Time Frames
-            </h3>
-            {/* <div className="grid grid-cols-4 gap-2 mb-2">
-              {["S5", "S10", "S15", "S30"].map((time) => (
-                <button
-                  key={time}
-                  onClick={() => {
-                    const binanceInterval = TIMEFRAME_MAP[time];
-                    setTfInterval(binanceInterval);
-                  }}
-                  className="px-3 py-2 bg-[#252836] text-gray-300 text-sm rounded-lg hover:bg-[#2d3748] transition-colors"
-                >
-                  {time}
-                </button>
-              ))}
-            </div> */}
-
-            <div className="grid grid-cols-4 gap-2 mb-2">
-              {["M1", "M2", "M3", "M5"].map((time) => (
-                <button
-                  key={time}
-                  onClick={() => {
-                    const binanceInterval = TIMEFRAME_MAP[time];
-                    setTfInterval(binanceInterval);
-                  }}
-                  className="px-3 py-2 bg-[#252836] text-gray-300 text-sm rounded-lg hover:bg-[#2d3748] transition-colors"
-                >
-                  {time}
-                </button>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-4 gap-2 mb-2">
-              {["M10", "M15", "M30", "H1"].map((time) => (
-                <button
-                  key={time}
-                  onClick={() => {
-                    const binanceInterval = TIMEFRAME_MAP[time];
-                    setTfInterval(binanceInterval);
-                  }}
-                  className="px-3 py-2 bg-[#252836] text-gray-300 text-sm rounded-lg hover:bg-[#2d3748] transition-colors"
-                >
-                  {time}
-                </button>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-4 gap-2">
-              {["H4", "D1"].map((time) => (
-                <button
-                  key={time}
-                  onClick={() => {
-                    const binanceInterval = TIMEFRAME_MAP[time];
-                    setTfInterval(binanceInterval);
-                  }}
-                  className="px-3 py-2 bg-[#252836] text-gray-300 text-sm rounded-lg hover:bg-[#2d3748] transition-colors"
-                >
-                  {time}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Settings */}
-          <div>
-            {/* <h3 className="text-gray-400 text-sm font-medium mb-3">Settings</h3> */}
-
-            {/* Enable timer */}
-            {/* <div className="flex items-center justify-between mb-4 p-3 bg-[#252836] rounded-lg">
-              <span className="text-gray-300 text-sm">Enable timer</span>
-
-              <button
-                onClick={() => setTimerEnabled(!timerEnabled)}
-                className={`w-12 h-6 rounded-full p-1 transition-all relative 
-      ${timerEnabled ? "bg-green-500" : "bg-gray-500"}`}
-              >
-                <div
-                  className={`w-4 h-4 bg-white rounded-full transition-all
-        ${timerEnabled ? "translate-x-6" : "translate-x-0"}`}
-                ></div>
-              </button>
-            </div> */}
-
-            {/* Enable autoscroll */}
-            {/* <div className="flex items-center justify-between p-3 bg-[#252836] rounded-lg">
-              <span className="text-gray-300 text-sm">Enable autoscroll</span>
-              <button
-                className="w-5 h-5 bg-white rounded-full"
-                onClick={() => setAutoScroll(!autoScroll)}
-              ></button>
-            </div> */}
-          </div>
-
-          {/* Settings Link */}
-          {/* <div className="mt-6 text-center">
-            <button className="text-blue-400 text-sm font-medium hover:text-blue-300">
-              Settings
-            </button>
-          </div> */}
+          ))}
         </div>
       )}
-
-      {/* ---------- DRAWING TOOLS POPUP ---------- */}
-      {drawingPopup && (
-        <div className="absolute right-60 left-70 top-20  w-56 bg-[#1a1d28] border z-50 border-[#2d3748] rounded-xl shadow-2xl p-3">
-          <button
-            onClick={() => toggleDrawingMode("vl")}
-            className="w-full px-3 py-2.5 hover:bg-[#252836] rounded-lg flex items-center gap-3 text-left text-gray-300 text-sm transition-colors"
-          >
-            <span className="text-lg">|</span>
-            <span>Vertical line</span>
-          </button>
-
-          <button
-            onClick={() => toggleDrawingMode("channel")}
-            className="w-full px-3 py-2.5 hover:bg-[#252836] rounded-lg flex items-center gap-3 text-left text-gray-300 text-sm transition-colors"
-          >
-            <span className="text-lg">/</span>
-            <span>Channel</span>
-          </button>
-
-          <button
-            onClick={() => toggleDrawingMode("hl")}
-            className="w-full px-3 py-2.5 hover:bg-[#252836] rounded-lg flex items-center gap-3 text-left text-gray-300 text-sm transition-colors"
-          >
-            <span className="text-lg">—</span>
-            <span>Horizontal line</span>
-          </button>
-
-          <button
-            onClick={() => toggleDrawingMode("trend")}
-            className="w-full px-3 py-2.5 hover:bg-[#252836] rounded-lg flex items-center gap-3 text-left text-gray-300 text-sm transition-colors"
-          >
-            <span className="text-lg">/</span>
-            <span>Trend line</span>
-          </button>
-
-          <button
-            onClick={() => toggleDrawingMode("ray")}
-            className="w-full px-3 py-2.5 hover:bg-[#252836] rounded-lg flex items-center gap-3 text-left text-gray-300 text-sm transition-colors"
-          >
-            <span className="text-lg">/</span>
-            <span>Ray</span>
-          </button>
-
-          <button
-            onClick={() => toggleDrawingMode("fibonacci")}
-            className="w-full px-3 py-2.5 hover:bg-[#252836] rounded-lg flex items-center gap-3 text-left text-gray-300 text-sm transition-colors"
-          >
-            <span className="text-lg">≡</span>
-            <span>Fibonacci Retracement</span>
-          </button>
-
-          <button
-            onClick={() => toggleDrawingMode("rectangle")}
-            className="w-full px-3 py-2.5 hover:bg-[#252836] rounded-lg flex items-center gap-3 text-left text-gray-300 text-sm transition-colors"
-          >
-            <span className="text-lg">/</span>
-            <span>Rectangle</span>
-          </button>
-        </div>
-      )}
-
-      {/* ---------- CHART ---------- */}
-      <div
-        ref={containerRef}
-        className="w-full relative z-0"
-        style={{ height: `${height}px` }}
-      />
     </div>
-  );
+  </>
+)}
+
+
+{/* 2. CHART TYPE POPUP */}
+{chartPopup && !isFullscreen && (
+  <>
+    <div
+      className="fixed inset-0 z-40 bg-black/50 md:hidden"
+      onClick={(e) => {
+        e.stopPropagation();
+        setChartPopup(false);
+      }}
+    ></div>
+
+    <div
+      className="absolute top-12 left-4 right-4 z-50 bg-[#1a1d28] border border-[#2d3748] rounded-xl shadow-2xl p-4 
+       md:right-20 md:left-auto md:w-[320px]"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        onClick={() => setChartPopup(false)}
+        className="absolute top-2 right-2 text-gray-400 hover:text-white p-1 rounded-full hover:bg-[#252836] transition-colors"
+      >
+        ✕
+      </button>
+
+      {/* Chart Type Icons */}
+      <div className="flex justify-between gap-2 mb-4 mt-4">
+        {["candles", "line", "bar", "area"].map((type) => (
+          <button
+            key={type}
+            onClick={() => setChartType(type)}
+            className={`flex-1 p-3 rounded-lg transition-colors flex justify-center items-center ${
+              chartType === type
+                ? "bg-[#2d3748] text-white"
+                : "bg-[#252836] text-gray-400 hover:bg-[#2d3748]"
+            }`}
+          >
+            {type === "candles" && "📊"}
+            {type === "line" && "📈"}
+            {type === "bar" && "📉"}
+            {type === "area" && "🔗"}
+          </button>
+        ))}
+      </div>
+
+      {/* Time Frames */}
+      <div className="mb-2">
+        <h3 className="text-gray-400 text-sm font-medium mb-3">
+          Time Frames
+        </h3>
+        <div className="flex flex-col gap-2">
+          {[
+            ["M1", "M2", "M3", "M5"],
+            ["M10", "M15", "M30", "H1"],
+            ["H4", "D1"],
+          ].map((row, rowIdx) => (
+            <div key={rowIdx} className="grid grid-cols-4 gap-2">
+              {row.map((time) => (
+                <button
+                  key={time}
+                  onClick={() => {
+                    if (TIMEFRAME_MAP[time])
+                      setTfInterval(TIMEFRAME_MAP[time]);
+                  }}
+                  className="px-2 py-2 bg-[#252836] text-gray-300 text-xs sm:text-sm rounded-lg hover:bg-[#2d3748] transition-colors text-center"
+                >
+                  {time}
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </>
+)}
+
+
+{/* 3. DRAWING TOOLS POPUP */}
+{drawingPopup && !isFullscreen && (
+  <>
+    <div
+      className="fixed inset-0 z-40 bg-black/50 md:hidden"
+      onClick={(e) => {
+        e.stopPropagation();
+        setDrawingPopup(false);
+      }}
+    ></div>
+
+    <div
+      className="absolute top-12 left-4 z-50 w-[220px] bg-[#1a1d28] border border-[#2d3748] rounded-xl shadow-2xl p-3 pt-10 
+     md:right-40 md:left-auto md:pt-3"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        onClick={() => setDrawingPopup(false)}
+        className="absolute top-2 right-2 text-gray-400 hover:text-white p-1 rounded-full hover:bg-[#252836] transition-colors"
+      >
+        ✕
+      </button>
+
+      <div className="flex flex-col gap-1 max-h-[60vh] overflow-y-auto">
+        {[
+          { id: "vl", icon: "|", label: "Vertical line" },
+          { id: "channel", icon: "/", label: "Channel" },
+          { id: "hl", icon: "—", label: "Horizontal line" },
+          { id: "trend", icon: "/", label: "Trend line" },
+          { id: "ray", icon: "/", label: "Ray" },
+          { id: "fibonacci", icon: "≡", label: "Fibonacci" },
+          { id: "rectangle", icon: "□", label: "Rectangle" },
+        ].map((tool) => (
+          <button
+            key={tool.id}
+            onClick={() => toggleDrawingMode(tool.id)}
+            className="w-full px-3 py-3 md:py-2 hover:bg-[#252836] rounded-lg flex items-center gap-3 text-left text-gray-300 text-sm transition-colors border-b border-[#2d3748] md:border-none last:border-none"
+          >
+            <span className="text-lg w-6 text-center">{tool.icon}</span>
+            <span>{tool.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  </>
+)}
+
+
+{/* Chart Container */}
+<div className="relative flex-1 w-full min-h-0">
+  <div ref={containerRef} className="absolute inset-0 w-full h-full" 
+    style={{ pointerEvents: "auto" }}
+
+  />
+  
+</div>
+</div>
+);
 };
 
 export default PocketOptionChart;

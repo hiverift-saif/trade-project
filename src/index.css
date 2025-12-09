@@ -1,12 +1,39 @@
+/* 1. Tailwind Import */
 @import "tailwindcss";
 
-/* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&display=swap');
+/* 2. Google Fonts Import (Updated with Moderustic & Nunito Sans) */
+@import url('https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&family=Moderustic:wght@300..800&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
 
-/* Global font apply */
+/* 3. Theme Configuration */
+@theme {
+  /* Default Font (Body) -> Nunito Sans is excellent for UI text */
+  --font-sans: "Nunito Sans", "Alan Sans", ui-sans-serif, system-ui, sans-serif;
+  
+  /* Heading Font -> Moderustic (As per your design requirements) */
+  --font-heading: "Moderustic", sans-serif;
+
+  /* Colors */
+  --color-brand-dark: #000420;
+  --color-brand-green: #50fa7b;
+}
+
+/* 4. Base Styles */
 @layer base {
   body {
-    font-family: "Alan Sans", "Nunito Sans", sans-serif;
+    font-family: var(--font-sans);
+    background-color: var(--color-brand-dark);
+    color: #94a3b8; /* Slate text */
   }
+
+  /* Apply Moderustic to all Headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+  }
+
+  /* Ye fullscreen ke time background scroll band kar dega */
+
+
+
 }
+

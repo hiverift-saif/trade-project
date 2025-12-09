@@ -18,8 +18,8 @@ export default function Quickhero() {
               "url('https://images.unsplash.com/photo-1643962579745-bcaa05ffc573?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cmFkaW5nJTIwY2hhcnRzJTIwZmluYW5jaWFsJTIwbWFya2V0cyUyMGRhc2hib2FyZCUyMGRhcmt8ZW58MXx8fHwxNzU4NjA3MzgxfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral')",
           }}
         ></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/90"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#000213] via-[#041379]/90 to-[#041379]/40 "></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#000213] via-[#041379]/90 to-[#041379]/40 "></div>
       </div>
 
       <div className="absolute inset-0 pointer-events-none">

@@ -205,7 +205,8 @@ function AffiliatePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black">
+    <div className="">
+    <div className="min-h-screen  bg-gradient-to-r from-[#000213] via-[#041379]/90 to-[#041379]/40 ">
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 overflow-hidden">
@@ -436,6 +437,7 @@ function AffiliatePage() {
           </div>
         </div>
       </section>
+    </div>
     </div>
   );
 }

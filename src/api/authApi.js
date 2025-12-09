@@ -14,6 +14,7 @@ export const registerUser = async (formData) => {
     phone: formData.mobile || formData.phone,
     role: formData.role || "user", // default
   };
+  
 
   try {
     const res = await apiClient.post("/auth/register", payload);

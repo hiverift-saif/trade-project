@@ -1,212 +1,289 @@
-import React, { useState } from "react";
-import { ChevronLeft, ChevronRight, Star, TrendingUp, Users, DollarSign } from "lucide-react";
+import React from 'react';
+import { ShieldCheck, Headset, HandCoins, UserRoundCog } from 'lucide-react';
 
-const testimonials = [
+// --- CSS Animation for Scrolling Text ---
+const scrollingTextStyles = `
+  @keyframes scrollText {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  
+  .animate-scroll-text {
+    animation: scrollText 20s linear infinite;
+  }
+`;
+
+// --- Feature Data ---
+const features = [
   {
     id: 1,
-    name: "Lisa Wang",
-    country: "Canada",
-    uid: "8472639",
-    rating: 5,
-    date: "March 5, 2025",
-    profit: "+$2,890",
-    review: "Zero deposit fees and lightning-fast withdrawals. The platform is user-friendly and perfect for both beginners and pros.",
-    initials: "LW",
+    title: "Friendly & Expert",
+    description: "Duty or the obligation that business it will frequently occurs pleasure to be repudiated.",
+    icon: UserRoundCog,
+    position: 'left',
+    verticalPosition: 'top'
   },
   {
     id: 2,
-    name: "John Doe",
-    country: "USA",
-    uid: "9283746",
-    rating: 4,
-    date: "Feb 18, 2025",
-    profit: "+$1,520",
-    review: "Trading on this platform is smooth and reliable. Highly recommended!",
-    initials: "JD",
+    title: "Regulated & Secure",
+    description: "Frequently occur that pleasures have to be repudiated accepted always holds.",
+    icon: ShieldCheck,
+    position: 'right',
+    verticalPosition: 'top'
   },
   {
     id: 3,
-    name: "Maria Lopez",
-    country: "Spain",
-    uid: "3847562",
-    rating: 5,
-    date: "Jan 12, 2025",
-    profit: "+$3,400",
-    review: "Excellent platform for both beginners and pros. Withdrawals are super fast.",
-    initials: "ML",
+    title: "No Hidden Fees",
+    description: "Right to find fault with a man who chooses to enjoy a pleasure that annoying consequence.",
+    icon: HandCoins,
+    position: 'left',
+    verticalPosition: 'bottom'
   },
-
-
-    {
+  {
     id: 4,
-    name: "Lisa Wang",
-    country: "Canada",
-    uid: "8472639",
-    rating: 5,
-    date: "March 5, 2025",
-    profit: "+$2,890",
-    review: "Zero deposit fees and lightning-fast withdrawals. The platform is user-friendly and perfect for both beginners and pros.",
-    initials: "LW",
-  },
-  {
-    id: 5,
-    name: "John Doe",
-    country: "USA",
-    uid: "9283746",
-    rating: 4,
-    date: "Feb 18, 2025",
-    profit: "+$1,520",
-    review: "Trading on this platform is smooth and reliable. Highly recommended!",
-    initials: "JD",
-  },
-  {
-    id: 6,
-    name: "Maria Lopez",
-    country: "Spain",
-    uid: "3847562",
-    rating: 5,
-    date: "Jan 12, 2025",
-    profit: "+$3,400",
-    review: "Excellent platform for both beginners and pros. Withdrawals are super fast.",
-    initials: "ML",
+    title: "24/7 Support",
+    description: "Great pleasure. To take a trivial example, which of us ever undertakes laborious.",
+    icon: Headset,
+    position: 'right',
+    verticalPosition: 'bottom'
   },
 ];
 
-const stats = [
-  {
-    icon: <Users className="w-8 h-8 text-white " />,
-    value: "50,000+",
-    label: "Active Traders",
-    gradient: "from-blue-400 to-indigo-400",
-    bgGradient: "bg-gradient-to-r from-blue-500 to-indigo-600",
-  },
-  {
-    icon: <DollarSign className="w-8 h-8 text-white" />,
-    value: "$50M+",
-    label: "Withdrawn",
-    gradient: "from-green-400 to-emerald-400",
-    bgGradient: "bg-gradient-to-r from-green-500 to-emerald-600",
-  },
-  {
-    icon: <Star className="w-8 h-8 text-white" />,
-    value: "4.5★",
-    label: "Average Rating",
-    gradient: "from-yellow-400 to-orange-400",
-    bgGradient: "bg-gradient-to-r from-yellow-500 to-orange-600",
-  },
-];
-
-export default function TestimonialSection() {
-  const [current, setCurrent] = useState(0);
-
-  const prevTestimonial = () => {
-    setCurrent((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1));
-  };
-
-  const nextTestimonial = () => {
-    setCurrent((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1));
-  };
-
+// --- Feature Card Component ---
+const FeatureCard = ({ title, description, icon: Icon, position }) => {
+  const isRight = position === 'right';
+  
   return (
-
-
-
-    
-    <section className="py-20 bg-gradient-to-b from-gray-900 to-black relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2280%22%20height%3D%2280%22%20viewBox%3D%220%200%2080%2080%22%20xmlns%3D%22http://www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23fff%22%20fill-opacity%3D%220.03%22%3E%3Cpath%20d%3D%22M0%2040h80v1H0zM40%200v80h1V0z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+    <div className={`relative ${isRight ? 'text-left pl-4 sm:pl-6 md:pl-8' : 'text-right pr-4 sm:pr-6 md:pr-8'}`}>
+      {/* Curved Line Image - Positioned absolutely */}
+      <div className={`hidden lg:block absolute top-1/2 -translate-y-1/2 ${isRight ? 'right-full mr-0' : 'left-full ml-0'} w-24 xl:w-32 h-20 xl:h-24 pointer-events-none`}>
+        <svg viewBox="0 0 120 80" className="w-full h-full">
+          {isRight ? (
+            // Right side - curve from left to right
+            <path 
+              d="M 0 40 Q 60 10, 120 40" 
+              fill="none" 
+              stroke="#d1d5db" 
+              strokeWidth="2"
+              strokeDasharray="5,5"
+            />
+          ) : (
+            // Left side - curve from right to left
+            <path 
+              d="M 120 40 Q 60 10, 0 40" 
+              fill="none" 
+              stroke="#d1d5db" 
+              strokeWidth="2"
+              strokeDasharray="5,5"
+            />
+          )}
+        </svg>
       </div>
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>
-      </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold  mb-6 bg-gradient-to-r from-white via-blue-100 to-green-100 bg-clip-text text-transparent">
-            What Our Traders Say
-          </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Join thousands of successful traders worldwide who trust Trade Pro
-          </p>
+      {/* Content */}
+      <div className={`flex items-start gap-3 sm:gap-4 ${isRight ? 'flex-row' : 'flex-row-reverse'}`}>
+        {/* Text Content */}
+        
+   
+
+        {/* Icon Box with Chevrons */}
+        <div className="relative flex-shrink-0">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br from-green-400 to-green-500 flex items-center justify-center shadow-lg">
+            <Icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
+          </div>
+          
+          {/* Decorative Chevrons */}
+          <div className={`absolute ${isRight ? 'right-full mr-2 sm:mr-3' : 'left-full ml-2 sm:ml-3'} top-1/2 -translate-y-1/2 flex flex-col gap-0.5 sm:gap-1`}>
+            <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 border-t-2 ${isRight ? 'border-l-2' : 'border-r-2'} border-green-400 ${isRight ? '-rotate-45' : 'rotate-45'}`}></div>
+            <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 border-t-2 ${isRight ? 'border-l-2' : 'border-r-2'} border-green-400 ${isRight ? '-rotate-45' : 'rotate-45'}`}></div>
+            <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 border-t-2 ${isRight ? 'border-l-2' : 'border-r-2'} border-green-400 ${isRight ? '-rotate-45' : 'rotate-45'}`}></div>
+          </div>
         </div>
 
-        {/* Testimonial Card */}
-        <div className="relative mb-16">
-          <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-xl rounded-3xl p-8 md:p-12 shadow-2xl border border-gray-700/50 hover:border-gray-600/50 transition-all duration-500">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-6">
-              <div className="flex items-center space-x-6">
-                <div className="relative w-20 h-20 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-2xl">
-                  <span className="text-white font-bold text-xl">{testimonials[current].initials}</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl blur opacity-50 animate-pulse"></div>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white">{testimonials[current].name}</h3>
-                  <p className="text-gray-400 font-medium">{testimonials[current].country}</p>
-                  <p className="text-xs text-gray-500">UID: {testimonials[current].uid}</p>
-                </div>
-              </div>
-              <div className="text-left md:text-right">
-                <div className="flex items-center space-x-1 mb-2">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-5 h-5 ${i < testimonials[current].rating ? "fill-yellow-400 text-yellow-400" : "text-gray-500"}`}
-                    />
-                  ))}
-                </div>
-                <p className="text-sm text-gray-400 mb-2">{testimonials[current].date}</p>
-                <div className="inline-flex items-center space-x-2 bg-green-500/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-green-500/30">
-                  <TrendingUp className="w-4 h-4 text-green-400" />
-                  <span className="text-xl font-bold text-green-400">{testimonials[current].profit}</span>
-                </div>
-              </div>
-            </div>
-            <blockquote className="text-xl text-gray-200 leading-relaxed mb-6 font-medium">
-              "{testimonials[current].review}"
-            </blockquote>
-            <div className="w-full bg-gray-700 rounded-full h-1 mb-4">
-              <div className="bg-gradient-to-r from-blue-500 to-green-500 h-1 rounded-full transition-all duration-6000" style={{ width: "100%" }}></div>
-            </div>
+             <div className="flex-1">
+          <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-1.5 sm:mb-2">{title}</h3>
+          <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{description}</p>
+        </div>
+      </div>
 
-            {/* Carousel controls */}
-            <div className="flex justify-center items-center space-x-6 mt-8">
-              <button onClick={prevTestimonial} className="w-12 h-12 rounded-full border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white transition-all duration-300 flex items-center justify-center">
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <div className="flex space-x-3">
-                {testimonials.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrent(idx)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${current === idx ? "bg-gradient-to-r from-blue-500 to-green-500 scale-125" : "bg-gray-600 hover:bg-gray-500"}`}
-                  ></button>
-                ))}
-              </div>
-              <button onClick={nextTestimonial} className="w-12 h-12 rounded-full border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white transition-all duration-300 flex items-center justify-center">
-                <ChevronRight className="w-5 h-5" />
-              </button>
+      {/* Connector Green Dot */}
+      <div className={`hidden lg:block absolute ${isRight ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'} top-1/2 -translate-y-1/2 w-3 h-3 xl:w-4 xl:h-4 bg-green-400 rounded-full shadow-lg border-2 border-white`}></div>
+    </div>
+  );
+};
+
+// --- Main Section Component ---
+const TestimonialSection = () => {
+  const topLeftFeature = features.find(f => f.position === 'left' && f.verticalPosition === 'top');
+  const topRightFeature = features.find(f => f.position === 'right' && f.verticalPosition === 'top');
+  const bottomLeftFeature = features.find(f => f.position === 'left' && f.verticalPosition === 'bottom');
+  const bottomRightFeature = features.find(f => f.position === 'right' && f.verticalPosition === 'bottom');
+
+  return (
+    <>
+      <style>{scrollingTextStyles}</style>
+      <div className="relative min-h-screen bg-gray-50 overflow-hidden py-12 md:py-16 lg:py-20 px-4 sm:px-6">
+        {/* Background Scrolling Text */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+          <div className="w-[95vw] sm:w-[90vw] md:w-[85vw] max-w-[1400px] overflow-hidden">
+            <div className="flex whitespace-nowrap animate-scroll-text mt-12 sm:mt-16 md:mt-20">
+              <span className="text-[4rem] sm:text-[6rem] md:text-[8rem] lg:text-[10rem] xl:text-[12rem] font-black text-gray-200 tracking-wider mx-4 sm:mx-6 md:mx-8">TRADEPRO</span>
+              <span className="text-[4rem] sm:text-[6rem] md:text-[8rem] lg:text-[10rem] xl:text-[12rem] font-black text-gray-200 tracking-wider mx-4 sm:mx-6 md:mx-8">TRADEPRO</span>
+              <span className="text-[4rem] sm:text-[6rem] md:text-[8rem] lg:text-[10rem] xl:text-[12rem] font-black text-gray-200 tracking-wider mx-4 sm:mx-6 md:mx-8">TRADEPRO</span>
+              <span className="text-[4rem] sm:text-[6rem] md:text-[8rem] lg:text-[10rem] xl:text-[12rem] font-black text-gray-200 tracking-wider mx-4 sm:mx-6 md:mx-8">TRADEPRO</span>
             </div>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {stats.map((stat, idx) => (
-            <div key={idx} className="text-center p-8 bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
-              <div className={`w-16 h-16 ${stat.bgGradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl`}>
-                {stat.icon}
-              </div>
-              <div className={`text-3xl font-bold  mb-2 bg-clip-text text-transparent bg-gradient-to-r ${stat.gradient}`}>
-                {stat.value}
-              </div>
-              <p className="text-gray-400 font-medium">{stat.label}</p>
+        {/* Content Container */}
+        <div className="relative max-w-7xl mx-auto">
+          {/* Title Section */}
+          <div className="text-center mb-12 md:mb-16 lg:mb-20">
+            <div className="inline-block px-4 sm:px-6 py-2 bg-green-400 rounded-full text-xs font-bold text-gray-900 mb-4 sm:mb-6 tracking-wide">
+              WHY CHOOSE US
             </div>
-          ))}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-3 sm:mb-4 px-4">
+              The Top Choice For Traders
+            </h1>
+            <p className="text-gray-400 max-w-2xl mx-auto text-xs sm:text-sm px-4">
+              Discover the most competitive prices in the market, updated<br className="hidden sm:block"/> regularly for your advantage.
+            </p>
+          </div>
+
+          {/* Main Grid - Phone Centered with Features Around */}
+          <div className="relative flex justify-center mb-12 lg:mb-0">
+            {/* Center Phone Column */}
+            <div className="flex justify-center relative">
+              {/* Glow Effect */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-72 md:h-72 bg-green-300 rounded-full blur-3xl opacity-20"></div>
+              </div>
+
+              {/* Phone Frame */}
+              <div className="relative w-64 h-[520px] sm:w-72 sm:h-[580px] md:w-80 md:h-[620px] bg-gray-900 rounded-[2.5rem] sm:rounded-[3rem] md:rounded-[3.5rem] shadow-2xl overflow-hidden border-[10px] sm:border-[12px] md:border-[14px] border-gray-900">
+                {/* Notch */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 sm:w-36 md:w-40 h-5 sm:h-6 md:h-7 bg-gray-900 rounded-b-3xl z-10"></div>
+                
+                {/* Screen Content */}
+                <div className="w-full h-full bg-white p-5 pt-9 sm:p-6 sm:pt-10 md:p-8 md:pt-12">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-6 sm:mb-7 md:mb-8">
+                    <div className="space-y-1 sm:space-y-1.5">
+                      <div className="w-5 sm:w-6 md:w-7 h-0.5 bg-gray-800 rounded"></div>
+                      <div className="w-5 sm:w-6 md:w-7 h-0.5 bg-gray-800 rounded"></div>
+                      <div className="w-5 sm:w-6 md:w-7 h-0.5 bg-gray-800 rounded"></div>
+                    </div>
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 bg-green-400 rounded-full flex items-center justify-center shadow-md">
+                      <UserRoundCog className="w-5 h-5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 text-white" />
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-5 md:mb-6 tracking-wide">SUMMARIES</h2>
+
+                  {/* Tabs */}
+                  <div className="flex gap-4 sm:gap-5 md:gap-6 mb-7 sm:mb-8 md:mb-10 text-xs sm:text-sm">
+                    <span className="text-gray-900 font-semibold">Lorem</span>
+                    <span className="text-gray-300">Ipsum</span>
+                    <span className="text-gray-300">Dolor</span>
+                  </div>
+
+                  {/* Circular Progress */}
+                  <div className="flex justify-center mb-7 sm:mb-8 md:mb-10">
+                    <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-44 md:h-44">
+                      <svg className="w-full h-full -rotate-90">
+                        <circle cx="50%" cy="50%" r="42%" fill="none" stroke="#f3f4f6" strokeWidth="12"/>
+                        <circle cx="50%" cy="50%" r="42%" fill="none" stroke="#4ade80" strokeWidth="12" strokeDasharray="471" strokeDashoffset="130" strokeLinecap="round"/>
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">72<span className="text-xl sm:text-2xl">%</span></span>
+                        <span className="text-[0.6rem] sm:text-xs text-gray-400 mt-0.5 sm:mt-1 text-center leading-tight px-2">Lorem Ipsum<br/>dolor sit.</span>
+                      </div>
+                      <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 left-2 sm:left-3 md:left-4 w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 bg-green-400 rounded-full shadow-md"></div>
+                    </div>
+                  </div>
+
+                  {/* Stats List */}
+                  <div className="space-y-3 sm:space-y-4 md:space-y-5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs sm:text-sm font-bold text-gray-900">Lorem Ipsum</p>
+                        <p className="text-[0.6rem] sm:text-xs text-gray-400">dolor sit amet</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+                        <svg className="w-10 h-5 sm:w-12 sm:h-6 md:w-14 md:h-7">
+                          <polyline points="0,18 18,8 36,14 54,4" fill="none" stroke="#10b981" strokeWidth="2"/>
+                        </svg>
+                        <span className="text-[0.6rem] sm:text-xs text-green-500">↑12.21</span>
+                        <span className="text-sm sm:text-base font-bold text-gray-900">$6,942</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs sm:text-sm font-bold text-gray-900">Lorem Ipsum</p>
+                        <p className="text-[0.6rem] sm:text-xs text-gray-400">dolor sit amet</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+                        <svg className="w-10 h-5 sm:w-12 sm:h-6 md:w-14 md:h-7">
+                          <polyline points="0,4 18,10 36,7 54,18" fill="none" stroke="#ef4444" strokeWidth="2"/>
+                        </svg>
+                        <span className="text-[0.6rem] sm:text-xs text-red-500">↓12.21</span>
+                        <span className="text-sm sm:text-base font-bold text-gray-900">$8,152</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Left Feature */}
+            <div className="hidden lg:block absolute left-0 top-8 xl:top-12 w-72 xl:w-80">
+              <FeatureCard {...topLeftFeature} />
+            </div>
+
+            {/* Top Right Feature */}
+            <div className="hidden lg:block absolute right-0 top-8 xl:top-12 w-72 xl:w-80">
+              <FeatureCard {...topRightFeature} />
+            </div>
+
+            {/* Bottom Left Feature */}
+            <div className="hidden lg:block absolute left-0 bottom-8 xl:bottom-12 w-72 xl:w-80">
+              <FeatureCard {...bottomLeftFeature} />
+            </div>
+
+            {/* Bottom Right Feature */}
+            <div className="hidden lg:block absolute right-0 bottom-8 xl:bottom-12 w-72 xl:w-80">
+              <FeatureCard {...bottomRightFeature} />
+            </div>
+          </div>
+
+          {/* Mobile View - Stacked */}
+          <div className="lg:hidden mt-8 sm:mt-10 md:mt-12 space-y-6 sm:space-y-8">
+            {features.map((feature) => (
+              <div key={feature.id} className="max-w-sm mx-auto">
+                <FeatureCard {...feature} />
+              </div>
+            ))}
+          </div>
         </div>
+
+        {/* Scroll to Top Button */}
+        <button 
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-12 h-12 sm:w-14 sm:h-14 bg-gray-900 rounded-full flex items-center justify-center shadow-xl hover:bg-gray-800 transition-all hover:scale-110 z-50"
+        >
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+        </button>
       </div>
-    </section>
+    </>
   );
-}
+};
+
+export default TestimonialSection;

@@ -1,141 +1,200 @@
-import React from "react";
-import { Smartphone, Apple, Monitor, MessageSquare, Download, ExternalLink, QrCode } from "lucide-react";
+import React, { useState } from "react";
+import { Check, Globe, Monitor, Smartphone, ArrowRight } from "lucide-react";
+import mobile from "../assets/mobile.png"; 
+// FontAwesome Icons (ensure you have them or replace with lucide equivalents)
+// npm install react-icons
+import { FaGooglePlay, FaApple, FaWindows } from "react-icons/fa";
+
+const platformsData = [
+  {
+    id: 0,
+    name: "Meta Trader 4",
+    short: "Meta Trader 4",
+    info: "Denouncing pleasure and praising pain was born and will give complete account of the system and expound.",
+    features: [
+      "Extensive Technical Indicators",
+      "Automated Trading with Expert Advisors",
+      "Low Resource Requirements",
+    ],
+    img: "https://tradebro-react-next-js-template.vercel.app/assets/images/resources/platform-1.png", // Phone Image Placeholder
+  },
+  {
+    id: 1,
+    name: "Meta Trader 5",
+    short: "Meta Trader 5",
+    info: "Provides advanced charting tools and flexible trading systems with powerful financial instruments.",
+    features: [
+      "Advanced Analytical Tools",
+      "Economic Calendar",
+      "Multi-Asset Trading Options",
+    ],
+    img: "https://tradebro-react-next-js-template.vercel.app/assets/images/resources/platform-1.png", // Use same or diff image
+  },
+];
 
 export default function DownloadAccessibility() {
-  const platforms = [
-    {
-      name: "Android",
-      subtitle: "Google Play + APK",
-      description: "Download from Google Play or install APK directly",
-      gradient: "from-green-500 to-emerald-600",
-      icon: <Smartphone className="w-10 h-10 text-white" />,
-      buttonText: "Download APK",
-    },
-    {
-      name: "iOS",
-      subtitle: "App Store",
-      description: "Available on the Apple App Store",
-      gradient: "from-blue-500 to-indigo-600",
-      icon: <Apple className="w-10 h-10 text-white" />,
-      buttonText: "Download iOS",
-    },
-    {
-      name: "Web App",
-      subtitle: "Browser Trading",
-      description: "Trade directly in your web browser",
-      gradient: "from-purple-500 to-violet-600",
-      icon: <Monitor className="w-10 h-10 text-white" />,
-      buttonText: "Open Web App",
-    },
-    {
-      name: "Telegram Bot",
-      subtitle: "Instant Trading",
-      description: "Trade through our Telegram bot",
-      gradient: "from-indigo-500 to-blue-600",
-      icon: <MessageSquare className="w-10 h-10 text-white" />,
-      buttonText: "Open Bot",
-    },
-  ];
+  const [active, setActive] = useState(0);
 
   return (
-    <section className="py-20 bg-gradient-to-b from-black to-gray-900 relative overflow-hidden">
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div
-          className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23fff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v6h-2v-6h2zM36%2014v6h-2v-6h2zM18%2034v6h-2v-6h2zM18%2014v6h-2v-6h2z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"
-        ></div>
-      </div>
+    <section className="w-full bg-[#000420] py-24 font-sans relative overflow-hidden">
+      
+      {/* Background Glow Effect (Optional) */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-900/20 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold  mb-6 bg-gradient-to-r from-white via-blue-100 to-green-100 bg-clip-text text-transparent">
-            Download &amp; Accessibility
-          </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Trade on any device, anywhere, anytime. Choose your preferred platform and
-            <span className="text-blue-400 font-semibold"> start trading today</span>.
-          </p>
-        </div>
-
-        {/* Platform Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-          {platforms.map((platform, idx) => (
-            <div
-              key={idx}
-              className={`group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 hover:border-gray-600/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/10`}
-            >
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${platform.gradient} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-500`}
-              ></div>
-              <div className="text-center relative">
-                <div className="flex justify-center mb-6">
-                  <div
-                    className={`relative w-20 h-20 bg-gradient-to-br ${platform.gradient} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-2xl`}
-                  >
-                    {platform.icon}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${platform.gradient} rounded-2xl blur opacity-50 group-hover:opacity-75 transition-opacity duration-300`}></div>
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-300 group-hover:bg-clip-text transition-all duration-300">
-                  {platform.name}
-                </h3>
-                <p className="text-sm text-blue-400 font-semibold mb-4">{platform.subtitle}</p>
-                <p className="text-sm text-gray-300 mb-8 leading-relaxed group-hover:text-gray-200 transition-colors duration-300">
-                  {platform.description}
-                </p>
-                <button
-                  className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm h-9 px-4 w-full bg-gradient-to-r ${platform.gradient} hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 text-white font-semibold border-0 group-hover:scale-105`}
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  {platform.buttonText}
-                </button>
-              </div>
+      <div className="container mx-auto px-4 md:px-8 max-w-7xl">
+        
+        {/* ====================================================
+            UPPER SECTION: PHONES + TEXT + TABS
+        ===================================================== */}
+        <div className="flex flex-col lg:flex-row items-center gap-16 mb-20">
+          
+          {/* --- LEFT: FLOATING PHONES --- */}
+          <div className="w-full lg:w-1/2 relative">
+            {/* Main Phone Image */}
+            <div className="relative z-10 animate-float">
+              <img 
+                src={mobile} 
+                alt="Trading App" 
+                className="w-full max-w-md mx-auto drop-shadow-2xl"
+              />
             </div>
-          ))}
-        </div>
-
-        {/* Quick Mobile Access */}
-        <div className="bg-gradient-to-r from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-3xl p-8 border border-gray-700/50">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="text-center lg:text-left">
-              <h3 className="text-3xl font-bold  mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                Quick Mobile Access
-              </h3>
-              <p className="text-xl text-gray-300 mb-6 leading-relaxed">
-                Scan the QR code with your mobile device to instantly access our trading platform
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm transition-all h-9 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold px-8 py-3">
-                  <ExternalLink className="w-5 h-5 mr-2" />
-                  Open Web Platform
-                </button>
-                <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all h-9 px-4 py-2 border bg-background dark:bg-input/30 border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">
-                  <QrCode className="w-5 h-5 mr-2" />
-                  Generate QR Code
-                </button>
-              </div>
-            </div>
-            <div className="flex justify-center">
-              <div className="relative">
-                <div className="w-48 h-48 bg-white rounded-2xl p-4 shadow-2xl">
-                  <div className="w-full h-full bg-gradient-to-br from-gray-800 to-black rounded-lg flex items-center justify-center">
-                    <QrCode className="w-24 h-24 text-white" />
-                  </div>
-                </div>
-                <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl blur-lg opacity-20"></div>
-              </div>
-            </div>
+            
+            {/* Decorative Elements behind phone (optional) */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-blue-500/10 to-transparent rounded-full blur-3xl -z-10" />
           </div>
-          <div className="mt-16 text-center">
-            <div className="inline-flex items-center space-x-3 bg-gray-800/50 backdrop-blur-sm rounded-2xl px-8 py-4 border border-gray-700/50">
-              <Monitor className="w-6 h-6 text-blue-400" />
-              <span className="text-gray-300 font-medium">
-                All platforms synchronized with your account - Trade seamlessly across devices
+
+          {/* --- RIGHT: CONTENT & TABS --- */}
+          <div className="w-full lg:w-1/2 space-y-8">
+            
+            {/* Badge */}
+            <div>
+              <span className="bg-[#50fa7b] text-[#051509] px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider">
+                Platforms
               </span>
             </div>
+
+            {/* Heading */}
+            <h2 className="text-4xl md:text-5xl font-bold font-heading text-white leading-tight">
+              Powerful Trading <br />
+              Platforms For Every <br />
+              Trader
+            </h2>
+
+            {/* TABS BUTTONS */}
+            <div className="flex flex-wrap gap-4">
+              {platformsData.map((p, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActive(i)}
+                  className={`flex items-center gap-3 px-6 py-4 rounded-xl border transition-all duration-300 ${
+                    active === i 
+                      ? "bg-[#0a192f] border-[#1e293b]" 
+                      : "bg-transparent border-white/10 hover:border-white/20"
+                  }`}
+                >
+                  {/* Custom Check Icon Circle */}
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    active === i ? "bg-[#50fa7b] text-black" : "bg-slate-700 text-slate-400"
+                  }`}>
+                    <Check size={20} strokeWidth={3} />
+                  </div>
+                  
+                  <div className="text-left">
+                    <span className={`block text-sm font-bold ${active === i ? "text-white" : "text-slate-400"}`}>
+                      {p.short}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Description Text */}
+            <p className="text-slate-400 text-lg leading-relaxed">
+              {platformsData[active].info}
+            </p>
+
+            {/* Features List */}
+            <ul className="space-y-4">
+              {platformsData[active].features.map((feature, index) => (
+                <li key={index} className="flex items-center gap-3 text-slate-300 font-medium">
+                  {/* Green Leaf/Bullet Icon */}
+                  <span className="text-[#50fa7b]">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                       <path d="M7 0C7 0 14 7 14 7C14 7 7 14 7 14C7 14 0 7 0 7C0 7 7 0 7 0Z" />
+                    </svg>
+                  </span>
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
           </div>
         </div>
+
+        {/* ====================================================
+            BOTTOM SECTION: DOWNLOAD CARDS
+        ===================================================== */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* CARD 1: MOBILE */}
+          <div className="bg-[#0a1020] border border-white/5 rounded-2xl p-8 text-center hover:border-[#50fa7b]/30 transition-colors group">
+            <div className="mb-4 flex justify-center">
+               <div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                  <Smartphone size={24} />
+               </div>
+            </div>
+            <h3 className="text-white font-bold text-lg mb-1">For Mobile Users</h3>
+            <p className="text-slate-500 text-sm mb-6">Available on Android and iPhone</p>
+            
+            <div className="flex justify-center gap-3">
+              <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#50fa7b] hover:text-black text-white transition-colors">
+                <FaGooglePlay size={16} />
+              </button>
+              <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#50fa7b] hover:text-black text-white transition-colors">
+                <FaApple size={18} />
+              </button>
+            </div>
+          </div>
+
+          {/* CARD 2: DESKTOP */}
+          <div className="bg-[#0a1020] border border-white/5 rounded-2xl p-8 text-center hover:border-[#50fa7b]/30 transition-colors group">
+            <div className="mb-4 flex justify-center">
+               <div className="w-12 h-12 bg-orange-500/10 rounded-full flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform">
+                  <Monitor size={24} />
+               </div>
+            </div>
+            <h3 className="text-white font-bold text-lg mb-1">For Desktop Users</h3>
+            <p className="text-slate-500 text-sm mb-6">Available on Windows & MacOS.</p>
+            
+            <div className="flex justify-center gap-3">
+              <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#50fa7b] hover:text-black text-white transition-colors">
+                <FaWindows size={18} />
+              </button>
+              <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#50fa7b] hover:text-black text-white transition-colors">
+                <FaApple size={18} />
+              </button>
+            </div>
+          </div>
+
+          {/* CARD 3: WEB TERMINAL (With Green Button) */}
+          <div className="bg-[#0a1020] border border-white/5 rounded-2xl p-8 text-center hover:border-[#50fa7b]/30 transition-colors group">
+            <div className="mb-4 flex justify-center">
+               <div className="w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center text-[#50fa7b] group-hover:scale-110 transition-transform">
+                  <Globe size={24} />
+               </div>
+            </div>
+            <h3 className="text-white font-bold text-lg mb-1">For Web Terminal</h3>
+            <p className="text-slate-500 text-sm mb-6">Trading directly via web browser.</p>
+            
+            <div className="flex justify-center">
+              <button className="flex items-center gap-2 bg-[#50fa7b] hover:bg-[#4ade80] text-black font-bold text-sm px-6 py-2.5 rounded-full transition-all shadow-lg shadow-green-500/20">
+                Web Platform <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+
+        </div>
+
       </div>
     </section>
   );

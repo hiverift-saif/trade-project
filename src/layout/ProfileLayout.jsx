@@ -12,12 +12,13 @@ function ProfileLayout() {
   const location = useLocation();
 
   // Keep Profile menu active when on any profile route
-  useEffect(() => {
-    if (location.pathname.startsWith('/profile')) {
-      setActiveMenu('Profile');
-      setShowLeftSidebar(true);
-    }
-  }, [location.pathname]);
+useEffect(() => {
+  if (location.pathname.startsWith('/ProfileLayout')) {
+    setActiveMenu('ProfilePage');
+    setShowLeftSidebar(true);
+  }
+}, [location.pathname]);
+
 
   return (
     <div className="min-h-screen bg-[#0b1320]">
@@ -28,7 +29,7 @@ function ProfileLayout() {
       />
       
       {/* Main Container with Sidebar */}
-      <div className="flex pt-14">
+      <div className="flex pt-1">
         {/* Left Sidebar - Always visible on profile pages */}
         <LeftSidebar
           isOpen={showLeftSidebar}

@@ -1,66 +1,77 @@
-// src/components/AboutUs.jsx
 import React from "react";
-import { Users, Award, Globe } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import AboutSection from "../Aboutcontent/Aboutsection";
+import MissionStatement from "../Aboutcontent/MissionStatement";
+import TestimonialSection from "../Homecontent/TestimonialSection";
+import FactCounter from "../Aboutcontent/FactCounter";
+import PartnerSection from "../Aboutcontent/PartnerSection";
+import AwardsSection from "../Aboutcontent/AwardsSection";
 
 export default function AboutUs() {
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-900 to-black text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-blue-200 to-green-200 bg-clip-text text-transparent">
-            About Trade Pro
-          </h2>
-          <p className="text-gray-300 max-w-3xl mx-auto text-lg md:text-xl leading-relaxed">
-            Trade Pro is a global trading platform dedicated to empowering traders of all levels. 
-            With cutting-edge tools, a secure environment, and educational resources, we aim to make 
-            financial markets accessible, transparent, and profitable for everyone. Our mission is 
-            to provide a seamless trading experience with fast executions, diverse instruments, 
-            and a community-driven approach that ensures continuous growth and learning.
-          </p>
+    <div className="">
+      <section className="relative h-[450px]  overflow-hidden">
+
+        {/* Background Image */}
+        <div className="absolute inset-0 h-full">
+          <img
+            src="https://plus.unsplash.com/premium_photo-1661611270994-637a2a80a309?q=80&w=1494&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            alt="About Background"
+            className="w-full h-full object-cover"
+          />
+
+          <div className="absolute inset-0 bg-gradient-to-r from-[#000213] via-[#041379]/90 to-[#041379]/40"></div>
         </div>
 
-        {/* Features / Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="flex flex-col items-center p-6 bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
-            <Users className="w-12 h-12 text-green-400 mb-4" />
-            <h3 className="text-2xl font-bold mb-2">50,000+ Traders</h3>
-            <p className="text-gray-300 text-center">
-              Our platform supports a global community of over 50,000 active traders.
-            </p>
-          </div>
+        {/* CONTENT */}
+ <div className="relative z-10 h-full flex flex-col justify-center">
+  <div className="container mx-auto px-4 text-white">
 
-          <div className="flex flex-col items-center p-6 bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
-            <Award className="w-12 h-12 text-yellow-400 mb-4" />
-            <h3 className="text-2xl font-bold mb-2">Trusted & Awarded</h3>
-            <p className="text-gray-300 text-center">
-              Recognized for excellence in trading innovation, customer support, and platform security.
-            </p>
-          </div>
+    {/* Title */}
+    <div className="flex justify-center items-center">
+      <h2 className="text-4xl md:text-7xl font-bold mb-3">
+        About Us
+      </h2>
+    </div>
 
-          <div className="flex flex-col items-center p-6 bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
-            <Globe className="w-12 h-12 text-blue-400 mb-4" />
-            <h3 className="text-2xl font-bold mb-2">Global Reach</h3>
-            <p className="text-gray-300 text-center">
-              Trade Pro operates worldwide, connecting traders to over 100 financial markets seamlessly.
-            </p>
-          </div>
-        </div>
+    {/* Breadcrumb at Bottom */}
+    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full px-4 md:pl-30">
+      <ul
+        className="
+          flex flex-col md:flex-row 
+          items-center md:items-center 
+          gap-2 text-xl text-white/80
+        "
+      >
+        <li>
+          <a href="/" className="hover:text-white">Home</a>
+        </li>
 
-        {/* More About */}
-        <div className="mt-16 max-w-4xl mx-auto text-center space-y-4">
-          <p className="text-gray-300 text-lg md:text-xl leading-relaxed">
-            At Trade Pro, we believe that trading should be intuitive, educational, and profitable. 
-            Whether you're a beginner exploring your first trades or an expert managing a complex portfolio, 
-            our platform equips you with the tools, insights, and support to succeed. Join our community 
-            and experience a new era of online trading.
-          </p>
-          <p className="text-gray-300 text-lg md:text-xl leading-relaxed">
-            Security, transparency, and customer satisfaction are the pillars of our service. We continuously 
-            innovate to provide cutting-edge trading instruments, seamless execution, and reliable withdrawal processes.
-          </p>
-        </div>
-      </div>
-    </section>
+        <li className="hidden md:flex items-center">
+          <ChevronRight size={14} />
+        </li>
+
+        <li>About</li>
+
+        <li className="hidden md:flex items-center">
+          <ChevronRight size={14} />
+        </li>
+
+        <li className="font-semibold text-white">About Us</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+      </section>
+
+      <AboutSection/>
+      <MissionStatement/>
+      <TestimonialSection/>
+      <FactCounter/>
+      <PartnerSection/>
+      <AwardsSection/>
+    </div>
   );
 }

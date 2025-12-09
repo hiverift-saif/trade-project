@@ -7,10 +7,13 @@ import TradingLuck from '../Homecontent/TradingLuck'
 import DownloadAccessibility from '../Homecontent/DownloadAccessibility'
 import TestimonialSection from '../Homecontent/TestimonialSection'
 import RiskWarningSection from '../Homecontent/RiskWarningSection'
+import BlogSection from '../Homecontent/BlogSection'
+import TestimonialsSection from '../Homecontent/TestimonialsSection'
+import GlobalReach from '../Homecontent/GlobalReach'
 
 const Home = () => {
   return (
-    <div>
+    <div className='' >
       <Herosection/>
       <TrustedSection/>
       <WhyChooseTradePro/>
@@ -19,6 +22,9 @@ const Home = () => {
       <DownloadAccessibility/>
       <TestimonialSection/>
       <RiskWarningSection/>
+      <BlogSection/>
+      <TestimonialsSection/>
+      <GlobalReach/>
     </div>
   )
 }

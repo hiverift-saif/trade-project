@@ -5,7 +5,7 @@ import CTASection from '../Quickcontent/CTASection'
 
 const Quickstart = () => {
   return (
-    <div>
+    <div className=''>
       <Quickhero/>
       <TradingSteps/>
       <CTASection/>

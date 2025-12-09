@@ -4,7 +4,8 @@ import { Link } from "react-router-dom";
 
 export default function FreeDemo() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
+    <div className="">
+    <div className="min-h-screen bg-gradient-to-r from-[#000213] via-[#041379]/90 to-[#041379]/40   ">
       <div className="relative min-h-screen flex items-center justify-center p-4">
         <div className="absolute inset-0">
           <div
@@ -21,7 +22,7 @@ export default function FreeDemo() {
 
 
           
-          <div className="text-center bg-gradient-to-br from-gray-800/90 to-gray-900/90 backdrop-blur-xl rounded-3xl p-12 border border-gray-700/50">
+          <div className="text-center bg-gradient-to-r from-[#000213] via-[#041379]/90 to-[#041379]/40  backdrop-blur-xl rounded-3xl p-12 border border-gray-700/50">
 
 
 
@@ -67,6 +68,7 @@ export default function FreeDemo() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -330,7 +330,7 @@ const openLevelsPanel = () => setShowLevelsPanel(true);
 
                           <ul className="p-2">
                             <li>
-                              <Link to="/profile">
+                              <Link to="/affiliate/profile">
                                 <button
                                   onClick={handleProfileClick}
                                   className="w-full flex items-center gap-2 py-2 px-2 hover:bg-gray-800"
@@ -496,12 +496,12 @@ const openLevelsPanel = () => setShowLevelsPanel(true);
 
       {/* Affiliate Levels Panel */}
  <div className="">
-  <button
+  {/* <button
     onClick={() => setShowLevelsPanel(true)}
     className="text-white text-sm md:text-md uppercase font-bold hover:text-purple-400 transition"
   >
     LEVEL-1
-  </button>
+  </button> */}
 
   {/* Slide-in Panel */}
   {showLevelsPanel && (

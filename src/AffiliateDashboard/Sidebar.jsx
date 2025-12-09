@@ -13,7 +13,7 @@ function Sidebar({ navItems }) {
           <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-green-500 rounded-xl flex items-center justify-center mr-3">
             <span className="text-white font-bold">TP</span>
           </div>
-          <Link to="/dashboard">
+          <Link to="/">
             <span className="text-xl text-white">Trade Pro</span>
           </Link>
         </div>

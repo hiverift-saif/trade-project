@@ -49,7 +49,7 @@ const steps = [
 
 export default function TradingSteps() {
   return (
-    <section className="py-20 relative bg-black">
+    <section className="py-20 relative bg-black bg-gradient-to-r from-[#000213] via-[#041379]/90 to-[#041379]/40 ">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         

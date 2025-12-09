@@ -13,13 +13,9 @@ import {
   Shield,
   X,
   User,
-  Eye,
-  RefreshCw,
-  AlertTriangle,
   CreditCard,
   Bell,
   Headphones,
-  Newspaper,
   Settings,
   Globe,
   LogIn,
@@ -44,9 +40,6 @@ function TopBar({
   // 🔹 AccountTopupForm states
   const [paymentMethod, setPaymentMethod] = useState("Tether (USDT) TRC-20");
   const [amount, setAmount] = useState("30");
-  const [email, setEmail] = useState("");
-  const [hasPromoCode, setHasPromoCode] = useState(false);
-  const [promoCode, setPromoCode] = useState("");
   const [isPaymentDropdownOpen, setIsPaymentDropdownOpen] = useState(false);
 
   // 🔹 Payment methods list
@@ -85,30 +78,30 @@ function TopBar({
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
-
-    navigate("/login"); // redirect to login page
+    navigate("/login");
   };
+
   return (
     <header
-  className="h-14 bg-[#1c202e] border-b border-zinc-800/50 flex items-center justify-between px-4 shadow-md z-50 relative"
-  ref={dropdownRef}
->
+      className="h-14 bg-[#1c202e] border-b border-zinc-800/50 flex items-center justify-between px-3 sm:px-4 shadow-md z-[100] relative select-none"
+      ref={dropdownRef}
+    >
       {/* === LEFT SIDE === */}
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleLeftSidebar}
-          className="md:hidden text-zinc-400 hover:text-white transition-all duration-200"
+          className="md:hidden text-zinc-400 hover:text-white transition-all duration-200 p-1"
         >
-          <Menu size={20} />
+          <Menu size={22} />
         </button>
       </div>
 
       {/* === RIGHT SIDE === */}
-      <div className="flex items-center gap-2 relative">
+      <div className="flex items-center gap-2 sm:gap-3 relative">
         {/* 🎁 Bonus Button */}
-        <button className="px-3 py-1 rounded-lg bg-sky-600/20 text-sky-300 text-sm hover:bg-sky-600/30 flex items-center gap-2 transition-all duration-200">
-          <Gift size={16} />
-          <span className="hidden sm:inline">Get 50% Bonus</span>
+        <button className="hidden sm:flex px-3 py-1.5 rounded-lg bg-sky-600/20 text-sky-300 text-xs hover:bg-sky-600/30 items-center gap-2 transition-all duration-200 border border-sky-600/30">
+          <Gift size={14} />
+          <span>Get 50% Bonus</span>
         </button>
 
         {/* 💰 Balance Dropdown */}
@@ -118,124 +111,66 @@ function TopBar({
             setShowTopupPanel(false);
             setShowProfilePanel(false);
           }}
-          className="flex items-center gap-1 px-3 py-1 rounded-lg bg-zinc-800 text-zinc-200 text-sm font-medium cursor-pointer hover:bg-zinc-700 transition-all duration-200 relative"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800/80 text-zinc-200 text-sm font-semibold cursor-pointer hover:bg-zinc-700 transition-all duration-200 border border-zinc-700/50"
         >
-          ${formatMoney(balance)}
-          <span className="text-zinc-400 ml-1">{selectedCurrency}</span>
-          {showAccountPanel ? (
-            <ChevronUp size={16} className="text-zinc-400 ml-1" />
-          ) : (
-            <ChevronDown size={16} className="text-zinc-400 ml-1" />
-          )}
+          <span className="text-emerald-400">$</span>
+          {formatMoney(balance)}
+          <span className="text-zinc-500 text-xs hidden sm:inline ml-1">{selectedCurrency}</span>
+          {showAccountPanel ? <ChevronUp size={14} className="text-zinc-400" /> : <ChevronDown size={14} className="text-zinc-400" />}
         </div>
 
-        {/* 🧾 ACCOUNT PANEL */}
+        {/* 🧾 ACCOUNT PANEL MODAL */}
         {showAccountPanel && (
-          <div className="absolute top-12 right-20 bg-slate-900 border border-slate-700 rounded-xl shadow-lg w-80 p-4 space-y-3 z-50 animate-fadeInDown">
-            {/* QT Real Account */}
-            <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
-              <div className="flex items-start justify-between">
+          <div className="absolute top-12 right-0 w-[92vw] sm:w-80 bg-[#1e2330] border border-zinc-700 rounded-xl shadow-2xl p-4 space-y-3 z-[9999] animate-in fade-in slide-in-from-top-2">
+            
+            {/* Real Account Card */}
+            <div className="bg-[#151922] rounded-lg p-3 border border-zinc-800">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-slate-600 rounded-lg flex items-center justify-center">
-                    <Layers className="w-5 h-5 text-slate-300" />
+                  <div className="w-9 h-9 bg-indigo-500/20 rounded-lg flex items-center justify-center border border-indigo-500/30">
+                    <Layers size={18} className="text-indigo-400" />
                   </div>
                   <div>
-                    <h3 className="text-white text-sm font-semibold">
-                      QT Real
-                    </h3>
-                    <p className="text-white text-lg font-bold">$0</p>
+                    <h3 className="text-zinc-300 text-xs uppercase font-bold tracking-wide">Real Account</h3>
+                    <p className="text-white text-base font-bold">$0.00</p>
                   </div>
                 </div>
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    navigate("/finance/deposit");
-                  }}
-                  className="flex-1 flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-lg transition-colors font-medium text-sm"
-                >
-                  <Wallet className="w-4 h-4" />
-                  Top up
+              <div className="grid grid-cols-4 gap-2">
+                <button onClick={() => navigate("/finance/deposit")} className="col-span-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg py-2 text-xs font-bold flex items-center justify-center gap-2 transition-colors">
+                  <Wallet size={14} /> DEPOSIT
                 </button>
-
-                <button className="w-11 h-11 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center border border-slate-600">
-                  <RotateCcw className="w-4 h-4 text-slate-300" />
+                <button className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded-lg flex items-center justify-center transition-colors">
+                  <RotateCcw size={16} />
                 </button>
-                <button className="w-11 h-11 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center border border-slate-600">
-                  <History className="w-4 h-4 text-slate-300" />
+                <button className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded-lg flex items-center justify-center transition-colors">
+                  <History size={16} />
                 </button>
               </div>
             </div>
 
-            {/* QT Demo Account */}
-            <div className="bg-slate-700/30 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 text-slate-400" />
-                </div>
-                <div>
-                  <h3 className="text-slate-300 text-sm font-medium">
-                    QT Demo
-                  </h3>
-                  <p className="text-slate-400 text-base">$50,000</p>
-                </div>
+            {/* Demo Account */}
+            <div className="bg-[#151922] rounded-lg p-3 flex items-center gap-3 border border-zinc-800 hover:border-zinc-600 cursor-pointer transition-colors group">
+              <div className="w-9 h-9 bg-zinc-700 rounded-lg flex items-center justify-center group-hover:bg-zinc-600 transition-colors">
+                <GraduationCap size={18} className="text-zinc-400 group-hover:text-white" />
+              </div>
+              <div>
+                <h3 className="text-zinc-400 text-xs uppercase font-bold">Demo Account</h3>
+                <p className="text-zinc-300 text-sm font-semibold">$50,000.00</p>
               </div>
             </div>
 
-            {/* Forex Dropdown */}
-            <button className="w-full bg-slate-700/30 hover:bg-slate-700/50 rounded-lg p-4 flex items-center justify-between transition-colors group">
+            {/* Forex Option */}
+            <div className="bg-[#151922] rounded-lg p-3 flex items-center justify-between border border-zinc-800 hover:border-zinc-600 cursor-pointer transition-colors group">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                  <svg
-                    className="w-5 h-5 text-slate-400"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <path
-                      d="M12 2L2 7L12 12L22 7L12 2Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M2 17L12 22L22 17"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M2 12L12 17L22 12"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                <div className="w-9 h-9 bg-zinc-700 rounded-lg flex items-center justify-center group-hover:bg-zinc-600 transition-colors">
+                  <Shield size={18} className="text-zinc-400 group-hover:text-white" />
                 </div>
-                <h3 className="text-slate-300 text-sm font-medium">Forex</h3>
+                <span className="text-zinc-300 text-sm font-semibold">Forex</span>
               </div>
-              <ChevronDown className="w-4 h-4 text-slate-500 group-hover:text-slate-400" />
-            </button>
-
-            {/* My Safe Section */}
-            <div className="bg-slate-700/30 rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-slate-400" />
-                  </div>
-                  <h3 className="text-slate-300 text-sm font-medium">
-                    My Safe
-                  </h3>
-                </div>
-                <button className="px-3 py-1 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-medium rounded transition-colors">
-                  Open
-                </button>
-              </div>
+              <ChevronDown size={16} className="text-zinc-500" />
             </div>
           </div>
         )}
@@ -247,315 +182,210 @@ function TopBar({
             setShowAccountPanel(false);
             setShowProfilePanel(false);
           }}
-          className="px-3 py-1 rounded-lg bg-emerald-600 text-white text-sm hover:bg-emerald-500 transition-all duration-200 font-medium"
+          className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold px-3 sm:px-4 py-1.5 rounded-lg shadow-lg shadow-emerald-900/20 transition-all active:scale-95"
         >
-          TOP UP
+          DEPOSIT
         </button>
 
-        {/* === PROFILE BUTTON === */}
+        {/* === PROFILE AVATAR === */}
         <button
           onClick={() => {
             setShowProfilePanel((prev) => !prev);
             setShowAccountPanel(false);
             setShowTopupPanel(false);
           }}
-          className="px-3 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white transition-colors flex items-center gap-2"
+          className="w-8 h-8 sm:w-9 sm:h-9 bg-zinc-700 hover:bg-zinc-600 rounded-full flex items-center justify-center text-zinc-300 border border-zinc-600 transition-all active:scale-95"
         >
           <User size={18} />
-          {/* <span className="text-sm">{userData?.name || "User"}</span> */}
         </button>
 
-        {/* === PROFILE PANEL === */}
+        {/* === 👤 PROFILE MODAL (Fully Responsive & Scrollable) === */}
         {showProfilePanel && (
-          <div className="absolute right-20 top-[36px] w-[40vw] max-w-3xl bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-y-auto max-h-[79vh] animate-fadeInDown p-6">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
-              <h2 className="text-white text-lg font-semibold flex items-center gap-2">
-                <User className="w-5 h-5 text-slate-400" /> User Profile
-              </h2>
-              <button
-                onClick={() => setShowProfilePanel(false)}
-                className="text-slate-400 hover:text-slate-200"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* 👤 Profile Dashboard */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Info */}
-              <div className="lg:col-span-2 space-y-6">
-                <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                  <div className="flex items-start gap-6">
-                    <div className="relative">
-                      <div className="w-24 h-24 bg-slate-700 rounded-full flex items-center justify-center border-4 border-emerald-500 relative overflow-hidden">
-                        <User className="w-12 h-12 text-slate-400" />
-                      </div>
-                      <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">✓</span>
-                      </div>
-                    </div>
-
-                    {/* 🔥 USER DETAILS HERE */}
-                    <div className="flex-1 space-y-2">
-                      {/* User Name */}
-                      <h2 className="text-white text-lg font-semibold">
-                        {userData?.name || "User"}
-                      </h2>
-
-                      {/* Role */}
-                      <p className="text-slate-400 text-sm">
-                        {userData?.role || "Member"}
-                      </p>
-
-                      {/* Email */}
-                      <p className="text-slate-400 text-sm flex items-center gap-1">
-                        <span className="text-slate-500">📧</span>
-                        {userData?.email || "Not Provided"}
-                      </p>
-
-                      {/* Mobile */}
-                      <p className="text-slate-400 text-sm flex items-center gap-1">
-                        <span className="text-slate-500">📱</span>
-                        {userData?.mobile || "Not Provided"}
-                      </p>
-
-                      {/* Balance */}
-                      <p className="text-slate-400 text-sm flex items-center gap-1">
-                        <span className="text-slate-500">💰</span>$
-                        {balance.toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Statistics */}
-                <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                  <h3 className="text-white font-semibold mb-4">
-                    Real Account Statistics:
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-slate-300 text-sm">
-                      <span>Trades:</span> <span>0</span>
-                    </div>
-                    <div className="flex justify-between text-slate-300 text-sm">
-                      <span>Turnover:</span> <span>0</span>
-                    </div>
-                    <div className="flex justify-between text-slate-300 text-sm">
-                      <span>Profit:</span> <span>0</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Panel Menu */}
-              <div className="space-y-2">
-                {[
-                  {
-                    icon: <Wallet />,
-                    label: "Deposit",
-                    route: "/finance/deposit",
-                  },
-                  {
-                    icon: <CreditCard />,
-                    label: "Withdrawal",
-                    route: "/finance/withdraw",
-                  },
-                  {
-                    icon: <Bell />,
-                    label: "Notifications",
-                    route: "/notifications",
-                  },
-                  { icon: <Headphones />, label: "Support", route: "/support" },
-                  { icon: <Settings />, label: "Settings", route: "/settings" },
-                  { icon: <Globe />, label: "Language", route: "/language" },
-                  { icon: <LogIn />, label: "Log out", route: "logout" }, // special flag
-                ].map((item, i) => (
-                  <button
-                    key={i}
-                    onClick={
-                      () =>
-                        item.label === "Log out"
-                          ? handleLogout() // 🔥 logout call
-                          : navigate(item.route) // normal navigate
-                    }
-                    className="w-full flex items-center gap-3 px-4 py-3 bg-slate-800
-                 hover:bg-slate-700 rounded-lg transition-colors border
-                 border-slate-700 text-slate-300"
-                  >
-                    {item.icon}
-                    <span className="text-sm">{item.label}</span>
+          <>
+            {/* Mobile Backdrop */}
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] md:hidden" onClick={() => setShowProfilePanel(false)} />
+            
+            <div className="fixed inset-0 md:absolute md:inset-auto md:top-14 md:right-0 z-[9999] flex flex-col md:block">
+              <div className="
+                w-full h-full md:h-auto md:w-[400px] lg:w-[450px] 
+                bg-[#151922] md:border md:border-zinc-700 md:rounded-xl md:shadow-2xl 
+                flex flex-col animate-in slide-in-from-right-10 md:slide-in-from-top-2 duration-200
+              ">
+                
+                {/* Header (Fixed) */}
+                <div className="flex items-center justify-between p-4 border-b border-zinc-800 bg-[#151922] shrink-0">
+                  <h2 className="text-white text-base font-bold flex items-center gap-2">
+                    <User size={18} className="text-indigo-400" /> User Profile
+                  </h2>
+                  <button onClick={() => setShowProfilePanel(false)} className="p-1.5 bg-zinc-800 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors">
+                    <X size={18} />
                   </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+                </div>
 
-        {/* === TOP UP PANEL === */}
-        {showTopupPanel && (
-          <div className="absolute right-20 top-[56px] w-[350px] bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-2xl animate-fadeInDown z-50">
-            <div className="flex items-start justify-between mb-5">
-              <div>
-                <h2 className="text-white text-lg font-semibold">
-                  Quick account top-up
-                </h2>
-                <p className="text-slate-400 text-sm">
-                  Make a deposit to start earning
-                </p>
-              </div>
-              <button
-                onClick={() => setShowTopupPanel(false)}
-                className="text-slate-400 hover:text-slate-300"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Payment Dropdown */}
-            <div className="mb-4">
-              <label className="text-white text-sm mb-2 block">
-                Payment Method
-              </label>
-              <div className="relative">
-                <button
-                  onClick={() =>
-                    setIsPaymentDropdownOpen(!isPaymentDropdownOpen)
-                  }
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 flex items-center justify-between hover:bg-slate-650 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-gradient-to-br from-teal-400 to-teal-600 rounded-full flex items-center justify-center text-xs">
-                      ₮
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+                  
+                  {/* User Info Card */}
+                  <div className="bg-[#1e2330] rounded-xl p-4 border border-zinc-700/50 flex flex-col items-center text-center">
+                    <div className="relative mb-3">
+                      <div className="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center border-2 border-indigo-500 overflow-hidden">
+                        <User size={32} className="text-zinc-500" />
+                      </div>
+                      <div className="absolute bottom-0 right-0 bg-emerald-500 border-2 border-[#1e2330] p-1 rounded-full">
+                        <Shield size={10} className="text-white fill-current" />
+                      </div>
                     </div>
-                    <span className="text-slate-200 text-sm">
-                      {paymentMethod}
-                    </span>
+                    <h3 className="text-white font-bold text-lg">{userData?.name || "Trader"}</h3>
+                    <p className="text-zinc-400 text-xs mb-3">ID: {userData?.id || "8839201"}</p>
+                    <div className="flex gap-2">
+                       <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] uppercase font-bold rounded border border-emerald-500/20">Verified</span>
+                       <span className="px-2 py-1 bg-indigo-500/10 text-indigo-400 text-[10px] uppercase font-bold rounded border border-indigo-500/20">Pro</span>
+                    </div>
                   </div>
-                  <ChevronDown
-                    className={`w-4 h-4 text-slate-400 transition-transform ${
-                      isPaymentDropdownOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
 
-                {/* Dropdown List */}
-                {isPaymentDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-2 max-h-64 overflow-y-auto bg-slate-800 border border-slate-700 rounded-lg shadow-2xl z-20 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800 p-2 space-y-2 animate-fadeInDown">
-                    {paymentMethods.map((method, index) => (
-                      <button
-                        key={index}
-                        onClick={() => {
-                          setPaymentMethod(method.name);
-                          setIsPaymentDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-all duration-150 border border-slate-700/70 shadow-sm"
+                  {/* Quick Stats */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-[#1e2330] p-3 rounded-lg border border-zinc-800">
+                      <p className="text-zinc-500 text-xs uppercase font-bold">Balance</p>
+                      <p className="text-white font-mono text-sm">${balance.toFixed(2)}</p>
+                    </div>
+                    <div className="bg-[#1e2330] p-3 rounded-lg border border-zinc-800">
+                      <p className="text-zinc-500 text-xs uppercase font-bold">Total Profit</p>
+                      <p className="text-emerald-400 font-mono text-sm">+$0.00</p>
+                    </div>
+                  </div>
+
+                  {/* Menu Links */}
+                  <div className="space-y-1">
+                    {[
+                      { icon: Wallet, label: "Deposit Funds", path: "/finance/deposit", color: "text-emerald-400" },
+                      { icon: CreditCard, label: "Withdraw Funds", path: "/finance/withdraw", color: "text-red-400" },
+                      { icon: History, label: "Transaction History", path: "/transactions" },
+                      { icon: Settings, label: "Account Settings", path: "/settings" },
+                      { icon: Headphones, label: "Help & Support", path: "/support" },
+                    ].map((item, idx) => (
+                      <button 
+                        key={idx} 
+                        onClick={() => { navigate(item.path); setShowProfilePanel(false); }}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-[#252a3d] text-zinc-300 hover:text-white transition-all group"
                       >
-                        <div
-                          className={`w-10 h-10 flex items-center justify-center rounded-lg text-lg font-medium shadow-inner ${
-                            method.name.includes("UPI")
-                              ? "bg-gradient-to-br from-green-500 to-emerald-600 text-white"
-                              : method.name.includes("Google Pay")
-                              ? "bg-gradient-to-br from-blue-500 to-sky-500 text-white"
-                              : method.name.includes("PhonePe")
-                              ? "bg-gradient-to-br from-purple-500 to-indigo-600 text-white"
-                              : method.name.includes("Binance")
-                              ? "bg-gradient-to-br from-yellow-400 to-yellow-600 text-black"
-                              : method.name.includes("Tether")
-                              ? "bg-gradient-to-br from-teal-500 to-emerald-500 text-white"
-                              : method.name.includes("Bitcoin")
-                              ? "bg-gradient-to-br from-orange-500 to-yellow-500 text-white"
-                              : method.name.includes("Ethereum")
-                              ? "bg-gradient-to-br from-indigo-400 to-indigo-600 text-white"
-                              : "bg-slate-600 text-white"
-                          }`}
-                        >
-                          {method.icon}
-                        </div>
-
-                        <div className="flex flex-col items-start">
-                          <span className="text-slate-200 text-sm font-medium">
-                            {method.name}
-                          </span>
-                          <span className="text-slate-400 text-xs">
-                            {method.desc || "Instant deposit"}
-                          </span>
-                        </div>
+                        <item.icon size={18} className={`group-hover:scale-110 transition-transform ${item.color || "text-zinc-400"}`} />
+                        <span className="text-sm font-medium">{item.label}</span>
+                        <ChevronDown size={14} className="-rotate-90 ml-auto text-zinc-600 group-hover:text-zinc-400" />
                       </button>
                     ))}
                   </div>
-                )}
+
+                  {/* Logout */}
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full mt-2 p-3 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center gap-2 transition-colors border border-red-500/20"
+                  >
+                    <LogIn size={16} />
+                    <span className="text-sm font-bold">Sign Out</span>
+                  </button>
+
+                </div>
               </div>
             </div>
-
-            {/* Amount Input */}
-            <div className="mb-4">
-              <label className="text-white text-sm mb-2 block">Amount</label>
-              <div className="relative">
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-slate-500 transition-colors pr-8"
-                  placeholder="30"
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
-                  $
-                </span>
-              </div>
-            </div>
-
-            {/* Email */}
-            <div className="mb-4">
-              <label className="text-white text-sm mb-2 block">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-slate-500 transition-colors"
-                placeholder="Email"
-              />
-            </div>
-
-            {/* Promo Code */}
-            <div className="mb-4 flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={hasPromoCode}
-                onChange={(e) => setHasPromoCode(e.target.checked)}
-                className="w-4 h-4 bg-slate-700 border border-slate-600 rounded accent-teal-500"
-              />
-              <span className="text-slate-300 text-sm">
-                I have a promo code
-              </span>
-            </div>
-
-            {hasPromoCode && (
-              <div className="mb-5">
-                <input
-                  type="text"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-slate-200 focus:outline-none focus:border-slate-500 transition-colors"
-                  placeholder="Enter promo code"
-                />
-              </div>
-            )}
-
-            {/* Submit */}
-            <button
-              onClick={() => {
-                const amt = parseFloat(amount || 0);
-                if (amt > 0) {
-                  setBalance((b) => b + amt);
-                  setShowTopupPanel(false);
-                }
-              }}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-3 rounded-lg transition-colors"
-            >
-              Continue and pay ${amount || "0"}
-            </button>
-          </div>
+          </>
         )}
+
+        {/* === 💳 TOP UP MODAL (Fully Responsive & Scrollable) === */}
+        {showTopupPanel && (
+          <>
+             {/* Mobile Backdrop */}
+             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] md:hidden" onClick={() => setShowTopupPanel(false)} />
+
+             <div className="fixed inset-0 flex items-center justify-center md:items-start md:justify-end md:inset-auto md:absolute md:top-14 md:right-0 z-[9999]">
+                <div className="w-[90vw] max-w-[360px] md:w-80 bg-[#1e2330] border border-zinc-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh] md:max-h-none animate-in zoom-in-95 md:zoom-in-100 duration-200">
+                  
+                  {/* Header */}
+                  <div className="flex items-center justify-between p-4 border-b border-zinc-700/50 bg-[#1e2330] shrink-0 rounded-t-xl">
+                    <div>
+                      <h2 className="text-white text-sm font-bold uppercase tracking-wide">Deposit</h2>
+                      <p className="text-zinc-400 text-[10px]">Select payment method</p>
+                    </div>
+                    <button onClick={() => setShowTopupPanel(false)} className="text-zinc-400 hover:text-white"><X size={18} /></button>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-4 overflow-y-auto space-y-4">
+                    
+                    {/* Method Selector */}
+                    <div>
+                      <label className="text-zinc-400 text-xs font-bold uppercase mb-2 block">Payment Method</label>
+                      <div className="relative">
+                        <button 
+                          onClick={() => setIsPaymentDropdownOpen(!isPaymentDropdownOpen)}
+                          className="w-full bg-[#151922] border border-zinc-700 rounded-lg p-3 flex items-center justify-between hover:border-zinc-500 transition-colors"
+                        >
+                          <div className="flex items-center gap-2 overflow-hidden">
+                             <div className="w-6 h-6 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 text-xs border border-emerald-500/30">₮</div>
+                             <span className="text-zinc-200 text-sm truncate">{paymentMethod}</span>
+                          </div>
+                          <ChevronDown size={16} className={`text-zinc-500 transition-transform ${isPaymentDropdownOpen ? "rotate-180" : ""}`} />
+                        </button>
+
+                        {/* Dropdown Options */}
+                        {isPaymentDropdownOpen && (
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-[#151922] border border-zinc-700 rounded-lg shadow-xl z-20 max-h-48 overflow-y-auto">
+                            {paymentMethods.map((m, i) => (
+                              <button 
+                                key={i} 
+                                onClick={() => { setPaymentMethod(m.name); setIsPaymentDropdownOpen(false); }}
+                                className="w-full flex items-center gap-3 p-3 hover:bg-zinc-800 transition-colors text-left border-b border-zinc-800/50 last:border-0"
+                              >
+                                <div className="text-lg">{m.icon}</div>
+                                <div>
+                                  <div className="text-zinc-200 text-sm font-medium">{m.name}</div>
+                                  <div className="text-zinc-500 text-[10px]">{m.desc}</div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Amount Input */}
+                    <div>
+                      <label className="text-zinc-400 text-xs font-bold uppercase mb-2 block">Amount (USD)</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
+                        <input 
+                          type="number" 
+                          value={amount} 
+                          onChange={(e) => setAmount(e.target.value)}
+                          className="w-full bg-[#151922] border border-zinc-700 rounded-lg py-3 pl-8 pr-3 text-white focus:outline-none focus:border-emerald-500 transition-colors font-mono"
+                        />
+                      </div>
+                      <div className="flex gap-2 mt-2">
+                        {[10, 50, 100, 500].map(v => (
+                          <button key={v} onClick={() => setAmount(String(v))} className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs py-1.5 rounded border border-zinc-700 transition-colors">
+                            ${v}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Submit Button */}
+                    <button 
+                      onClick={() => {
+                        const amt = parseFloat(amount || 0);
+                        if(amt > 0) { setBalance(b => b + amt); setShowTopupPanel(false); }
+                      }}
+                      className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg shadow-lg shadow-emerald-900/20 active:scale-95 transition-all"
+                    >
+                      PROCEED TO PAY
+                    </button>
+
+                  </div>
+                </div>
+             </div>
+          </>
+        )}
+
       </div>
     </header>
   );

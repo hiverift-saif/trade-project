@@ -71,27 +71,14 @@ function LeftSidebar({
     {
       icon: Coins,
       label: "Quick Trading Real Account",
-      route: "/registration",
+      route: "/trading",
     },
     {
       icon: GraduationCap,
       label: "Quick Trading Demo Account",
-      route: "/registration",
+      route: "/trading",
     },
-    {
-      icon: FileText,
-      label: "Shares Trading Real Account",
-      route: "/registration",
-    },
-    {
-      icon: FileText,
-      label: "Shares Trading Demo Account",
-      route: "/registration",
-    },
-    { icon: Activity, label: "Forex MT4 Real Account", route: "/registration" },
-    { icon: Activity, label: "Forex MT4 Demo Account", route: "/registration" },
-    { icon: Globe, label: "Forex MT5 Real Account", route: "/registration" },
-    { icon: Globe, label: "Forex MT5 Demo Account", route: "/registration" },
+
   ];
 
   const financeSubMenu = [
@@ -134,27 +121,27 @@ function LeftSidebar({
     //   active: location.pathname === "/finance/mysafe",
     // },
   ];
+const profileSubMenu = [
+  {
+    icon: User,
+    label: "Profile",
+    route: "/ProfileLayout/ProfilePage",
+    active: location.pathname === "/ProfileLayout/ProfilePage",
+  },
+  {
+    icon: User,
+    label: "Trading Profile",
+    route: "/ProfileLayout/Trading-Profile",
+    active: location.pathname === "/ProfileLayout/Trading-Profile",
+  },
+  {
+    icon: Lock,
+    label: "Trading History",
+    route: "/ProfileLayout/Trading-History",
+    active: location.pathname === "/ProfileLayout/Trading-History",
+  },
+];
 
-  const profileSubMenu = [
-    {
-      icon: User,
-      label: "Profile",
-      route: "/profile/Profile",
-      active: location.pathname === "/profile/Profile",
-    },
-    {
-      icon: User,
-      label: "Trading Profile",
-      route: "/profile/Trading-Profile",
-      active: location.pathname === "/profile/Trading-Profile",
-    },
-    {
-      icon: Lock,
-      label: "Trading History",
-      route: "/profile/Trading-History",
-      active: location.pathname === "/profile/Trading-History",
-    },
-  ];
 
   const marketSubMenu = [
     {
@@ -485,7 +472,7 @@ function LeftSidebar({
             <X size={20} />
           </button>
         </div>
-        <ul className="flex flex-col h-full gap-5">
+        <ul className="flex flex-col h-full gap-5 mt-2">
           {subMenus[menu].map((item, index) => (
             <li key={index}>
               <div
@@ -494,14 +481,18 @@ function LeftSidebar({
                     ? "text-white bg-indigo-900/50"
                     : "bg-[#0a0e18]"
                 }`}
-                onClick={() => {
-                  console.log(`Navigating to ${item.route}`);
-                  navigate(item.route);
-                  setActiveMenu(null);
-                  if (setShowLeftSidebar) setShowLeftSidebar(false);
-                  if (setShowSignals) setShowSignals(false);
-                  if (setShowSocialModal) setShowSocialModal(false);
-                }}
+            onClick={() => {
+  navigate(item.route);
+
+  if (menu === "Finance") {
+    // Finance open hi rahe
+    setActiveMenu("Finance");
+  } else {
+    // Baaki submenu close ho jaaye
+    setActiveMenu(null);
+  }
+}}
+
               >
                 <item.icon size={20} className="text-blue-300" />
                 <span className="flex-1">{item.label}</span>
@@ -526,7 +517,7 @@ function LeftSidebar({
       )}
       <aside
         className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] ${
-          isOpen ? "w-64" : "w-20"
+          isOpen ? "w-30" : "w-20"
         } bg-[#050713] border-r border-zinc-800/50 flex flex-col items-center py-4 gap-2 z-60 shadow-lg transition-all duration-300 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } md:static md:w-20 md:translate-x-0`}
@@ -570,7 +561,7 @@ function LeftSidebar({
 
           <button
             onClick={() => {
-              navigate("/Registration");
+              // navigate("/Registration");
               if (setShowLeftSidebar) setShowLeftSidebar(false);
             }}
             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-600/20 hover:bg-green-600/30 text-green-300 text-xs w-full justify-start px-4 transition-all duration-200"
