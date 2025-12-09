@@ -79,7 +79,6 @@ const AboutSection = () => {
 
 </div>
 
-``
               </div>
 
 
