@@ -85,7 +85,7 @@ const blogPosts = [
   }
 ];
 
-export default function Blogcard() {
+export default function BlogCard() {
   return (
     <section className="py-20 bg-white font-sans">
       <div className="container mx-auto px-4 md:px-8 max-w-7xl">
