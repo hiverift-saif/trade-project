@@ -1,6 +1,6 @@
 import React from 'react'
 import { ChevronRight } from "lucide-react";
-import BlogCard from '../AboutContent/Blogcard.jsx';
+import BlogCard from '../AboutContent/Blogcard';
 
 const Blog = () => {
   return (
