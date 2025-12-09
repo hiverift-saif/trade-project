@@ -1,11 +1,12 @@
 import React from "react";
 import { ChevronRight } from "lucide-react";
-import AboutSection from "../Aboutcontent/Aboutsection";
-import MissionStatement from "../Aboutcontent/MissionStatement";
-import TestimonialSection from "../Homecontent/TestimonialSection";
-import FactCounter from "../Aboutcontent/FactCounter";
-import PartnerSection from "../Aboutcontent/PartnerSection";
-import AwardsSection from "../Aboutcontent/AwardsSection";
+import AboutSection from "../AboutContent/AboutSection";
+import MissionStatement from "../AboutContent/MissionStatement";
+import TestimonialSection from "../HomeContent/TestimonialSection";
+import FactCounter from "../AboutContent/FactCounter";
+import PartnerSection from "../AboutContent/PartnerSection";
+import AwardsSection from "../AboutContent/AwardsSection";
+
 
 export default function AboutUs() {
   return (
