@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Trophy, ArrowLeft, ArrowRight } from 'lucide-react';
 import leave from "../assets/leave.png";
 
-const AwardsSlider = () => {
+const AwardsSection = () => {
   // 1. Data Array (ज्यादा आइटम्स डाले हैं ताकि स्लाइड हो सके)
   const awards = [
     {
@@ -188,4 +188,4 @@ const AwardsSlider = () => {
   );
 };
 
-export default AwardsSlider;
+export default AwardsSection;

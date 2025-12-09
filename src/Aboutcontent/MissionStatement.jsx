@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, ChevronUp } from 'lucide-react';
 
-const MissionStatementSection = () => {
+const MissionStatement = () => {
   const [activeTab, setActiveTab] = useState('mission');
 
   const tabs = [
@@ -148,4 +148,4 @@ const MissionStatementSection = () => {
   );
 };
 
-export default MissionStatementSection;
+export default MissionStatement;
