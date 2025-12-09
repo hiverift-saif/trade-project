@@ -1,6 +1,6 @@
 import React from "react";
 import { ChevronRight } from "lucide-react";
-import AboutSection from "../AboutContent/AboutSection";
+import AboutSection from "../AboutContent/AboutSection.jsx";
 import MissionStatement from "../AboutContent/MissionStatement";
 import TestimonialSection from "../HomeContent/TestimonialSection";
 import FactCounter from "../AboutContent/FactCounter";
